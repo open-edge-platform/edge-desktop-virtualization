@@ -1,0 +1,142 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: "QEMU: Build, Trivy & ClamAV Scan"
+run-name: "Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
+
+# Only run at most 1 workflow concurrently per PR, unlimited for branches
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  qemu-build-and-scan:
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Cache QEMU source & build directory
+        id: cache-qemu
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-qemu
+        with:
+          path: workspace/qemu-8.2.1
+          # Use the hash of the document this workflow is based on to decide whether the build should be re-run or not
+          key: qemu-binary-$(hashFiles('kubevirt-patch/README.md')
+
+      - name: Build and patch QEMU
+        continue-on-error: false
+        if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' }}
+        # Each logical block here is copied exactly from a code block in docs/kubevirt-patch-qemu-sriov.md
+        run: |
+          mkdir -p workspace
+          cd workspace
+          wget -N --no-check-certificate https://download.01.org/intel-linux-overlay/ubuntu/pool/main/q/qemu/qemu_8.2.1+ppa1-noble9.debian.tar.xz
+          mkdir qemu_8.2.1+ppa1-noble9.debian
+          tar -xf 'qemu_8.2.1+ppa1-noble9.debian.tar.xz' -C 'qemu_8.2.1+ppa1-noble9.debian'
+
+          wget -N --no-check-certificate https://download.qemu.org/qemu-8.2.1.tar.xz
+          tar -xf qemu-8.2.1.tar.xz
+          cd qemu-8.2.1
+
+          cp  -r ../qemu_8.2.1+ppa1-noble9.debian/debian/patches/sriov/ .
+
+          git apply ./sriov/*.patch
+
+          ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
+          perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
+
+          docker build -t qemu_build:centos-stream9 -f Dockerfile.centos-stream9 .
+          cat <<EOF > buildscript.sh
+          #!/bin/bash
+          set -x
+          set -e
+          cd /src
+          rm -rf build
+          ./configure --prefix=/usr --enable-kvm --disable-xen --enable-libusb --enable-debug-info --enable-debug  --enable-sdl --enable-vhost-net --enable-spice --disable-debug-tcg  --enable-opengl  --enable-gtk  --enable-virtfs --target-list=x86_64-softmmu --audio-drv-list=pa --firmwarepath=/usr/share/qemu-firmware:/usr/share/ipxe/qemu:/usr/share/seavgabios:/usr/share/seabios:/usr/share/qemu-kvm/ --disable-spice
+          mkdir -p build
+          cd build
+          ninja
+          ninja install
+          EOF
+          chmod +x buildscript.sh
+
+          docker run \
+              -v $(pwd):/src:Z \
+              -w /src  \
+              --entrypoint=/src/buildscript.sh \
+              --security-opt label=disable \
+              qemu_build:centos-stream9
+
+          ls -la build/qemu-system-x86_64
+          sha256sum build/qemu-system-x86_64
+
+      - name: Upload qemu-system-x86_64 artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: qemu-system-x86_64 artifact
+          path: |
+            workspace/qemu-8.2.1/build/qemu-system-x86_64
+
+      - name: trivy qemu source scan
+        continue-on-error: true
+        shell: bash
+        run: |
+          cd workspace/qemu-8.2.1
+          trivy --version
+          which trivy
+          trivy image --download-db-only
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+
+          # Use the downloaded template
+          trivy fs . --format template --template "@trivy-html.tpl" --exit-code 1 --severity MEDIUM,HIGH,CRITICAL -o "trivy_code_scan_qemu.html"
+
+      - name: Upload trivy reports
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-code-scan-results-core
+          path: |
+              workspace/qemu-8.2.1/trivy_code_scan_qemu.html
+
+      - name: ClamAV QEMU Antivirus Scan
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo "Starting ClamAV scan on workspace/qemu-8.2.1/build/..."
+
+          docker run --rm \
+            --mount type=bind,source=./workspace/qemu-8.2.1/build/,target=/scandir \
+            clamav/clamav:stable \
+            clamscan --recursive --log=/scandir/clamav-scan-report.log \
+            /scandir
+
+          SCAN_EXIT_CODE=$?
+          sudo chown $USER:$USER workspace/qemu-8.2.1/build/clamav-scan-report.log 2>/dev/null || true
+
+          if [ $SCAN_EXIT_CODE -ne 0 ]; then
+            echo "ClamAV scan failed or found issues"
+            exit 1
+          fi
+
+      - name: Upload QEMU Antivirus Report
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: antivirus-qemu-report-core
+          path: workspace/qemu-8.2.1/build/clamav-scan-report.log

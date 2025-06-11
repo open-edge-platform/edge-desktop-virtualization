@@ -1,0 +1,13 @@
+name: 'Setup Tools'
+description: 'Sets up required tools'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Go
+      uses: actions/setup-go@v5
+
+    - name: Install Trivy
+      shell: bash
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin

@@ -27,16 +27,16 @@ The device plugin handles the following key functions[1]:
     *   Mounting necessary device nodes
     *   Mounting necessary volumes
 
-## Build 
+## Build
 ### Local Setup
 
 To test it in local system, have a docker registry running in your system.
 ```shell
 docker run -d -p 5000:5000 --name registry registry:2.7
 ```
-This registry is accessible through port `5000`. To have the device-plugin up and running in your kubernetes system, you can run the `build.sh` file. This script will delete the existing device-plugin, if any, build, push to registry and create the deployment. You can adjust the resulting docker image tag & repository by changing the optional arguments `version` (default "v1") and `repo` (default "127.0.0.1:5000"). 
+This registry is accessible through port `5000`. To have the device-plugin up and running in your kubernetes system, you can run the `build.sh` file. This script will delete the existing device-plugin, if any, build, and optionally push to registry and create the deployment. You can adjust the resulting docker image tag & repository by changing the optional arguments `ver` (default "v1") and `repo` (default "127.0.0.1:5000"). Add `--push` to push to the repo after the image is successfully built.
 ```shell
-./build.sh [version] [repo]
+./build.sh --ver v1 --repo "127.0.0.1:5000" --push
 ```
 
 ## Deploy
@@ -76,7 +76,7 @@ kube-system   device-plugin-maverikflats-device-plugin-zxkqm          1/1     Ru
 
 ## Verify setup
 
-Upon having the device-plugin up and running, you should see the resources and resource count show up in your node(s). 
+Upon having the device-plugin up and running, you should see the resources and resource count show up in your node(s).
 ```shell
 ➜  kubectl describe node
 Name:               npgarch

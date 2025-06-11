@@ -45,14 +45,15 @@ QEMU emulator version 9.0.0 (qemu-kvm-9.0.0-10.el9)
 
 The SRIOV patches to QEMU are based on QEMU 8.2.1
 
-1. Download the the SR-IOV patches for QEMU
+1. Download the SR-IOV patches for QEMU
 
     ```sh
     cd ~/workspace
 
     wget -N --no-check-certificate https://download.01.org/intel-linux-overlay/ubuntu/pool/main/q/qemu/qemu_8.2.1+ppa1-noble9.debian.tar.xz
 
-    tar -xvf qemu_8.2.1+ppa1-noble9.debian.tar.xz
+    mkdir qemu_8.2.1+ppa1-noble9.debian
+    tar -xf 'qemu_8.2.1+ppa1-noble9.debian.tar.xz' -C 'qemu_8.2.1+ppa1-noble9.debian'
     ```
 
 1. Download the same version of QEMU that matches the downloaded patches:
@@ -60,7 +61,7 @@ The SRIOV patches to QEMU are based on QEMU 8.2.1
     ```sh
     wget -N --no-check-certificate https://download.qemu.org/qemu-8.2.1.tar.xz
 
-    tar -xvf qemu-8.2.1.tar.xz
+    tar -xf qemu-8.2.1.tar.xz
 
     cd qemu-8.2.1
     ```
@@ -75,8 +76,6 @@ The SRIOV patches to QEMU are based on QEMU 8.2.1
 
     ```sh
     git apply ./sriov/*.patch
-
-    cd ~/workspace
     ```
 
 ### 2.1 Creating CentOS 9 containerized environment
@@ -88,26 +87,22 @@ The original idea to build within the Centos container comes from this [link](ht
 1. Generate the Centos 9 image to be used for QEMU build environment
 
     ```sh
-    cd qemu-8.2.1
-
     ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
     ```
 
 1. Patch `Dockerfile.centos-stream9` to include missing dependencies
 
     ```sh
-    vim Dockerfile.centos-stream9
+    perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
     ```
+
+    This makes the following changes to `Dockerfile.centos-stream9`
 
     ```diff
             zlib-devel \
             zlib-static \
-    -        zstd &&
-    +        zstd \
-    +        libslirp-devel \
-    +        liburing-devel \
-    +        libbpf-devel \
-    +        libblkio-devel && \
+    -        zstd && \
+    +        zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel && \
         dnf autoremove -y && \
         dnf clean all -y && \
         rpm -qa | sort > /packages.txt && \
@@ -177,7 +172,7 @@ The original idea to build within the Centos container comes from this [link](ht
     13c2760bf012a8011ddbe0c595ec3dca24249debe32bc4d1e338ec8538ad7453 build/qemu-system-x86_64
     ```
 
-## 3. Enabling Kubevirt with GTK display support libararies
+## 3. Enabling Kubevirt with GTK display support libraries
 
 1. Clone the kubevirt repo:
 
@@ -346,7 +341,7 @@ The original idea to build within the Centos container comes from this [link](ht
 5.  Ensure Kubernetes is installed and local cluster is running.
 6.  Import the images into the container runtime
     ```sh
-    sudo ctr -n k8s.io images import sidecar-shim.tar 
+    sudo ctr -n k8s.io images import sidecar-shim.tar
     sudo ctr -n k8s.io images import virt-api.tar
     sudo ctr -n k8s.io images import virt-controller.tar
     sudo ctr -n k8s.io images import virt-handler.tar
