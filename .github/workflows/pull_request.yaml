@@ -1,0 +1,107 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: "PR Scans and Unit Tests"
+run-name: "PR workflow (by @${{ github.actor }} via ${{ github.event_name }})"
+
+
+# Only run at most 1 workflow concurrently per PR, unlimited for branches
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'device-plugins-for-kubernetes/**'
+  push:
+    branches:
+      - main
+
+jobs:
+  device-plugins-for-kubernetes:
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Build the device plugin and docker image
+        working-directory: device-plugins-for-kubernetes
+        continue-on-error: false
+        run: |
+          ./build.sh --ver "$GITHUB_SHA" --repo "localhost"
+      - name: trivy repo scan
+        continue-on-error: false
+        shell: bash
+        working-directory: device-plugins-for-kubernetes
+        run: |
+          trivy --version
+          which trivy
+          trivy image --download-db-only
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+
+          # Use the downloaded template
+          trivy fs . --format template --template "@trivy-html.tpl" -o "trivy_code_scan_core.html"
+
+      - name: Upload trivy reports
+        continue-on-error: false
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-code-scan-results-core
+          path: |
+              device-plugins-for-kubernetes/trivy_code_scan_core.html
+
+      - name: Trivy Image Scan
+        continue-on-error: false
+        shell: bash
+        run: |
+              curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+              trivy image "localhost/mf-device-plugin:$GITHUB_SHA" --ignore-unfixed --format template --template "@trivy-html.tpl" -o device-plugins-for-kubernetes/trivy_image_scan_core-backend.html
+              trivy image --quiet --format spdx-json --output device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json "localhost/mf-device-plugin:$GITHUB_SHA"
+
+      - name: Upload Trivy Image Report
+        continue-on-error: false
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy image scan report-core
+          path: |
+                device-plugins-for-kubernetes/trivy_image_scan_core-backend.html
+                device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json
+
+      - name: ClamAV Antivirus Scan
+        continue-on-error: false
+        shell: bash
+        run: |
+          echo "Starting ClamAV scan on device-plugins-for-kubernetes/..."
+
+          docker run --rm \
+            --mount type=bind,source=./device-plugins-for-kubernetes/,target=/scandir \
+            clamav/clamav:stable \
+            clamscan --recursive --log=/scandir/clamav-scan-report.log \
+            /scandir
+
+          SCAN_EXIT_CODE=$?
+          sudo chown $USER:$USER device-plugins-for-kubernetes/clamav-scan-report.log 2>/dev/null || true
+
+          if [ $SCAN_EXIT_CODE -ne 0 ]; then
+            echo "ClamAV scan failed or found issues"
+            exit 1
+          fi
+
+      - name: Upload Antivirus Report
+        continue-on-error: true
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: antivirus-report-core
+          path: device-plugins-for-kubernetes/clamav-scan-report.log
