@@ -14,8 +14,12 @@ on:
     # Chosen arbitrarily and could be moved - 01:30 UTC is generally after workday ends in US and before it starts in India
     - cron: "35 1 * * *"
   # TODO REMOVE THIS - JUST FOR TESTING
-  pull_request:
   push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 permissions: read-all
 
