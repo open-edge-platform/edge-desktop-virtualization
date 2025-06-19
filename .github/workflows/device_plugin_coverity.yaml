@@ -80,7 +80,6 @@ jobs:
 
       - name: Run coverity build
         working-directory: device-plugins-for-kubernetes
-        continue-on-error: false
         run: |
           cov-build --dir $HOME/cov-int ./build.sh --ver "$EDV_VERSION" --repo "localhost"
 

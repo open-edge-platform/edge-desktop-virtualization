@@ -38,13 +38,11 @@ jobs:
 
       - name: Build the device plugin and docker image
         working-directory: device-plugins-for-kubernetes
-        continue-on-error: false
         run: |
           ./build.sh --ver "$EDV_VERSION" --repo "localhost:5000"
 
       - name: Build device plugin release tarball
         working-directory: device-plugins-for-kubernetes
-        continue-on-error: false
         run: |
           mkdir device-plugin-artifacts
           cd device-plugin-artifacts
@@ -62,7 +60,6 @@ jobs:
           ls -hal
 
       - name: Upload device plugin release tarball
-        continue-on-error: false
         uses: actions/upload-artifact@v4
         with:
           name: device-plugin artifacts
@@ -70,7 +67,6 @@ jobs:
               device-plugins-for-kubernetes/device-plugin-artifacts/intel-idv-device-plugin-${{ env.EDV_VERSION }}.tar.gz
 
       - name: trivy repo scan
-        continue-on-error: false
         shell: bash
         working-directory: device-plugins-for-kubernetes
         run: |
@@ -83,7 +79,6 @@ jobs:
           trivy fs . --format template --template "@trivy-html.tpl" -o "trivy_code_scan_core.html"
 
       - name: Upload trivy reports
-        continue-on-error: false
         uses: actions/upload-artifact@v4
         with:
           name: trivy-code-scan-results-core
@@ -99,7 +94,6 @@ jobs:
               trivy image --quiet --format spdx-json --output device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json "localhost:5000/mf-device-plugin:$EDV_VERSION"
 
       - name: Upload Trivy Image Report
-        continue-on-error: false
         uses: actions/upload-artifact@v4
         with:
           name: Trivy image scan report-core
@@ -128,7 +122,6 @@ jobs:
           fi
 
       - name: Upload Antivirus Report
-        continue-on-error: false
         if: always()
         uses: actions/upload-artifact@v4
         with:

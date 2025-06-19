@@ -37,6 +37,8 @@ jobs:
 
       - name: Setup Tools & Common Variables
         uses: ./.github/actions/setup-tools
+        with:
+          go: "false"
 
       - name: Cache QEMU source & build directory
         id: cache-qemu
@@ -49,7 +51,6 @@ jobs:
           key: qemu-binary-${{ hashFiles('kubevirt-patch/README.md') }}
 
       - name: Build and patch QEMU
-        continue-on-error: false
         if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' }}
         # Each logical block here is copied exactly from a code block in kubevirt-patch/README.md
         run: |
@@ -97,7 +98,6 @@ jobs:
 
       - name: Upload qemu-system-x86_64 artifact
         id: upload-qemu
-        continue-on-error: false
         uses: actions/upload-artifact@v4
         with:
           name: qemu-artifact
@@ -118,7 +118,6 @@ jobs:
           trivy fs . --format template --template "@trivy-html.tpl" --exit-code 1 --severity MEDIUM,HIGH,CRITICAL -o "trivy_code_scan_qemu.html"
 
       - name: Upload trivy reports
-        continue-on-error: false
         uses: actions/upload-artifact@v4
         with:
           name: trivy-code-scan-results-core
@@ -146,10 +145,9 @@ jobs:
           fi
 
       - name: Upload QEMU Antivirus Report
-        continue-on-error: false
         uses: actions/upload-artifact@v4
         with:
-          name: antivirus-qemu-report-core
+          name: antivirus-qemu
           path: workspace/qemu-8.2.1/build/clamav-scan-report.log
 
   kubevirt-build-and-scan:
@@ -167,6 +165,8 @@ jobs:
 
       - name: Setup Tools & Common Variables
         uses: ./.github/actions/setup-tools
+        with:
+          go: "false"
 
       - name: Cache Kubevirt output artifacts
         id: cache-kubevirt
@@ -176,27 +176,53 @@ jobs:
         with:
           path: workspace/kubevirt-artifacts
           # Use the hash of the document this workflow is based on to decide whether the build should be re-run or not
+          # NOTE: This must be a superset of the qemu cache hashFiles above. In other words if qemu needs to be rebuilt, so does kubevirt
           key: kubevirt-binary-${{ hashFiles('kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch', 'kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch', 'kubevirt-patch/README.md') }}
 
+      ######################################################################################################3
+      # The kubevirt workflow requires 30+ GB of free space to run successfully
+      # These steps delete many unnecessary files from the actions runner so that enough space is available
+      # These pieces are only run if a kubevirt build needs to be done
+      - name: Disable man-db to make package install and removal faster
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
+        run: |
+          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+          sudo dpkg-reconfigure man-db
+
+      - name: Free Disk Space (Ubuntu)
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
+        # This is a fork of the popular jlumbroso/free-disk-space@main with faster performance
+        # @byron-marohn reviewed all the code in this specific commit on Jun 19 2025
+        uses: xc2/free-disk-space@fbe203b3788f2bebe2c835a15925da303eaa5efe
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: false # Retain swap file for improved build performance
+
+      ######################################################################################################3
+
       - name: Run local docker registry
-        continue-on-error: false
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
         run: |
           # Run a local registry
           docker run -d -p 5000:5000 --name registry registry:2.7
 
       - name: Download QEMU artifact
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
         uses: actions/download-artifact@v4
         with:
           artifact-ids: ${{ needs.qemu-build-and-scan.outputs.qemu-artifact-id }}
           path: . # Will unpack into a folder with the name used in upload-artifact, containing the binary
 
       - name: Build and patch kubevirt
-        continue-on-error: false
         if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
         # Each logical block here is copied exactly from a code block in kubevirt-patch/README.md
         run: |
-          mkdir -p workspace
-          cd workspace
+          mkdir -p $EDV_HOME/workspace
+          cd $EDV_HOME/workspace
           git clone https://github.com/kubevirt/kubevirt.git
           cd kubevirt
 
@@ -224,33 +250,126 @@ jobs:
 
           make manifests
 
+          echo "Partition sizes & free space following build:"
+          df -h
+
       - name: Export kubevirt build artifacts to output directory
-        continue-on-error: false
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
         shell: bash
-        working-directory: workspace/kubevirt-artifacts
         run: |
-          cp -a ../kubevirt/_out/manifests/release/kubevirt-operator.yaml
-          cp -a ../kubevirt/_out/manifests/release/kubevirt-cr.yaml
+          mkdir -p $EDV_HOME/workspace/kubevirt-artifacts
+          cd $EDV_HOME/workspace/kubevirt-artifacts
+
+          cp $EDV_HOME/workspace/kubevirt/_out/manifests/release/kubevirt-operator.yaml .
+          cp $EDV_HOME/workspace/kubevirt/_out/manifests/release/kubevirt-cr.yaml .
+
           docker image pull localhost:5000/sidecar-shim:$EDV_VERSION
           docker image pull localhost:5000/virt-api:$EDV_VERSION
           docker image pull localhost:5000/virt-handler:$EDV_VERSION
           docker image pull localhost:5000/virt-launcher:$EDV_VERSION
           docker image pull localhost:5000/virt-operator:$EDV_VERSION
           docker image pull localhost:5000/virt-controller:$EDV_VERSION
+
           docker save -o sidecar-shim.tar localhost:5000/sidecar-shim:$EDV_VERSION
           docker save -o virt-api.tar localhost:5000/virt-api:$EDV_VERSION
           docker save -o virt-controller.tar localhost:5000/virt-controller:$EDV_VERSION
           docker save -o virt-handler.tar localhost:5000/virt-handler:$EDV_VERSION
           docker save -o virt-launcher.tar localhost:5000/virt-launcher:$EDV_VERSION
           docker save -o virt-operator.tar localhost:5000/virt-operator:$EDV_VERSION
-          tar czf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
 
+          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
+
+          echo "Contents of $(pwd):"
+          ls -hal
+
+          echo "Partition sizes & free space following export:"
+          df -h
+
+      # If the cache was loaded, then the artifacts folder contains valid images which are still valid for this version
+      # (i.e. nothing changed about kubevirt or qemu, so there was no need to rebuild the images)
+      # However, they will have the old tag - whatever the tag was when they were built last
+      # Need to re-tag them and import them into docker so they're usable by subsequent steps
+      - name: Reload and re-tag cached images
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit == 'true' }}
+        shell: bash
+        run: |
+          cd $EDV_HOME/workspace/kubevirt-artifacts
+
+          # Extract the old version from the kubevirt-operator file
+          OLD_VERSION="$(cat kubevirt-operator.yaml | grep -A 1 KUBEVIRT_VERSION | grep value: | perl -p -e 's|^.*value: (.*)$|\1|g')"
+
+          perl -p -i -e "s|$OLD_VERSION|$NEW_VERSION|g" kubevirt-operator.yaml
+
+          docker image load -i $EDV_HOME/workspace/kubevirt-artifacts/sidecar-shim.tar
+          docker image load -i $EDV_HOME/workspace/kubevirt-artifacts/virt-api.tar
+          docker image load -i $EDV_HOME/workspace/kubevirt-artifacts/virt-controller.tar
+          docker image load -i $EDV_HOME/workspace/kubevirt-artifacts/virt-handler.tar
+          docker image load -i $EDV_HOME/workspace/kubevirt-artifacts/virt-launcher.tar
+          docker image load -i $EDV_HOME/workspace/kubevirt-artifacts/virt-operator.tar
+
+          docker tag localhost:5000/sidecar-shim:$OLD_VERSION localhost:5000/sidecar-shim:$EDV_VERSION
+          docker tag localhost:5000/virt-api:$OLD_VERSION localhost:5000/virt-api:$EDV_VERSION
+          docker tag localhost:5000/virt-controller:$OLD_VERSION localhost:5000/virt-controller:$EDV_VERSION
+          docker tag localhost:5000/virt-handler:$OLD_VERSION localhost:5000/virt-handler:$EDV_VERSION
+          docker tag localhost:5000/virt-launcher:$OLD_VERSION localhost:5000/virt-launcher:$EDV_VERSION
+          docker tag localhost:5000/virt-operator:$OLD_VERSION localhost:5000/virt-operator:$EDV_VERSION
+
+          docker save -o sidecar-shim.tar localhost:5000/sidecar-shim:$EDV_VERSION
+          docker save -o virt-api.tar localhost:5000/virt-api:$EDV_VERSION
+          docker save -o virt-controller.tar localhost:5000/virt-controller:$EDV_VERSION
+          docker save -o virt-handler.tar localhost:5000/virt-handler:$EDV_VERSION
+          docker save -o virt-launcher.tar localhost:5000/virt-launcher:$EDV_VERSION
+          docker save -o virt-operator.tar localhost:5000/virt-operator:$EDV_VERSION
+
+          rm intel-idv-kubevirt*.tar.gz
+          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
+
+          echo "Contents of $(pwd):"
           ls -hal
 
       - name: Upload kubevirt artifacts
-        continue-on-error: false
         uses: actions/upload-artifact@v4
         with:
-          name: kubevirt artifacts
+          name: kubevirt-artifacts
           path: |
             workspace/kubevirt-artifacts/intel-idv-kubevirt-${{ env.EDV_VERSION }}.tar.gz
+
+      - name: Trivy Image Scan
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p workspace/kubevirt-trivy
+          cd workspace/kubevirt-trivy
+
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+          trivy image "localhost:5000/sidecar-shim:$EDV_VERSION"     --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_sidecar-shim.html
+          trivy image "localhost:5000/virt-api:$EDV_VERSION"         --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-api.html
+          trivy image "localhost:5000/virt-controller:$EDV_VERSION"  --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-controller.html
+          trivy image "localhost:5000/virt-handler:$EDV_VERSION"     --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-handler.html
+          trivy image "localhost:5000/virt-launcher:$EDV_VERSION"    --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-launcher.html
+          trivy image "localhost:5000/virt-operator:$EDV_VERSION"    --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-operator.html
+
+          trivy image --quiet --format spdx-json --output trivy_sidecar-shim.spdx.json    "localhost:5000/sidecar-shim:$EDV_VERSION"
+          trivy image --quiet --format spdx-json --output trivy_virt-api.spdx.json        "localhost:5000/virt-api:$EDV_VERSION"
+          trivy image --quiet --format spdx-json --output trivy_virt-controller.spdx.json "localhost:5000/virt-controller:$EDV_VERSION"
+          trivy image --quiet --format spdx-json --output trivy_virt-handler.spdx.json    "localhost:5000/virt-handler:$EDV_VERSION"
+          trivy image --quiet --format spdx-json --output trivy_virt-launcher.spdx.json   "localhost:5000/virt-launcher:$EDV_VERSION"
+          trivy image --quiet --format spdx-json --output trivy_virt-operator.spdx.json   "localhost:5000/virt-operator:$EDV_VERSION"
+
+      - name: Upload Trivy Image Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy kubevirt image scan
+          path: |
+            workspace/kubevirt-trivy/trivy_sidecar-shim.html
+            workspace/kubevirt-trivy/trivy_virt-api.html
+            workspace/kubevirt-trivy/trivy_virt-controller.html
+            workspace/kubevirt-trivy/trivy_virt-handler.html
+            workspace/kubevirt-trivy/trivy_virt-launcher.html
+            workspace/kubevirt-trivy/trivy_virt-operator.html
+            workspace/kubevirt-trivy/trivy_sidecar-shim.spdx.json
+            workspace/kubevirt-trivy/trivy_virt-api.spdx.json
+            workspace/kubevirt-trivy/trivy_virt-controller.spdx.json
+            workspace/kubevirt-trivy/trivy_virt-handler.spdx.json
+            workspace/kubevirt-trivy/trivy_virt-launcher.spdx.json
+            workspace/kubevirt-trivy/trivy_virt-operator.spdx.json

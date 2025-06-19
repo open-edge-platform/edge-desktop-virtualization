@@ -1,21 +1,30 @@
 name: 'Setup Tools'
 description: 'Sets up required tools'
 
+inputs:
+  go:
+    description: "Run setup-go action if true"
+    required: false
+    default: "true"
+  trivy:
+    description: "Install Trivy if true"
+    required: false
+    default: "true"
+
 runs:
   using: "composite"
   steps:
     - name: Setup Go
-      continue-on-error: false
+      if: "${{ inputs.go == 'true' }}"
       uses: actions/setup-go@v5
 
     - name: Install Trivy
-      continue-on-error: false
+      if: "${{ inputs.trivy == 'true' }}"
       shell: bash
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
     - name: Set EDV_VERSION to the current git version for this actions run
-      continue-on-error: false
       shell: bash
       run: |
         # Print the most recent commit
@@ -37,7 +46,6 @@ runs:
         echo "EDV_VERSION=$EDV_VERSION" >> $GITHUB_ENV
 
     - name: Set EDV_HOME to the checked-out edge-desktop-virtualization source code
-      continue-on-error: false
       shell: bash
       run: |
         echo "EDV_HOME=$(pwd)" >> $GITHUB_ENV
