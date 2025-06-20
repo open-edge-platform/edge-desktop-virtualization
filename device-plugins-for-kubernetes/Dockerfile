@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Use a minimal base image
-FROM alpine:latest
+FROM debian:stable-slim
 
 # Set the working directory inside the container
 WORKDIR /app

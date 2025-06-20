@@ -1,0 +1,51 @@
+name: 'Setup Tools'
+description: 'Sets up required tools'
+
+inputs:
+  go:
+    description: "Run setup-go action if true"
+    required: false
+    default: "true"
+  trivy:
+    description: "Install Trivy if true"
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Go
+      if: "${{ inputs.go == 'true' }}"
+      uses: actions/setup-go@v5
+
+    - name: Install Trivy
+      if: "${{ inputs.trivy == 'true' }}"
+      shell: bash
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+    - name: Set EDV_VERSION to the current git version for this actions run
+      shell: bash
+      run: |
+        # Print the most recent commit
+        echo "Most recent commit:"
+        git log -1
+
+        if [[ $(git log | grep commit | wc -l) -lt 10 ]]; then
+          echo "Commit history is squashed, EDV_VERSION will be wrong. Calling action should checkout code with fetch-depth:0"
+          exit 1
+        fi
+
+        # Version based on commits since the most recent tag
+        # If the current commit is a tag, use that tag
+        # If not, use <most recent tag>-<num commits since tag>-<short commit hash>
+        # i.e. v1-11-gdc6c0bd
+        EDV_VERSION="$(git describe --tags --always)"
+
+        echo "EDV_VERSION=$EDV_VERSION"
+        echo "EDV_VERSION=$EDV_VERSION" >> $GITHUB_ENV
+
+    - name: Set EDV_HOME to the checked-out edge-desktop-virtualization source code
+      shell: bash
+      run: |
+        echo "EDV_HOME=$(pwd)" >> $GITHUB_ENV

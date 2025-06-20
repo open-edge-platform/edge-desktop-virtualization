@@ -1,0 +1,129 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: "Device Plugin: Build, Trivy & ClamAV Scan"
+run-name: "Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
+
+# Only run at most 1 workflow concurrently per PR, unlimited for branches
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+jobs:
+  device-plugins-for-kubernetes:
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # All history, not just latest commit
+          ref: ${{ github.event.pull_request.head.sha }} # Check out the actual commit, not a fake merge commit
+
+      - name: Setup Tools & Common Variables
+        uses: ./.github/actions/setup-tools
+
+      - name: Build the device plugin and docker image
+        working-directory: device-plugins-for-kubernetes
+        run: |
+          ./build.sh --ver "$EDV_VERSION" --repo "localhost:5000"
+
+      - name: Build device plugin release tarball
+        working-directory: device-plugins-for-kubernetes
+        run: |
+          mkdir device-plugin-artifacts
+          cd device-plugin-artifacts
+
+          docker image pull busybox:latest
+          docker image tag busybox:latest localhost:5000/busybox:latest
+          docker image save -o busybox.tar localhost:5000/busybox:latest
+
+          docker image save -o device-plugin.tar "localhost:5000/mf-device-plugin:$EDV_VERSION"
+
+          cp -a ../deploy/manifests/maverikflats-device-plugin.yaml device-plugin.yaml
+
+          tar czf intel-idv-device-plugin-$EDV_VERSION.tar.gz busybox.tar device-plugin.tar device-plugin.yaml
+
+          ls -hal
+
+      - name: Upload device plugin release tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: device-plugin artifacts
+          path: |
+              device-plugins-for-kubernetes/device-plugin-artifacts/intel-idv-device-plugin-${{ env.EDV_VERSION }}.tar.gz
+
+      - name: trivy repo scan
+        shell: bash
+        working-directory: device-plugins-for-kubernetes
+        run: |
+          trivy --version
+          which trivy
+          trivy image --download-db-only
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+
+          # Use the downloaded template
+          trivy fs . --format template --template "@trivy-html.tpl" -o "trivy_code_scan_core.html"
+
+      - name: Upload trivy reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-code-scan-results-core
+          path: |
+              device-plugins-for-kubernetes/trivy_code_scan_core.html
+
+      - name: Trivy Image Scan
+        continue-on-error: true
+        shell: bash
+        run: |
+              curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+              trivy image "localhost:5000/mf-device-plugin:$EDV_VERSION" --ignore-unfixed --format template --template "@trivy-html.tpl" -o device-plugins-for-kubernetes/trivy_image_scan_core-backend.html
+              trivy image --quiet --format spdx-json --output device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json "localhost:5000/mf-device-plugin:$EDV_VERSION"
+
+      - name: Upload Trivy Image Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy image scan report-core
+          path: |
+                device-plugins-for-kubernetes/trivy_image_scan_core-backend.html
+                device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json
+
+      - name: ClamAV Antivirus Scan
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo "Starting ClamAV scan on device-plugins-for-kubernetes/..."
+
+          docker run --rm \
+            --mount type=bind,source=./device-plugins-for-kubernetes/,target=/scandir \
+            clamav/clamav:stable \
+            clamscan --recursive --log=/scandir/clamav-scan-report.log \
+            /scandir
+
+          SCAN_EXIT_CODE=$?
+          sudo chown $USER:$USER device-plugins-for-kubernetes/clamav-scan-report.log 2>/dev/null || true
+
+          if [ $SCAN_EXIT_CODE -ne 0 ]; then
+            echo "ClamAV scan failed or found issues"
+            exit 1
+          fi
+
+      - name: Upload Antivirus Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: antivirus-report-core
+          path: device-plugins-for-kubernetes/clamav-scan-report.log

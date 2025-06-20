@@ -45,14 +45,15 @@ QEMU emulator version 9.0.0 (qemu-kvm-9.0.0-10.el9)
 
 The SRIOV patches to QEMU are based on QEMU 8.2.1
 
-1. Download the the SR-IOV patches for QEMU
+1. Download the SR-IOV patches for QEMU
 
     ```sh
     cd ~/workspace
 
     wget -N --no-check-certificate https://download.01.org/intel-linux-overlay/ubuntu/pool/main/q/qemu/qemu_8.2.1+ppa1-noble9.debian.tar.xz
 
-    tar -xvf qemu_8.2.1+ppa1-noble9.debian.tar.xz
+    mkdir qemu_8.2.1+ppa1-noble9.debian
+    tar -xf 'qemu_8.2.1+ppa1-noble9.debian.tar.xz' -C 'qemu_8.2.1+ppa1-noble9.debian'
     ```
 
 1. Download the same version of QEMU that matches the downloaded patches:
@@ -60,7 +61,7 @@ The SRIOV patches to QEMU are based on QEMU 8.2.1
     ```sh
     wget -N --no-check-certificate https://download.qemu.org/qemu-8.2.1.tar.xz
 
-    tar -xvf qemu-8.2.1.tar.xz
+    tar -xf qemu-8.2.1.tar.xz
 
     cd qemu-8.2.1
     ```
@@ -75,8 +76,6 @@ The SRIOV patches to QEMU are based on QEMU 8.2.1
 
     ```sh
     git apply ./sriov/*.patch
-
-    cd ~/workspace
     ```
 
 ### 2.1 Creating CentOS 9 containerized environment
@@ -88,26 +87,22 @@ The original idea to build within the Centos container comes from this [link](ht
 1. Generate the Centos 9 image to be used for QEMU build environment
 
     ```sh
-    cd qemu-8.2.1
-
     ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
     ```
 
 1. Patch `Dockerfile.centos-stream9` to include missing dependencies
 
     ```sh
-    vim Dockerfile.centos-stream9
+    perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
     ```
+
+    This makes the following changes to `Dockerfile.centos-stream9`
 
     ```diff
             zlib-devel \
             zlib-static \
-    -        zstd &&
-    +        zstd \
-    +        libslirp-devel \
-    +        liburing-devel \
-    +        libbpf-devel \
-    +        libblkio-devel && \
+    -        zstd && \
+    +        zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel && \
         dnf autoremove -y && \
         dnf clean all -y && \
         rpm -qa | sort > /packages.txt && \
@@ -177,17 +172,14 @@ The original idea to build within the Centos container comes from this [link](ht
     13c2760bf012a8011ddbe0c595ec3dca24249debe32bc4d1e338ec8538ad7453 build/qemu-system-x86_64
     ```
 
-## 3. Enabling Kubevirt with GTK display support libararies
+## 3. Enabling Kubevirt with GTK display support libraries
 
 1. Clone the kubevirt repo:
 
     ```sh
-    mkdir ~/workspace
-
+    mkdir -p ~/workspace
     cd ~/workspace
-
     git clone https://github.com/kubevirt/kubevirt.git
-
     cd kubevirt
     ```
 
@@ -196,16 +188,16 @@ The original idea to build within the Centos container comes from this [link](ht
     git checkout v1.5.0
     ```
 
-1. Apply a patch to kubevirt to update dependencies which resolve potential security issues since the original v1.5.0 kubevirt was released
+1. Apply a patch to kubevirt to update dependencies which resolve potential security issues since the original v1.5.0 kubevirt was released. $EDV_HOME should be set to the path to the top level of this repository (e.g. edge-desktop-virtualization).
     ```sh
-    git apply your/path/to/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
+    git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
     ```
 
 1. [OPTIONAL] Update kubevirt dependency images using the `make bump-images` command. Note that you may also have to update `go_version` in `WORKSPACE` if applicable.
 
 1. Apply the kubevirt patch from this repo to expand kubevirt virt-launcher image with additional dependencies to support GTK
     ```sh
-    git apply your/path/to/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
+    git apply $EDV_HOME/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
     ```
 
 1. Create a directory to place the custom QEMU binary and copy it from the QEMU build
@@ -218,13 +210,13 @@ The original idea to build within the Centos container comes from this [link](ht
 1. Obtain the `SHA` hash number of the QEMU binary
 
     ```sh
-    sha256sum ./build/qemu-system-x86_64
-    13c2760bf012a8011ddbe0c595ec3dca24249debe32bc4d1e338ec8538ad7453 ./build/qemu-system-x86_64
+    QEMU_SHA256="$(sha256sum ./build/qemu-system-x86_64 | cut -d ' ' -f 1)"
+    echo "QEMU_SHA256=$QEMU_SHA256"
     ```
 
 1. Patch the top level `WORKSPACE` file in top level `kubevirt` directory. Replace `<SHA256SUM_OF_PATCHED_QEMU>` with your sha256sum from the previous step
     ```sh
-    vim WORKSPACE
+    perl -p -i -e "s|<SHA256SUM_OF_PATCHED_QEMU>|$QEMU_SHA256|g" WORKSPACE
     ```
 
 1. Export the location of the docker registry and build tag (local docker registry in this case)
