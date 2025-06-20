@@ -43,33 +43,34 @@ QEMU emulator version 9.0.0 (qemu-kvm-9.0.0-10.el9)
 
 ## 2. Building and patching QEMU
 
-The SRIOV patches to QEMU are based on QEMU 8.2.1
+The SRIOV patches to QEMU are based on QEMU 9.1.0
 
-1. Download the SR-IOV patches for QEMU
+1. Download the SR-IOV Intel distribution of QEMU, and extract the patches. Note that 0e33000c was the version tested in this guide, there might be newer patches/fixes on the 9.1.0-gfx-sriov branch.
 
     ```sh
-    cd ~/workspace
+    mkdir -p workspace
+    cd workspace
 
-    wget -N --no-check-certificate https://download.01.org/intel-linux-overlay/ubuntu/pool/main/q/qemu/qemu_8.2.1+ppa1-noble9.debian.tar.xz
-
-    mkdir qemu_8.2.1+ppa1-noble9.debian
-    tar -xf 'qemu_8.2.1+ppa1-noble9.debian.tar.xz' -C 'qemu_8.2.1+ppa1-noble9.debian'
+    git clone https://github.com/intel/Intel-distribution-of-QEMU.git
+    cd Intel-distribution-of-QEMU
+    git checkout 0e33000c917458cd1c6d884377d6442d50b14a58
+    git format-patch -50
     ```
 
 1. Download the same version of QEMU that matches the downloaded patches:
 
     ```sh
-    wget -N --no-check-certificate https://download.qemu.org/qemu-8.2.1.tar.xz
-
-    tar -xf qemu-8.2.1.tar.xz
-
-    cd qemu-8.2.1
+    cd ..
+    wget -N https://download.qemu.org/qemu-9.1.0.tar.xz
+    tar -xf qemu-9.1.0.tar.xz
+    cd qemu-9.1.0
     ```
 
-1. Copy the patches from `qemu_8.2.1+ppa1-noble9.debian` to qemu-8.2.1 directory:
+1. Copy the patches exported above to a new `sriov` directory:
 
     ```sh
-    cp  -r ../qemu_8.2.1+ppa1-noble9.debian/debian/patches/sriov/ .
+   mkdir sriov
+   cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
     ```
 
 1. Apply patches:
@@ -124,10 +125,10 @@ The original idea to build within the Centos container comes from this [link](ht
 
 1. Starting Centos 9 build environment
 
-    Start the Centos 9 environment container from `qemu-8.2.1` directory. This allows the whole content of the QEMU source to be inside the environment.
+    Start the Centos 9 environment container from `qemu-9.1.0` directory. This allows the whole content of the QEMU source to be inside the environment.
 
     ```sh
-    cd qemu-8.2.1
+    cd qemu-9.1.0
 
     podman run -ti \
         -v $(pwd):/src:Z \
@@ -158,7 +159,7 @@ The original idea to build within the Centos container comes from this [link](ht
     [root@<container> src]# ninja install
     ```
 
-1. Exit the CentOS build container environment - the built artifacts will be present in the `qemu-8.2.1` directory on host.
+1. Exit the CentOS build container environment - the built artifacts will be present in the `qemu-9.1.0` directory on host.
 
     ```sh
     [root@<container> src]# exit
@@ -204,7 +205,7 @@ The original idea to build within the Centos container comes from this [link](ht
 
     ```sh
     mkdir build
-    cp ../qemu-8.2.1/build/qemu-system-x86_64 build/qemu-system-x86_64
+    cp ../qemu-9.1.0/build/qemu-system-x86_64 build/qemu-system-x86_64
     ```
 
 1. Obtain the `SHA` hash number of the QEMU binary
