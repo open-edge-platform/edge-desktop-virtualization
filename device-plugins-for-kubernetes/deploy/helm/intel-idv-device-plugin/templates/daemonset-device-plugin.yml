@@ -1,16 +1,21 @@
+{{- if .Values.devicePlugin.enabled }}
+---
+{{- $daemonsetName := printf "%s" (include "maverikflats-device-plugin.fullname" .) | trunc 63 | trimSuffix "-" }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: device-plugin
+  name: {{ $daemonsetName }}
   namespace: kube-system
+  labels:
+    {{- include "maverikflats-device-plugin.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      name: device-plugin
+      {{- include "maverikflats-device-plugin.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        name: device-plugin
+        {{- include "maverikflats-device-plugin.templateLabels" . | nindent 8 }}
     spec:
       initContainers:
         - name: set-permissions
@@ -42,10 +47,9 @@ spec:
               echo "Will use user:group = $USER_ID_TO_USE:$GROUP_ID_TO_USE"
 
               # Process each path
-              for path in /dev/dri /dev/dri/card0 /dev/udmabuf /dev/vfio /dev/bus/usb /tmp/.X11-unix; do
+              for path in /dev/dri /dev/dri/card0 /dev/dri/renderD128 /dev/udmabuf /dev/vfio /dev/bus/usb /tmp/.X11-unix; do
                 if [ -e "$path" ]; then
                   echo "Path $path exists, changing ownership to $USER_ID_TO_USE:$GROUP_ID_TO_USE"
-                  #chown -R root:qemu $path
                   chown -R $USER_ID_TO_USE:$GROUP_ID_TO_USE $path
                   chmod 777 $path
                 else
@@ -58,9 +62,9 @@ spec:
               level: s0
           env:
             - name: USER_ID
-              value: "107"
+              value: "{{ .Values.userId}}"
             - name: GROUP_ID
-              value: "107"
+              value: "{{ .Values.groupId}}"
           volumeMounts:
             - name: dev-dri-mount
               mountPath: /dev/dri
@@ -73,8 +77,9 @@ spec:
             - name: usb-mount
               mountPath: /dev/bus/usb
       containers:
-        - name: mvf-device-plugin
-          image: 'localhost:5000/mf-device-plugin:v1'
+        {{- if .Values.intelIdvPluginEnabled }}
+        - name: intel-idv-device-plugin
+          image: {{ include "maverikflats-device-plugin.fullimage" . }}
           imagePullPolicy: Always
           volumeMounts:
             - name: device-plugin
@@ -89,6 +94,7 @@ spec:
               mountPath: /dev/vfio
             - name: usb-mount
               mountPath: /dev/bus/usb
+        {{- end }}
       volumes:
         - name: device-plugin
           hostPath:
@@ -108,3 +114,4 @@ spec:
         - name: usb-mount
           hostPath:
             path: /dev/bus/usb
+{{- end }}

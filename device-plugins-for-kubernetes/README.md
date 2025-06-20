@@ -132,7 +132,7 @@ To consume the custom resources, define them in your pod's resource requests.
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mvf-test-pod
+  name: intel-idv-test-pod
 spec:
   containers:
     - name: test-container

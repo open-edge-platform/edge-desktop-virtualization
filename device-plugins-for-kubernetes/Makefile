@@ -4,7 +4,7 @@
 BINARY_NAME ?= device-plugin
 PKG_LIST := $(shell go list ./... | grep -v /vendor/)
 DOCKER_REPO ?= localhost:5000
-BUILD_NAME ?= mf-$(BINARY_NAME)
+BUILD_NAME ?= intel-idv-$(BINARY_NAME)
 HELM_CHART_NAME ?= mdp
 BUILD_VERSION ?= v1
 DOCKER_IMAGE ?= $(DOCKER_REPO)/$(BUILD_NAME):$(BUILD_VERSION)
