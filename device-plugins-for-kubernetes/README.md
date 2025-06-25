@@ -50,11 +50,11 @@ You can deploy the device plugin as a DaemonSet to ensure that it runs on every 
 * Helm installed in the system
 
 ### Steps for Helm Chart installation
-1. Navigate to `deploy/helm/maverikflats-device-plugin` folder
-2. Run `helm install device-plugin .`
+1. Navigate to `deploy/helm/intel-idv-device-plugin` folder
+2. Run `helm install intel-idv-device-plugin .`
 ```shell
-➜ helm install device-plugin .
-NAME: device-plugin
+➜ helm install intel-idv-device-plugin .
+NAME: intel-idv-device-plugin
 LAST DEPLOYED: Thu Mar 20 04:43:20 2025
 NAMESPACE: default
 STATUS: deployed
@@ -64,7 +64,7 @@ TEST SUITE: None
 ➜ kubectl get po -A
 NAMESPACE     NAME                                                    READY   STATUS      RESTARTS   AGE
 .
-kube-system   device-plugin-maverikflats-device-plugin-zxkqm          1/1     Running     0          3s
+kube-system   intel-idv-device-plugin-zxkqm          1/1     Running     0          3s
 .
 ```
 
@@ -72,7 +72,7 @@ kube-system   device-plugin-maverikflats-device-plugin-zxkqm          1/1     Ru
 
 1.  **Build the Device Plugin:** Build the device plugin binary using Go.
 2.  **Push to registry:** Build and Push the image to your designated registry
-3.  **Apply the DaemonSet:** Update `deploy/manifests/maverikflats-device-plugin.yaml` with the pushed image and deploy to your Kubernetes cluster using `kubectl apply -f deploy/manifests/maverikflats-device-plugin.yaml`.
+3.  **Apply the DaemonSet:** Update `deploy/manifests/intel-idv-device-plugin.yaml` with the pushed image and deploy to your Kubernetes cluster using `kubectl apply -f deploy/manifests/intel-idv-device-plugin.yaml`.
 
 ## Verify setup
 
@@ -132,7 +132,7 @@ To consume the custom resources, define them in your pod's resource requests.
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mvf-test-pod
+  name: intel-idv-test-pod
 spec:
   containers:
     - name: test-container

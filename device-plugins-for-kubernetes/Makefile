@@ -4,7 +4,7 @@
 BINARY_NAME ?= device-plugin
 PKG_LIST := $(shell go list ./... | grep -v /vendor/)
 DOCKER_REPO ?= localhost:5000
-BUILD_NAME ?= mf-$(BINARY_NAME)
+BUILD_NAME ?= intel-idv-$(BINARY_NAME)
 HELM_CHART_NAME ?= mdp
 BUILD_VERSION ?= v1
 DOCKER_IMAGE ?= $(DOCKER_REPO)/$(BUILD_NAME):$(BUILD_VERSION)
@@ -41,7 +41,7 @@ docker-push:
 	docker push $(DOCKER_IMAGE)
 
 deploy:
-	helm install $(HELM_CHART_NAME) deploy/helm/maverikflats-device-plugin
+	helm install $(HELM_CHART_NAME) deploy/helm/intel-idv-device-plugin
 
 undeploy:
 	helm uninstall $(HELM_CHART_NAME)

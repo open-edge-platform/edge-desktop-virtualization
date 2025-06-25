@@ -36,10 +36,10 @@ This guide provides step-by-step instructions to package and run IDV services us
 - Run the following commands to create a tar file for the IDV solution:
 
 ```bash
-sudo mkdir idv-solution-1.0
-sudo cp -r autologin.conf etc/systemd/user/idv-init.service etc/systemd/user/idv-launcher.service init/ launcher/ idv-solution-1.0/
-sudo tar -czf idv-solution-1.0.tar.gz idv-solution-1.0/
-sudo chmod +x idv-solution-1.0.tar.gz
+sudo mkdir intel-idv-services-0.1
+sudo cp -r autologin.conf etc/systemd/user/idv-init.service etc/systemd/user/idv-launcher.service init/ launcher/ intel-idv-services-0.1/
+sudo tar -czf intel-idv-services-0.1.tar.gz intel-idv-services-0.1/
+sudo chmod +x intel-idv-services-0.1.tar.gz
 ```
 
 ## Step 2: Copy Files to RPM SOURCES
@@ -86,7 +86,7 @@ sudo ./setup_permissions.sh
 ## Step 5: Build the RPM Package
 
   ```bash
-  rpmbuild -ba ~/rpmbuild/SPECS/idv-solution.spec
+  rpmbuild -ba ~/rpmbuild/SPECS/intel-idv-services.spec
   ```
   - If successful, the RPM package will be created in the `~/rpmbuild/RPMS/noarch/` directory. Make a note of the path of RPM package for further steps.
   > **Note**: If the build fails, check the .spec file for syntax errors or missing dependencies. 
@@ -138,12 +138,12 @@ sudo ./setup_permissions.sh
 - To uninstall the RPM package, run:
 
   ```bash
-  sudo rpm -e idv-solution
+  sudo rpm -e intel-idv-services
   ```
 
 ### Post-Reboot Instructions
 
-- If the machine is rebooted, navigate to the `idv/` directory and run the following command to reset permissions:
+- If the machine is rebooted, navigate to the `idv-services/` directory and run the following command to reset permissions:
 
   ```bash
   sudo ./setup_permissions.sh
@@ -162,7 +162,7 @@ sudo ./setup_permissions.sh
   ```bash
   journalctl --user -u idv-init.service
   ```
-  Ensure that all required files are present in `/opt/idv`.
+  Ensure that all required files are present in `/usr/bin/idv`.
 
 - If the VMs do not launch after starting the `idv-launcher` service, check the service logs using the following command:
 
@@ -170,9 +170,9 @@ sudo ./setup_permissions.sh
   journalctl --user -u idv-launcher.service
   ```
 
-  You can also check the `start_all_vms.log` in `/opt/idv/launcher` directory for errors using the command:
+  You can also check the journalctl logs for errors using the command:
 
   ```bash
-  sudo cat /opt/idv/launcher/start_all_vms.log
+  sudo journalctl -t idv-services
   ```  
   Ensure that the `vm.conf` file is correctly configured and all required files (e.g., firmware and qcow2 files) are present and the file paths are valid.

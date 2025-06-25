@@ -6,7 +6,6 @@
 # These contents may have been developed with support from one or more
 # Intel-operated generative artificial intelligence solutions.
 
-
 source vm.conf
 
 set -eE

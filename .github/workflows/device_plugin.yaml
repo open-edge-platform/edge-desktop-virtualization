@@ -47,13 +47,13 @@ jobs:
           mkdir device-plugin-artifacts
           cd device-plugin-artifacts
 
-          docker image pull busybox:latest
-          docker image tag busybox:latest localhost:5000/busybox:latest
-          docker image save -o busybox.tar localhost:5000/busybox:latest
+          docker image pull busybox:glibc
+          docker image tag busybox:glibc localhost:5000/busybox:glibc
+          docker image save -o busybox.tar localhost:5000/busybox:glibc
 
-          docker image save -o device-plugin.tar "localhost:5000/mf-device-plugin:$EDV_VERSION"
+          docker image save -o device-plugin.tar "localhost:5000/intel-idv-device-plugin:$EDV_VERSION"
 
-          cp -a ../deploy/manifests/maverikflats-device-plugin.yaml device-plugin.yaml
+          cp -a ../deploy/manifests/intel-idv-device-plugin.yaml device-plugin.yaml
 
           tar czf intel-idv-device-plugin-$EDV_VERSION.tar.gz busybox.tar device-plugin.tar device-plugin.yaml
 
@@ -90,8 +90,8 @@ jobs:
         shell: bash
         run: |
               curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
-              trivy image "localhost:5000/mf-device-plugin:$EDV_VERSION" --ignore-unfixed --format template --template "@trivy-html.tpl" -o device-plugins-for-kubernetes/trivy_image_scan_core-backend.html
-              trivy image --quiet --format spdx-json --output device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json "localhost:5000/mf-device-plugin:$EDV_VERSION"
+              trivy image "localhost:5000/intel-idv-device-plugin:$EDV_VERSION" --ignore-unfixed --format template --template "@trivy-html.tpl" -o device-plugins-for-kubernetes/trivy_image_scan_core-backend.html
+              trivy image --quiet --format spdx-json --output device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json "localhost:5000/intel-idv-device-plugin:$EDV_VERSION"
 
       - name: Upload Trivy Image Report
         uses: actions/upload-artifact@v4

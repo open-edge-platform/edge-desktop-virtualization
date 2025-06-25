@@ -1,0 +1,8 @@
+devicePlugin:
+  enabled: true
+image:
+  repository: localhost:5000/intel-idv-device-plugin
+  tag: "v1.1"
+intelIdvPluginEnabled: true
+userId: "107"
+groupId: "107"

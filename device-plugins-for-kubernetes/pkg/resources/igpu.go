@@ -29,6 +29,9 @@ func (r *ResourceIGPU) ListDevices() []*pluginapi.Device {
 	if _, err := os.Stat(constants.IGpuDevicePath); os.IsNotExist(err) {
 		return []*pluginapi.Device{} // Return an empty list if the path doesn't exist
 	}
+	if _, err := os.Stat(constants.RenderD128DevicePath); os.IsNotExist(err) {
+		return []*pluginapi.Device{} // Return an empty list if the path doesn't exist
+	}
 	devices := make([]*pluginapi.Device, constants.IGpuDeviceCount)
 
 	for i := 0; i < constants.IGpuDeviceCount; i++ {

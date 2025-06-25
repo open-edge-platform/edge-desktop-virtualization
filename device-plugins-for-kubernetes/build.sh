@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Default values
-DEFAULT_VER="v1"
+DEFAULT_VER="v1.1"
 DEFAULT_DOCKER_REPO="127.0.0.1:5000"
 DEFAULT_PUSH="false"
 VER="$DEFAULT_VER"
@@ -51,7 +51,7 @@ fi
 # Build the device plugin
 echo "Building the device plugin..."
 rm -f device-plugin
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o device-plugin cmd/main.go
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 BUILD_VERSION=$VER go build -o device-plugin cmd/main.go
 if [[ $? -ne 0 ]]; then
   echo "Error: Failed to build the device plugin"
   exit 1
@@ -59,7 +59,7 @@ fi
 
 # Build the Docker image
 echo "Building the Docker image..."
-docker build --no-cache -t "$DOCKER_REPO/mf-device-plugin:$VER" .
+docker build --no-cache -t "$DOCKER_REPO/intel-idv-device-plugin:$VER" .
 if [[ $? -ne 0 ]]; then
   echo "Error: Failed to build the Docker image"
   exit 1
@@ -68,7 +68,7 @@ fi
 # Push the Docker image if --push is specified
 if [[ $PUSH == "true" ]]; then
   echo "Pushing the Docker image to the repository..."
-  ! docker push "$DOCKER_REPO/mf-device-plugin:$VER"
+  ! docker push "$DOCKER_REPO/intel-idv-device-plugin:$VER"
   if [[ $? -ne 0 ]]; then
     echo "Error: Failed to push the Docker image"
     exit 1
@@ -76,6 +76,8 @@ if [[ $PUSH == "true" ]]; then
 fi
 
 # Update the deployment manifest with the newly built image version
-perl -p -i -e "s|image:.*mf-device-plugin:.*$|image: '$DOCKER_REPO/mf-device-plugin:$VER'|g" deploy/manifests/maverikflats-device-plugin.yaml
+perl -p -i -e "s|image:.*intel-idv-device-plugin:.*$|image: '$DOCKER_REPO/intel-idv-device-plugin:$VER'|g" deploy/manifests/intel-idv-device-plugin.yaml
+perl -p -i -e "s|repository:.*$|repository: $DOCKER_REPO/intel-idv-device-plugin|g" deploy/helm/intel-idv-device-plugin/values.yaml
+perl -p -i -e "s|tag:.*$|tag: \"$VER\"|g" deploy/helm/intel-idv-device-plugin/values.yaml
 
 echo "Build successful."

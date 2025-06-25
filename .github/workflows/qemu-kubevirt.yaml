@@ -269,7 +269,12 @@ jobs:
           cd $EDV_HOME/workspace/kubevirt-artifacts
 
           cp $EDV_HOME/workspace/kubevirt/_out/manifests/release/kubevirt-operator.yaml .
-          cp $EDV_HOME/workspace/kubevirt/_out/manifests/release/kubevirt-cr.yaml .
+          cp $EDV_HOME/kubevirt-patch/kubevirt-cr-gfx-sriov.yaml .
+
+          # Modify the generated operator yaml to specify images by tag, rather than sha256
+          cat kubevirt-operator.yaml | sed '/name: VIRT_API_SHASUM/,/name: KUBEVIRT_VERSION/ { /name: KUBEVIRT_VERSION/!d }' > kubevirt-operator.new.yaml
+          perl -p -i -e "s|virt-operator\@sha256.*\$|virt-operator:$EDV_VERSION|g" kubevirt-operator.new.yaml
+          mv -f kubevirt-operator.new.yaml kubevirt-operator.yaml
 
           docker image pull localhost:5000/sidecar-shim:$EDV_VERSION
           docker image pull localhost:5000/virt-api:$EDV_VERSION

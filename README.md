@@ -10,15 +10,24 @@
 # Desktop Virtualization solution with graphics SR-IOV
 
 ## Table of Contents
+- [Edge Desktop Virtualization](#edge-desktop-virtualization)
+  - [IDV Services](#idv-services)
+  - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
+  - [Kubevirt Patch](#kubevirt-patch)
+  - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
+    - [Discrete Helm charts](#discrete-helm-charts)
+    - [Single Helm deployment](#single-helm-deployment)
 - [Desktop Virtualization solution with graphics SR-IOV](#desktop-virtualization-solution-with-graphics-sr-iov)
   - [Table of Contents](#table-of-contents)
   - [Pre-requisites](#pre-requisites)
     - [System Requirements](#system-requirements)
       - [Recommended Hardware Configuration](#recommended-hardware-configuration)
     - [Build EMT](#build-emt)
+      - [Pre-requisite](#pre-requisite)
+      - [Image Build Steps](#image-build-steps)
     - [Install EMT](#install-emt)
     - [Generate Virtual Machine qcow2 with required drivers for SR-IOV](#generate-virtual-machine-qcow2-with-required-drivers-for-sr-iov)
-  - [Further steps](#further-steps)
+    - [Further steps](#further-steps)
 
 ## Pre-requisites
 
@@ -83,7 +92,7 @@ sudo -E make image -j8 REBUILD_TOOLS=y REBUILD_PACKAGES=n CONFIG_FILE=imageconfi
 
 ### Install EMT
 
-To Flash EMT MF image on a NUC follow [EMT image installation docs](https://github.com/intel-innersource/applications.virtualization.maverickflats-tiberos-itep/blob/vm_sidecar_dev_plugin/tiber/tiber_flash_partition.md)
+To Flash EMT DV image on a NUC follow [EMT image installation docs](https://github.com/intel-innersource/applications.virtualization.maverickflats-tiberos-itep/blob/vm_sidecar_dev_plugin/tiber/tiber_flash_partition.md)
 
 To verify checkout [Other methods](https://github.com/smitesh-sutaria/edge-microvisor-toolkit/blob/3.0/docs/developer-guide/get-started/installation-howto.md)
 
@@ -95,5 +104,5 @@ https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-windows-vm.md#m
 
 ### Further steps
 
-For further steps to launch VMs, refer the README [here](idv/README.md)
+For further steps to launch VMs, refer the README [here](idv-services/README.md)
 

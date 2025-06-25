@@ -353,6 +353,18 @@ The original idea to build within the Centos container comes from this [link](ht
     sudo ctr -n k8s.io images import virt-launcher.tar
     sudo ctr -n k8s.io images import virt-operator.tar
     ```
+    Alternatively 
+    ```sh
+    sudo k3s ctr i import virt-operator.tar
+    sudo k3s ctr i import virt-api.tar
+    sudo k3s ctr i import virt-controller.tar
+    sudo k3s ctr i import virt-handler.tar
+    sudo k3s ctr i import virt-launcher.tar
+    sudo k3s ctr i import sidecar-shim.tar
+
+    sudo k3s ctr i import device-plugin.tar
+    sudo k3s ctr i import busybox.tar
+    ```
 7.  Verify the images are imported correctly
     ```sh
     sudo crictl images | grep localhost
@@ -405,3 +417,50 @@ The original idea to build within the Centos container comes from this [link](ht
     NAME                            AGE   PHASE
     kubevirt.kubevirt.io/kubevirt   19d   Deployed
     ```
+10.  Enable Virt-Handler to discover Graphics VFs
+     Update KubeVirt custom resource configuration to enable virt-handler to discover graphics VFs on the host. All discovered VFs will be published as *allocatable* resource
+
+    **Update Graphics Device ID in `kubevirt-cr-gfx-sriov.yaml` if not found**
+      - Read the Device ID of Intel Graphics Card from Host, Ex: for RPL
+        ```sh
+        $ cat /sys/devices/pci0000\:00/0000\:00\:02.0/device
+
+        0xa7a0
+        ```
+      - Add the Device ID in `pciHostDevices` section
+        ```yaml
+        - pciVendorSelector: "8086:a7a0"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+        ```
+
+    Apply the YAML changes
+    ```sh
+    kubectl apply -f manifests/kubevirt-cr-gfx-sriov.yaml
+    ```
+
+    **Check for presence of `intel.com/sriov-gpudevices` resource**
+
+    ```sh
+    kubectl describe nodes
+    ```
+    Output:
+    ```sh
+    Capacity:
+        intel.com/sriov-gpudevice:     7
+    Allocatable:
+        intel.com/sriov-gpudevice:     7
+    Allocated resources:
+        Resource                       Requests     Limits
+        --------                       --------     ------
+        intel.com/sriov-gpudevice      0            0
+    ```
+    > [!Note] 
+    > Please wait for all virt-handler pods to complete restarts\
+    > The value of **Requests** and **Limits** will increase upon successful resource allocation to running pods/VMs
+
+11.  Install CDI
+     ```sh
+     kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-operator.yaml
+     kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-cr.yaml
+     ```

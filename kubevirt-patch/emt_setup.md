@@ -61,9 +61,9 @@ crw-rw-r--. 1 root qemu 189, 8 May 15 22:14 009
 ...
 ```
 
-# 3. Display setup for TiberOS
+# 3. Display setup for EMT OS
 
-TiberOS boots with no GUI and prompts for user login, login using default credentials\
+EMT OS boots with no GUI and prompts for user login, login using default credentials\
 XSERVER is installed by default, make the below settings before starting X server
 
 ## 3.1 Disable DPMS and screen blanking on the X Window System

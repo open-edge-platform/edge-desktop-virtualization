@@ -1,8 +1,0 @@
-devicePlugin:
-  enabled: true
-image:
-  repository: localhost:5000/mf-device-plugin
-  tag: "v1"
-mvfPluginEnabled: true
-userId: "107"
-groupId: "107"

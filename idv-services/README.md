@@ -3,14 +3,16 @@
 This file contains steps to launch virtual machines using a system service.
 
 ## Table of Contents
-- [Virtual machine configuration file](#virtual-machine-configuration-file)
-- [Modify VM configuration](#modify-vm-configuration)
-- [Run IDV services via an RPM package](#run-idv-services-via-an-rpm-package)
-- [Manual steps to run IDV service](#manual-steps-to-run-idv-service)
-  - [Run script to copy necessary files to `/opt` directory](#step-1-run-script-to-copy-necessary-files-to-opt-directory)
+1. [Virtual machine configuration file](#virtual-machine-configuration-file)
+2. [Modify VM configuration](#modify-vm-configuration)
+3. [Run IDV services via an RPM package](#run-idv-services-via-an-rpm-package)
+4. [Manual steps to run IDV service](#manual-steps-to-run-idv-service)
+  - [Run script to copy necessary files to `/usr/bin` directory](#step-1-run-script-to-copy-necessary-files-to-usrbin-directory)
   - [Enable and start `idv-init` service](#step-2-enable-and-start-idv-init-service)
   - [Enable and start `idv-launcher` service](#step-3-enable-and-start-idv-launcher-service)
-- [Troubleshooting](#troubleshooting)
+5. [Enable auto-login for the `guest` user](#enable-auto-login-for-the-guest-user)
+6. [Post-Reboot Instructions](#post-reboot-instructions)
+7. [Troubleshooting](#troubleshooting)
 
 ## Virtual machine configuration file 
 
@@ -44,12 +46,11 @@ This file contains steps to launch virtual machines using a system service.
 
 - If you prefer not to use the RPM package, follow these steps:
 
-  ## Step 1: Run script to copy necessary files to `/opt` directory
+  ## Step 1: Run script to copy necessary files to `/usr/bin` directory
 
-  - Navigate to the `idv` directory and run the `copy_files.sh` file with superuser privileges using the following command
+  - Run the `copy_files.sh` file with superuser privileges using the following command
 
     ```bash
-    cd idv
     sudo chmod +x copy_files.sh
     sudo ./copy_files.sh
     ```
@@ -57,7 +58,7 @@ This file contains steps to launch virtual machines using a system service.
 
   ## Step 2: Enable and start `idv-init` service
 
-    The `idv-init` service initializes the environment by enumerating SR-IOV virtual functions, starting the X server and setting up permissions required to run the scripts to launch VMs. This is a prerequisite for launching the virtual machines.
+    The `idv-init` service initializes the environment by enumerating SR-IOV virtual functions, starting the X server. This is a prerequisite for launching the virtual machines.
 
   - Run the following command to enable `idv-init` service
     
@@ -101,6 +102,32 @@ This file contains steps to launch virtual machines using a system service.
     ```
     **Note**: Once the idv-launcher service starts, all the VMs should be launched in respective monitors.
 
+## Enable auto-login for the `guest` user
+
+- To, enable auto-login for the `guest` user, place the [autologin.conf](autologin.conf) file in the `/etc/systemd/system/getty@tty1.service.d` directory. Run the following command from the `idv-services/` directory - 
+  
+  ```bash
+  # Create `getty@tty1.service.d` if it doesn't exist
+  sudo mkdir /etc/systemd/system/getty@tty1.service.d
+  sudo cp autologin.conf /etc/systemd/system/getty@tty1.service.d/
+  ```
+
+  **Note**: When autologin is enabled for the `guest` user, they will be automatically logged in after each reboot.
+
+## Post-Reboot Instructions
+
+- If the machine is rebooted, navigate to the `idv-services/` directory and run the following command to reset permissions:
+
+  ```bash
+  sudo ./setup_permissions.sh
+  ```
+  - Once this script is executed, the IDV services (idv-int.service and idv-launcher.service) should start automatically. Verify their status using:
+  
+  ```bash
+  systemctl --user status idv-int.service
+  systemctl --user status idv-launcher.service
+  ```
+
 ## Troubleshooting
 
 - If the `idv-init` service fails to start, check the service logs using the following command:
@@ -108,18 +135,12 @@ This file contains steps to launch virtual machines using a system service.
   ```bash
   journalctl --user -xeu idv-init.service
   ```
-  Ensure that all required files are present in `/opt/idv`.
+  Ensure that all required files are present in `/usr/bin/idv`.
 
 
 - If the VMs do not launch after starting the `idv-launcher` service, check the service logs using the following command:
 
   ```bash
-  journalctl --user -u idv-launcher.service
-  ```
-
-  You can also check the `start_all_vms.log` in `/opt/idv/launcher` directory for errors using the command:
-
-  ```bash
-  sudo cat /opt/idv/launcher/start_all_vms.log
+  sudo journalctl -t idv-services
   ```  
   Ensure that the `vm.conf` file is correctly configured and all required files (e.g., firmware and qcow2 files) are present and the file paths are valid.

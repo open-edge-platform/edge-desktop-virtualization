@@ -1,0 +1,8 @@
+apiVersion: v2
+name: intel-idv-device-plugin
+description: A Helm chart for the intel-idv-device-plugin on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">= 1.26.0-0"
+home: https://github.com/open-edge-platform/edge-desktop-virtualization/tree/main/device-plugins-for-kubernetes
