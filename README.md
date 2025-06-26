@@ -35,7 +35,7 @@
 
 Edge Microvisor Toolkit + Graphics SR-IOV is designed to support all Intel® Core platforms from 12th gen onwards.
 
-This software is validated on below:
+This software is validated on below specifications:
 
 |         Core™         |
 | ----------------------|
