@@ -1,5 +1,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/edge-desktop-virtualization/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/edge-desktop-virtualization)
+![CodeQL](https://img.shields.io/github/workflow/status/open-edge-platform/edge-desktop-virtualization/CodeQL%20Analysis/main?label=CodeQL&logo=github)
 
 # Edge Desktop Virtualization
 
