@@ -1,4 +1,4 @@
-# Edge Desktop Virtualization
+# Edge Desktop Virtualization (Graphics SRIOV)
 
 ## [IDV Services](idv-services/README.md)
 ## [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
