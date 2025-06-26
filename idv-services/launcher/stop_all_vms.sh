@@ -6,6 +6,7 @@
 # These contents may have been developed with support from one or more
 # Intel-operated generative artificial intelligence solutions.
 
+# shellcheck source=/dev/null
 source vm.conf
 
 declare -A VM_LIST
@@ -19,7 +20,7 @@ done
 for vm in "${VM_LIST[@]}"; do
     name="${vm}_name"
     qcow2_file_path="${vm}_qcow2_file"
-    sudo ./stop_vm.sh ${!name} "${!qcow2_file_path}.d"
+    sudo ./stop_vm.sh "${!name}" "${!qcow2_file_path}.d"
 done
 
 # wait until the start_vm script completes cleanup
