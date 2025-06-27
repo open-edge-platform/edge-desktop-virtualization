@@ -75,7 +75,7 @@ jobs:
 
           mkdir sriov
           cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
-          ls -la
+          ls -la sriov/
 
           git apply --reject --ignore-whitespace --stat sriov/*.patch
 
