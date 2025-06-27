@@ -71,6 +71,7 @@ jobs:
           wget -N https://download.qemu.org/qemu-9.1.0.tar.xz
           tar -xf qemu-9.1.0.tar.xz
           cd qemu-9.1.0
+          git init
           ls -la
 
           mkdir sriov
