@@ -61,6 +61,7 @@ jobs:
           cd Intel-distribution-of-QEMU
           git checkout 0e33000c917458cd1c6d884377d6442d50b14a58
           git format-patch -50
+          ls -la
 
           if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/9.1.0-gfx-sriov)" ]; then
             echo "::warning file=kubevirt-patch/README.md::The 9.1.0-gfx-sriov branch has new commits which are not included here. Consider updating the README and this workflow."
@@ -70,11 +71,13 @@ jobs:
           wget -N https://download.qemu.org/qemu-9.1.0.tar.xz
           tar -xf qemu-9.1.0.tar.xz
           cd qemu-9.1.0
+          ls -la
 
           mkdir sriov
           cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
+          ls -la
 
-          git apply --reject --ignore-whitespace --stat ./sriov/*.patch
+          git apply --reject --ignore-whitespace --stat sriov/*.patch
 
           ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
           perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
