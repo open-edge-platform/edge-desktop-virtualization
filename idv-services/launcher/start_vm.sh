@@ -136,7 +136,7 @@ function disable_kernel_irq_chip() {
 }
 
 function set_display() {
-    OIFS=$IFS IFS=',' input_arr=("$1") IFS=$OIFS
+    IFS=',' read -ra input_arr <<< "$1"
     display_num=0
 
     # Check missing sub-param
@@ -597,7 +597,7 @@ function set_pt_wifi() {
 # Function to parse and set SPICE options
 function set_spice() {
     # Check sub-param from input
-    OIFS=$IFS IFS=',' input_arr=("$1") IFS=$OIFS
+    IFS=',' read -ra input_arr <<< "$1"
 
     # Check missing sub-param
     if [[ ${#input_arr[@]} == 0 ]]; then
@@ -694,7 +694,7 @@ function set_spice() {
 # Function to parse and set Audio options
 function set_audio() {
     # Check sub-param from input
-    OIFS=$IFS IFS=',' input_arr=("$1") IFS=$OIFS
+    IFS=',' read -ra input_arr <<< "$1"
 
     # Check missing sub-param
     if [[ ${#input_arr[@]} == 0 ]]; then
