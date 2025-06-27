@@ -1,6 +1,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/edge-desktop-virtualization/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/edge-desktop-virtualization)
 [![CodeQL](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql)
+[![Device Plugin: Coverity Scan](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml)
 
 # Edge Desktop Virtualization (Graphics SR-IOV)
 
