@@ -74,7 +74,7 @@ jobs:
           mkdir sriov
           cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
 
-          git apply --stat ./sriov/*.patch
+          git apply --reject --whitespace=fix --stat ./sriov/*.patch
 
           ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
           perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
