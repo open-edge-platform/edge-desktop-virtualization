@@ -13,9 +13,6 @@ set -eE
 sudo chmod -t /tmp
 
 #------------------------------------------------------      Global variable    ----------------------------------------------------------
-
-INSTALL_DIR="/opt/qcow2"
-
 kernel_maj_ver=0
 TPM_DIR=${vm1_qcow2_file}.d
 SETUP_LOCK=/tmp/sriov.setup.lock
@@ -39,7 +36,6 @@ GUEST_DISP_TYPE="-display gtk,gl=on"
 GUEST_DISPLAY_MAX=4
 GUEST_DISPLAY_MIN=1
 GUEST_MAX_OUTPUTS=4
-GUEST_FULL_SCREEN=0
 GUEST_KIRQ_CHIP="-machine kernel_irqchip=on"
 GUEST_VGA_DEV="-device virtio-gpu-pci"
 GUEST_MAC_ADDR=
@@ -75,14 +71,15 @@ USB_OPTIONS=
 
 #------------------------------------------------------         Functions       ----------------------------------------------------------
 function check_kernel_version() {
-    local cur_ver=$(uname -r | sed "s/\([0-9.]*\).*/\1/")
+    local cur_ver
+    cur_ver=$(uname -r | sed "s/\([0-9.]*\).*/\1/")
     local req_ver="5.10.0"
     kernel_maj_ver=${cur_ver:0:1}
 
     if [ "$(printf '%s\n' "$cur_ver" "$req_ver" | sort -V | head -n1)" != "$req_ver" ]; then
         echo "E: Detected Linux version: $cur_ver!"
         echo "E: Please upgrade to iotg kernel version newer than $req_ver!"
-        return -1
+        return 1
     fi
 }
 
@@ -117,7 +114,7 @@ function set_name() {
 function set_disk() {
     if [[ $OS_VALUE == "windows" ]]; then
         GUEST_DISK="-drive file=$1,id=windows_disk1,format=qcow2,cache=none"
-        set_swtpm $1
+        set_swtpm "$1"
     elif [[ $OS_VALUE == "ubuntu"  ]]; then
         GUEST_DISK="-drive file=$1,if=virtio,id=ubuntu_disk1,format=qcow2,cache=none"
     fi
@@ -139,7 +136,7 @@ function disable_kernel_irq_chip() {
 }
 
 function set_display() {
-    OIFS=$IFS IFS=',' input_arr=($1) IFS=$OIFS
+    OIFS=$IFS IFS=',' input_arr=("$1") IFS=$OIFS
     display_num=0
 
     # Check missing sub-param
@@ -154,7 +151,7 @@ function set_display() {
             max-outputs*)
                 # Save max-ouputs
                 GUEST_MAX_OUTPUTS=${target: -1}
-                if [ $GUEST_MAX_OUTPUTS -lt $GUEST_DISPLAY_MIN ] || [ $GUEST_MAX_OUTPUTS -gt $GUEST_DISPLAY_MAX ]; then
+                if [ "$GUEST_MAX_OUTPUTS" -lt "$GUEST_DISPLAY_MIN" ] || [ "$GUEST_MAX_OUTPUTS" -gt "$GUEST_DISPLAY_MAX" ]; then
                     echo "E: set_display: $target exceed limit, must be between $GUEST_DISPLAY_MIN to $GUEST_DISPLAY_MAX!"
                     exit
                 fi
@@ -164,7 +161,6 @@ function set_display() {
             full-screen*)
                 # Set full-screen=on
                 GUEST_DISP_TYPE+=",full-screen=on"
-                GUEST_FULL_SCREEN=1
                 shift
                 ;;
 
@@ -179,10 +175,10 @@ function set_display() {
                 connectors_arr[$display_num]=$target
                 ((display_num+=1))
                 # Check if display number within limit
-                if [ $display_num -gt $GUEST_DISPLAY_MAX ]; then
+                if [ $display_num -gt "$GUEST_DISPLAY_MAX" ]; then
                     echo "E: set_display: $target exceed maximum display number of $GUEST_DISPLAY_MAX!"
                     exit
-                elif [ $display_num -gt $GUEST_MAX_OUTPUTS ]; then
+                elif [ $display_num -gt "$GUEST_MAX_OUTPUTS" ]; then
                     echo "E: set_display: $target exceed maximum output number of $GUEST_MAX_OUTPUTS!"
                     exit
                 fi
@@ -215,8 +211,11 @@ function set_display() {
 }
 
 function setup_sriov() {
+    local vendor
+    local device
+
     # Calculate hugepages needed
-    required_hugepg=$(numfmt --to-unit=2Mi --from=iec ${GUEST_MEM:3})
+    required_hugepg=$(numfmt --to-unit=2Mi --from=iec "${GUEST_MEM:3}")
     # Adjust guest memory to align with hugepage size
     GUEST_MEM="-m $((required_hugepg*2))M"
 
@@ -245,9 +244,9 @@ function setup_sriov() {
     done
 
     # Detect total number of VFs
-    totalvfs=$(</sys/bus/pci/devices/0000\:00\:02.0/sriov_totalvfs)
+    totalvfs=$(</sys/bus/pci/devices/0000:00:02.0/sriov_totalvfs)
 
-    if [ $totalvfs -eq 0 ]; then
+    if [ "$totalvfs" -eq 0 ]; then
         echo "Error: total number of supported VFs is 0"
         setup_lock_release
         exit
@@ -255,14 +254,14 @@ function setup_sriov() {
     echo "Total VFs $totalvfs"
 
     # Detect number of VFs
-    numvfs=$(</sys/bus/pci/devices/0000\:00\:02.0/sriov_numvfs)
+    numvfs=$(</sys/bus/pci/devices/0000:00:02.0/sriov_numvfs)
 
     # Enable VFs only when 0
-    if [ $numvfs -eq 0 ]; then
+    if [ "$numvfs" -eq 0 ]; then
         # Setup VFIO
         echo "Enabling $totalvfs VFs"
-        local vendor=$(cat /sys/bus/pci/devices/0000:00:02.0/iommu_group/devices/0000:00:02.0/vendor)
-        local device=$(cat /sys/bus/pci/devices/0000:00:02.0/iommu_group/devices/0000:00:02.0/device)
+        vendor=$(cat /sys/bus/pci/devices/0000:00:02.0/iommu_group/devices/0000:00:02.0/vendor)
+        device=$(cat /sys/bus/pci/devices/0000:00:02.0/iommu_group/devices/0000:00:02.0/device)
         sudo sh -c "modprobe i2c-algo-bit"
         sudo sh -c "sudo modprobe video"
         sudo sh -c "echo '0' | sudo tee -a /sys/bus/pci/devices/0000\:00\:02.0/sriov_drivers_autoprobe > /dev/null"
@@ -273,28 +272,28 @@ function setup_sriov() {
     fi
 
     # Detect number of VFs
-    numvfs=$(</sys/bus/pci/devices/0000\:00\:02.0/sriov_numvfs)
+    numvfs=$(</sys/bus/pci/devices/0000:00:02.0/sriov_numvfs)
 
     # Detect first available VF
     for (( avail=1; avail<=numvfs; avail++ )); do
-        is_enabled=$(</sys/bus/pci/devices/0000:00:02.$avail/enable)
-        if [ $is_enabled = 0 ]; then
+        is_enabled=$(</sys/bus/pci/devices/0000:00:02."$avail"/enable)
+        if [ "$is_enabled" = 0 ]; then
             VF_USED=$avail
             echo "Using VF $avail"
             break;
         fi
     done
 
-    if [ $VF_USED -eq 0 ]; then
+    if [ "$VF_USED" -eq 0 ]; then
         echo "Error: no VF available"
         setup_lock_release
         exit
     fi
 
     # Configure timeout values
-    if [ $kernel_maj_ver -eq 5 ]; then
+    if [ "$kernel_maj_ver" -eq 5 ]; then
         vf_sysfs_path="/sys/class/drm/card0/iov/vf$avail/gt"
-    elif [ $kernel_maj_ver -eq 6 ]; then
+    elif [ "$kernel_maj_ver" -eq 6 ]; then
         vf_sysfs_path="/sys/class/drm/card0/prelim_iov/vf$avail/gt0"
     fi
     sudo sh -c "echo 500000 | sudo tee -a $vf_sysfs_path/preempt_timeout_us > /dev/null"
@@ -309,14 +308,14 @@ function setup_sriov() {
 
 function cleanup_sriov() {
     # Detect number of VFs
-    numvf=$(</sys/bus/pci/devices/0000\:00\:02.0/sriov_numvfs)
+    numvf=$(</sys/bus/pci/devices/0000:00:02.0/sriov_numvfs)
 
     do_cleanup=1
-    if [ $numvf -ne 0 ]; then
+    if [ "$numvf" -ne 0 ]; then
         # Check that all VFs are disabled
         for (( avail=1; avail<=numvf; avail++ )); do
-            is_enabled=$(</sys/bus/pci/devices/0000:00:02.$avail/enable)
-            if [ $is_enabled = 1 ]; then
+            is_enabled=$(</sys/bus/pci/devices/0000:00:02."$avail"/enable)
+            if [ "$is_enabled" = 1 ]; then
                 do_cleanup=0
                 break;
             fi
@@ -330,15 +329,15 @@ function cleanup_sriov() {
     if [ $do_cleanup -eq 1 ]; then
         # Restore hugepg to 0
         free_hugepg=$(</sys/kernel/mm/hugepages/hugepages-2048kB/free_hugepages)
-        if [ $free_hugepg -eq $nr_hugepg ]; then
+        if [ "$free_hugepg" -eq "$nr_hugepg" ]; then
             new_nr_hugepg=0
         fi
-    elif [ $HUGEPG_ALLOC > 0 ]; then
+    elif [ $HUGEPG_ALLOC -gt 0 ]; then
         # Restore hugepg allocated to VM
         new_nr_hugepg=$(( nr_hugepg - HUGEPG_ALLOC ))
     fi
 
-    if [ $new_nr_hugepg -ne $nr_hugepg ]; then
+    if [ $new_nr_hugepg -ne "$nr_hugepg" ]; then
         echo "Restoring hugepages $new_nr_hugepg"
         sudo sh -c "echo $new_nr_hugepg | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages > /dev/null"
 
@@ -360,7 +359,7 @@ function cleanup_sriov() {
 
 function set_fwd_port() {
     if [[ $OS_VALUE == "windows" ]]; then
-        OIFS=$IFS IFS=',' port_arr=($1) IFS=$OIFS
+        IFS=',' read -ra port_arr <<< "$1"
         for e in "${port_arr[@]}"; do
             if [[ $e =~ ^ssh= ]]; then
                 GUEST_NET="${GUEST_NET/4444-:22/${e#*=}-:22}"
@@ -370,17 +369,17 @@ function set_fwd_port() {
                 GUEST_NET="${GUEST_NET/5986-:5986/${e#*=}-:5986}"
             else
                 echo "E: Forward port, Invalid parameter"
-                return -1;
+                return 1;
             fi
         done
     elif [[  $OS_VALUE == "ubuntu" ]]; then
-	OIFS=$IFS IFS=',' port_arr=($1) IFS=$OIFS
+	    IFS=',' read -ra port_arr <<< "$1"
         for e in "${port_arr[@]}"; do
             if [[ $e =~ ^ssh= ]]; then
                 GUEST_NET="${GUEST_NET/2222-:22/${e#*=}-:22}"
             else
                 echo "E: Forward port, Invalid parameter"
-                return -1;
+                return 1;
             fi
         done
     fi
@@ -395,7 +394,7 @@ function set_pwr_ctrl() {
     qmp_socket=""
 
     # Check if there is any qga and qmp power socket available
-    for (( avail=0; avail<$MAX_NUM_GUEST; avail++ )); do
+    for (( avail=0; avail<"$MAX_NUM_GUEST"; avail++ )); do
         qga_socket=qga-pwr-socket-$avail
         qmp_socket=qmp-pwr-socket-$avail
 
@@ -421,7 +420,7 @@ function set_pwr_ctrl() {
         fi
     done
 
-    if [ ! $qga_socket ] || [ ! $qmp_socket ]; then
+    if [ ! "$qga_socket" ] || [ ! "$qmp_socket" ]; then
         echo "E: No power control socket available, maximum upto $MAX_NUM_GUEST!"
         setup_lock_release
         exit
@@ -435,17 +434,21 @@ function set_extra_qcmd() {
 function set_pt_pci_vfio() {
     local PT_PCI=$1
     local unset=$2
-    if [ ! -z $PT_PCI ]; then
+    local pci
+    local vendor
+    local device
+    local driver_in_use
+    if [ -n "$PT_PCI" ]; then
         sudo sh -c "modprobe vfio-pci"
         local iommu_grp_dev="/sys/bus/pci/devices/$PT_PCI/iommu_group/devices/*"
         local d
         for d in $iommu_grp_dev; do
-            local pci=$(basename $d)
-            local vendor=$(cat $d/vendor)
-            local device=$(cat $d/device)
+            pci=$(basename "$d")
+            vendor=$(cat "$d"/vendor)
+            device=$(cat "$d"/device)
 
             if [[ $unset == "unset" ]]; then
-                local driver_in_use=$(basename $(realpath $d/driver))
+                driver_in_use=$(basename "$(realpath "$d"/driver)")
                 if [[ $driver_in_use == "vfio-pci" ]]; then
                     echo "unset PCI passthrough: $pci, $vendor:$device"
                     sudo sh -c "echo $pci > /sys/bus/pci/drivers/vfio-pci/unbind"
@@ -456,7 +459,7 @@ function set_pt_pci_vfio() {
                 echo "set PCI passthrough: $pci, $vendor:$device"
                 [[ -d $d/driver ]] && sudo sh -c "echo $pci > $d/driver/unbind"
                 sudo sh -c "echo $vendor $device > /sys/bus/pci/drivers/vfio-pci/new_id"
-                GUEST_PCI_PT_ARRAY+=($PT_PCI)
+                GUEST_PCI_PT_ARRAY+=("$PT_PCI")
             fi
         done
     fi
@@ -464,8 +467,8 @@ function set_pt_pci_vfio() {
 
 function cleanup_pt_pci() {
     local id
-    for id in ${GUEST_PCI_PT_ARRAY[@]}; do
-        set_pt_pci_vfio $id "unset"
+    for id in "${GUEST_PCI_PT_ARRAY[@]}"; do
+        set_pt_pci_vfio "$id" "unset"
     done
     unset GUEST_PCI_PT_ARRAY
 }
@@ -474,13 +477,13 @@ function cleanup_pwr_ctrl() {
     # cleanup qmp power control socket on exit
     if [ -S "/tmp/$qmp_socket" ]; then
         echo "clean up qmp socket $qmp_socket"
-        unlink /tmp/$qmp_socket
+        unlink /tmp/"$qmp_socket"
     fi
 
     # cleanup qga power control socket on exit
     if [ -S "/tmp/$qga_socket" ]; then
         echo "clean up qga socket $qga_socket"
-        unlink /tmp/$qga_socket
+        unlink /tmp/"$qga_socket"
     fi
 }
 
@@ -496,33 +499,36 @@ function cleanup_pwr_ctrl() {
 function is_usb_dev_udc()
 {
     local pci_id=$1
-    local prog_if=$(lspci -vmms $pci_id | grep ProgIf)
-    if [[ ! -z $prog_if ]]; then
-        if [[ ${prog_if#*:} -eq fe ]]; then
+    local prog_if
+    prog_if=$(lspci -vmms "$pci_id" | grep ProgIf)
+    if [[ -n "$prog_if" ]]; then
+        if [[ "${prog_if#*:}" = "fe" ]]; then
             return 0
         fi
     fi
 
-    return -1
+    return 1
 }
 
 function set_pt_usb() {
     local d
+    local USB_CONTROLLERS_DENYLIST
+    local USB_PCI
 
     # Deny USB Thunderbolt controllers to avoid performance degrade during suspend/resume
-    local USB_CONTROLLERS_DENYLIST='8086:15e9\|8086:9a13\|8086:9a1b\|8086:9a1c\|8086:9a15\|8086:9a1d'
+    USB_CONTROLLERS_DENYLIST='8086:15e9\|8086:9a13\|8086:9a1b\|8086:9a1c\|8086:9a15\|8086:9a1d'
 
-    local USB_PCI=`lspci -D -nn | grep -i usb | grep -v "$USB_CONTROLLERS_DENYLIST" | awk '{print $1}'`
+    USB_PCI=$(lspci -D -nn | grep -i usb | grep -v "$USB_CONTROLLERS_DENYLIST" | awk '{print $1}')
     # As BT chip is going to be passthrough to host, make the interface down in host
     if [ "$(hciconfig)" != "" ]; then
         hciconfig hci0 down
     fi
     # passthrough only USB host controller
     for d in $USB_PCI; do
-        is_usb_dev_udc $d && continue
+        is_usb_dev_udc "$d" && continue
 
         echo "passthrough USB device: $d"
-        set_pt_pci_vfio $d
+        set_pt_pci_vfio "$d"
         GUEST_USB_PT_DEV+=" -device vfio-pci,host=${d#*:},x-no-kvm-intx=on"
     done
 
@@ -533,25 +539,29 @@ function set_pt_usb() {
 
 function set_pt_udc() {
     local d
-    local UDC_PCI=$(lspci -D | grep "USB controller" | grep -o "....:..:..\..")
+    local UDC_PCI
+
+    UDC_PCI=$(lspci -D | grep "USB controller" | grep -o "....:..:..\..")
 
     # passthrough only USB device controller
     for d in $UDC_PCI; do
-        is_usb_dev_udc $d || continue
+        is_usb_dev_udc "$d" || continue
 
         echo "passthrough UDC device: $d"
-        set_pt_pci_vfio $d
+        set_pt_pci_vfio "$d"
         GUEST_UDC_PT_DEV+=" -device vfio-pci,host=${d#*:},x-no-kvm-intx=on"
     done
 }
 
 function set_pt_audio() {
     local d
-    local AUDIO_PCI=$(lspci -D |grep -i "Audio" | grep -o "....:..:..\..")
+    local AUDIO_PCI
+
+    AUDIO_PCI=$(lspci -D |grep -i "Audio" | grep -o "....:..:..\..")
 
     for d in $AUDIO_PCI; do
         echo "passthrough Audio device: $d"
-        set_pt_pci_vfio $d
+        set_pt_pci_vfio "$d"
         GUEST_AUDIO_PT_DEV+=" -device vfio-pci,host=${d#*:},x-no-kvm-intx=on"
         GUEST_AUDIO_DEV=""
     done
@@ -559,11 +569,13 @@ function set_pt_audio() {
 
 function set_pt_eth() {
     local d
-    local ETH_PCI=$(lspci -D |grep -i "Ethernet" | grep -o "....:..:..\..")
+    local ETH_PCI
+
+    ETH_PCI=$(lspci -D |grep -i "Ethernet" | grep -o "....:..:..\..")
 
     for d in $ETH_PCI; do
         echo "passthrough Ethernet device: $d"
-        set_pt_pci_vfio $d
+        set_pt_pci_vfio "$d"
         GUEST_ETH_PT_DEV+=" -device vfio-pci,host=${d#*:},x-no-kvm-intx=on"
         GUEST_NET=""
     done
@@ -571,11 +583,13 @@ function set_pt_eth() {
 
 function set_pt_wifi() {
     local d
-    local WIFI_PCI=$(lshw -C network |grep -i "description: wireless interface" -A5 |grep "bus info" |grep -o "....:..:....")
+    local WIFI_PCI
+
+    WIFI_PCI=$(lshw -C network |grep -i "description: wireless interface" -A5 |grep "bus info" |grep -o "....:..:....")
 
     for d in $WIFI_PCI; do
         echo "passthrough WiFi device: $d"
-        set_pt_pci_vfio $d
+        set_pt_pci_vfio "$d"
         GUEST_WIFI_PT_DEV+=" -device vfio-pci,host=${d#*:}"
     done
 }
@@ -583,7 +597,7 @@ function set_pt_wifi() {
 # Function to parse and set SPICE options
 function set_spice() {
     # Check sub-param from input
-    OIFS=$IFS IFS=',' input_arr=($1) IFS=$OIFS
+    OIFS=$IFS IFS=',' input_arr=("$1") IFS=$OIFS
 
     # Check missing sub-param
     if [[ ${#input_arr[@]} == 0 ]]; then
@@ -624,7 +638,6 @@ function set_spice() {
                         echo "E: set_spice: Invalid disable-ticketing value: $disable_ticketing"
                         exit
                     fi
-                    GUEST_SPICED_TICKETING=$disable_ticketing
                     shift
                     ;;
 
@@ -652,7 +665,7 @@ function set_spice() {
 
                     if (( usb_redir_channel > 0 && usb_redir_channel <= MAX_USB_REDIR_CHANNEL )); then
                         # set spice usb redir parameters
-                        for i in $(seq $usb_redir_channel); do
+                        for i in $(seq "$usb_redir_channel"); do
                             GUEST_SPICE_USBREDIR+="-chardev spicevmc,name=usbredir,id=usbredirchardev$i \
                                                     -device usb-redir,chardev=usbredirchardev$i,id=usbredirdev$i "
                         done
@@ -681,7 +694,7 @@ function set_spice() {
 # Function to parse and set Audio options
 function set_audio() {
     # Check sub-param from input
-    OIFS=$IFS IFS=',' input_arr=($1) IFS=$OIFS
+    OIFS=$IFS IFS=',' input_arr=("$1") IFS=$OIFS
 
     # Check missing sub-param
     if [[ ${#input_arr[@]} == 0 ]]; then
@@ -766,8 +779,8 @@ function set_audio() {
 }
 
 function setup_swtpm() {
-    mkdir -p $TPM_DIR/vtpm0
-    swtpm socket --tpmstate dir=$TPM_DIR/vtpm0 --tpm2 --ctrl type=unixio,path=$TPM_DIR/vtpm0/swtpm-sock --daemon
+    mkdir -p "$TPM_DIR"/vtpm0
+    swtpm socket --tpmstate dir="$TPM_DIR"/vtpm0 --tpm2 --ctrl type=unixio,path="$TPM_DIR"/vtpm0/swtpm-sock --daemon
 }
 
 function set_usb_passthrough() {
@@ -810,7 +823,7 @@ function cleanup() {
 }
 
 function error() {
-    echo "$BASH_SOURCE Failed at line $1: $2"
+    echo "${BASH_SOURCE[0]} Failed at line $1: $2"
     exit
 }
 
@@ -850,13 +863,12 @@ function launch_guest() {
               $USB_OPTIONS\
     "
 
-    echo $EXE_CMD
-    eval $EXE_CMD
+    echo "$EXE_CMD"
+    eval "$EXE_CMD"
 }
 
 function show_help() {
-    printf "$(basename "$0") [-h] [-m] [-c] [-n] [-d] [-f] [-p] [-e] [--passthrough-pci-usb] [--passthrough-pci-udc] [--passthrough-pci-audio] [--passthrough-pci-eth] [--passthrough-pci-wifi] [--disable-kernel-irqchip] [--display] [--enable-pwr-ctrl] [--spice] [--audio]\n"
-    printf "Options:\n"
+    printf "%s [-h] [-m] [-c] [-n] [-d] [-f] [-p] [-e] [--passthrough-pci-usb] [--passthrough-pci-udc] [--passthrough-pci-audio] [--passthrough-pci-eth] [--passthrough-pci-wifi] [--disable-kernel-irqchip] [--display] [--enable-pwr-ctrl] [--spice] [--audio]\n" "$(basename "$0")"    printf "Options:\n"
     printf "\t-h  show this help message\n"
     printf "\t-m  specify guest memory size, eg. \"-m 4G or -m 4096M\"\n"
     printf "\t-c  specify guest cpu number, eg. \"-c 4\"\n"
@@ -866,7 +878,7 @@ function show_help() {
     printf "\t-p  specify host forward ports, current support ssh,winrdp,winrm, eg. \"-p ssh=4444,winrdp=5555,winrm=6666\"\n"
     printf "\t-e  specify extra qemu cmd, eg. \"-e \"-monitor stdio\"\"\n"
     printf "\t-u  comma-separated list of USB devices to attach to the VM in the format: <hostbus>-<device-id>\"\"\n"
-    printf "\t-o  specify the OS to configure. Supported OSes are "ubuntu" and "windows"\"\"\n"
+    printf "\t-o  specify the OS to configure. Supported OSes are \"ubuntu\" and \"windows\"\n"
     printf "\t--passthrough-pci-usb passthrough USB PCI bus to guest.\n"
     printf "\t--passthrough-pci-udc passthrough USB Device Controller ie. UDC PCI bus to guest.\n"
     printf "\t--passthrough-pci-audio passthrough Audio PCI bus to guest.\n"
@@ -907,32 +919,32 @@ function parse_arg() {
                 ;;
 
             -m)
-                set_mem $2
+                set_mem "$2"
                 shift
                 ;;
 
             -c)
-                set_cpu $2
+                set_cpu "$2"
                 shift
                 ;;
 
             -n)
-                set_name $2
+                set_name "$2"
                 shift
                 ;;
 
             -d)
-                set_disk $2
+                set_disk "$2"
                 shift
                 ;;
 
             -f)
-                set_firmware_path $2
+                set_firmware_path "$2"
                 shift
                 ;;
 
             -p)
-                set_fwd_port $2
+                set_fwd_port "$2"
                 shift
                 ;;
 
@@ -942,12 +954,12 @@ function parse_arg() {
                 ;;
 
             -u)
-                set_usb_passthrough $2
+                set_usb_passthrough "$2"
                 shift
                 ;;
             
             -o)
-                set_params $2
+                set_params "$2"
                 shift
                 ;;
 
@@ -997,11 +1009,11 @@ function parse_arg() {
             -?*)
                 echo "Error: Invalid option $1"
                 show_help
-                return -1
+                return 1
                 ;;
             *)
                 echo "unknown option: $1"
-                return -1
+                return 1
                 ;;
         esac
         shift
@@ -1013,10 +1025,10 @@ function parse_arg() {
 
 trap 'setup_lock_release; cleanup' EXIT
 trap 'error ${LINENO} "$BASH_COMMAND"' ERR
-parse_arg "$@" || exit -1
+parse_arg "$@" || exit 1
 
 # check
-check_kernel_version || exit -1
+check_kernel_version || exit 1
 
 # setup
 setup_lock_acquire
@@ -1030,4 +1042,4 @@ setup_lock_release
 # launch
 launch_guest
 
-echo "Done: \"$(realpath $0) $@\""
+echo "Done: \"$(realpath "$0")\"" "$@"
