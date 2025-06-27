@@ -68,9 +68,9 @@ jobs:
           fi
 
           cd ..
-          git clone https://github.com/qemu/qemu.git qemu-9.1.0
+          wget -N https://download.qemu.org/qemu-9.1.0.tar.xz
+          tar -xf qemu-9.1.0.tar.xz
           cd qemu-9.1.0
-          git checkout v9.1.0
           ls -la
 
           mkdir sriov
