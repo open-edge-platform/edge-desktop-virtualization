@@ -9,10 +9,15 @@
 # shellcheck source=/dev/null
 source vm.conf
 
+if [[ -z "${guest}" ]]; then
+  echo "Error: 'guest' variable is not set. Please define it in vm.conf."
+  exit 1
+fi
+
 declare -A VM_LIST
 
 VM_LIST=()
-for ((counter = 1; counter <= ${guest}; counter++)); do
+for ((counter = 1; counter <= guest; counter++)); do
   vm="vm${counter}"
   VM_LIST[${#VM_LIST[@]}]=${vm}
 done
