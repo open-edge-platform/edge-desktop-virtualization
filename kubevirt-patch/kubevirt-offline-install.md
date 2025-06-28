@@ -1,5 +1,5 @@
 # Kubevirt installation using TAR files
-This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 8.2.1 that supports local display of edge node. Hence tagged the version as v1.5.0_DV and is shared as a [Kubevirt TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-kubevirt-v0.1.tar.gz)
+This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node. Hence tagged the version as v1.5.0_DV and is shared as a [Kubevirt TAR](link_to_kubevier_tar)
 
 Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-device-plugin-v0.1.tar.gz) to support enabling Display Virtualization on local display of edge node
 

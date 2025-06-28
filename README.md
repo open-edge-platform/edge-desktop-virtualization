@@ -1,4 +1,9 @@
-# Edge Desktop Virtualization
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/edge-desktop-virtualization/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/edge-desktop-virtualization)
+[![CodeQL](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql)
+[![Device Plugin: Coverity Scan](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml)
+
+# Edge Desktop Virtualization (Graphics SR-IOV)
 
 ## [IDV Services](idv-services/README.md)
 ## [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
@@ -35,7 +40,7 @@
 
 Edge Microvisor Toolkit + Graphics SR-IOV is designed to support all Intel® Core platforms from 12th gen onwards.
 
-This software is validated on below:
+This software is validated on below specifications:
 
 |         Core™         |
 | ----------------------|
