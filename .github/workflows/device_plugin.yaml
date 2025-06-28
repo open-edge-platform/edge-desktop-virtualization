@@ -55,7 +55,13 @@ jobs:
 
           cp -a ../deploy/manifests/intel-idv-device-plugin.yaml device-plugin.yaml
 
-          tar czf intel-idv-device-plugin-$EDV_VERSION.tar.gz busybox.tar device-plugin.tar device-plugin.yaml
+          # tar czf intel-idv-device-plugin-$EDV_VERSION.tar.gz busybox.tar device-plugin.tar device-plugin.yaml
+
+          for file in *.tar; do
+            zstd --no-progress -T0 -16 -f --long=25 "$file" -o "${file}.zst"
+          done
+
+          tar cvzf intel-idv-device-plugin-$EDV_VERSION.tar.gz *.zst *.yaml
 
           ls -hal
 
