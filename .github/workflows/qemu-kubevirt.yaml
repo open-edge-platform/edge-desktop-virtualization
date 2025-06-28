@@ -61,7 +61,6 @@ jobs:
           cd Intel-distribution-of-QEMU
           git checkout 0e33000c917458cd1c6d884377d6442d50b14a58
           git format-patch -50
-          ls -la
 
           if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/9.1.0-gfx-sriov)" ]; then
             echo "::warning file=kubevirt-patch/README.md::The 9.1.0-gfx-sriov branch has new commits which are not included here. Consider updating the README and this workflow."
@@ -72,11 +71,9 @@ jobs:
           tar -xf qemu-9.1.0.tar.xz
           cd qemu-9.1.0
           git init
-          ls -la
 
           mkdir sriov
           cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
-          ls -la sriov/
 
           git apply sriov/*.patch
 
@@ -295,7 +292,13 @@ jobs:
           docker save -o virt-launcher.tar localhost:5000/virt-launcher:$EDV_VERSION
           docker save -o virt-operator.tar localhost:5000/virt-operator:$EDV_VERSION
 
-          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
+          # tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
+
+          for file in *.tar; do
+            zstd --no-progress -T0 -16 -f --long=25 "$file" -o "${file}.zst"
+          done
+
+          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.zst *.yaml
 
           echo "Contents of $(pwd):"
           ls -hal
@@ -341,7 +344,13 @@ jobs:
           docker save -o virt-operator.tar localhost:5000/virt-operator:$EDV_VERSION
 
           rm intel-idv-kubevirt*.tar.gz
-          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
+          # tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
+
+          for file in *.tar; do
+            zstd --no-progress -T0 -16 -f --long=25 "$file" -o "${file}.zst"
+          done
+
+          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.zst *.yaml
 
           echo "Contents of $(pwd):"
           ls -hal
