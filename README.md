@@ -1,28 +1,30 @@
+# Edge Desktop Virtualization solution with Intel® Graphics SR-IOV
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/edge-desktop-virtualization/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/edge-desktop-virtualization)
 [![CodeQL](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql)
 [![Device Plugin: Coverity Scan](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml)
 
-# Edge Desktop Virtualization (Graphics SR-IOV)
+## Overview
 
-## [IDV Services](idv-services/README.md)
-## [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
-## [Kubevirt Patch](kubevirt-patch/README.md)
-## Sample Application : VM deployment Helm charts
-   ### [Discrete Helm charts](sample-application/discrete/README.md)
-   ### [Single Helm deployment](sample-application/single/README.md)
+Intel's Single Root I/O Virtualization (SR-IOV) for graphics is a technology that allows a single physical Intel graphics processing unit (GPU) to be presented as multiple virtual devices to different virtual machines (VMs). This enables efficient GPU resource sharing and improves performance for graphics-intensive workloads within virtualized environments
 
-# Desktop Virtualization solution with graphics SR-IOV
+### How it works
+
+
+### Hardware requirements:
+SR-IOV for Intel graphics typically requires hardware generation of Alder Lake (12th Gen Intel Core) or newer.
+One can check if your Intel graphics controller supports SR-IOV by executing below command for the Single Root I/O Virtualization (SR-IOV) PCI capability
+ ```sh
+ sudo lspci -s 2.0 -v
+ ```
+![Graphics SR-IOV Support](docs/images/gfx-sriov-support.png "Graphics SR-IOV support")
 
 ## Table of Contents
-- [Edge Desktop Virtualization](#edge-desktop-virtualization)
-  - [IDV Services](#idv-services)
-  - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
-  - [Kubevirt Patch](#kubevirt-patch)
-  - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
-    - [Discrete Helm charts](#discrete-helm-charts)
-    - [Single Helm deployment](#single-helm-deployment)
-- [Desktop Virtualization solution with graphics SR-IOV](#desktop-virtualization-solution-with-graphics-sr-iov)
+- [Edge Desktop Virtualization solution with Intel® Graphics SR-IOV](#edge-desktop-virtualization-solution-with-intel-graphics-sr-iov)
+  - [Overview](#overview)
+    - [How it works](#how-it-works)
+    - [Hardware requirements:](#hardware-requirements)
   - [Table of Contents](#table-of-contents)
   - [Pre-requisites](#pre-requisites)
     - [System Requirements](#system-requirements)
@@ -33,6 +35,12 @@
     - [Install EMT](#install-emt)
     - [Generate Virtual Machine qcow2 with required drivers for SR-IOV](#generate-virtual-machine-qcow2-with-required-drivers-for-sr-iov)
     - [Further steps](#further-steps)
+  - [IDV Services](#idv-services)
+  - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
+  - [Kubevirt Patch](#kubevirt-patch)
+  - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
+    - [Discrete Helm charts](#discrete-helm-charts)
+    - [Single Helm deployment](#single-helm-deployment)
 
 ## Pre-requisites
 
@@ -111,3 +119,9 @@ https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-windows-vm.md#m
 
 For further steps to launch VMs, refer the README [here](idv-services/README.md)
 
+## [IDV Services](idv-services/README.md)
+## [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
+## [Kubevirt Patch](kubevirt-patch/README.md)
+## Sample Application : VM deployment Helm charts
+   ### [Discrete Helm charts](sample-application/discrete/README.md)
+   ### [Single Helm deployment](sample-application/single/README.md)
