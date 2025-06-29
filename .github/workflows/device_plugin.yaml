@@ -61,7 +61,7 @@ jobs:
 
           mkdir intel-idv-device-plugin-$EDV_VERSION
           mv *.zst *.yaml intel-idv-device-plugin-$EDV_VERSION/
-          tar cvzf intel-idv-device-plugin-$EDV_VERSION.tar.gz
+          tar cvzf intel-idv-device-plugin-$EDV_VERSION
 
           ls -hal
 
