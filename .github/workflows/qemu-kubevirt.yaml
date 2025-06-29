@@ -303,7 +303,8 @@ jobs:
 
           mkdir intel-idv-kubevirt-$EDV_VERSION
           mv *.zst *.yaml intel-idv-kubevirt-$EDV_VERSION/
-          tar cvzf intel-idv-kubevirt-$EDV_VERSION
+          ls -hal
+          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz intel-idv-kubevirt-$EDV_VERSION
 
           echo "Contents of $(pwd):"
           ls -hal
@@ -356,7 +357,7 @@ jobs:
 
           mkdir intel-idv-kubevirt-$EDV_VERSION
           mv *.zst *.yaml intel-idv-kubevirt-$EDV_VERSION/
-          tar cvzf intel-idv-kubevirt-$EDV_VERSION
+          tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz intel-idv-kubevirt-$EDV_VERSION
 
           echo "Contents of $(pwd):"
           ls -hal
