@@ -46,7 +46,7 @@ jobs:
         env:
           cache-name: cache-qemu
         with:
-          path: workspace/qemu-8.2.1
+          path: workspace/qemu-9.1.0
           # Use the hash of the document this workflow is based on to decide whether the build should be re-run or not
           key: qemu-binary-${{ hashFiles('kubevirt-patch/README.md') }}
 
@@ -56,18 +56,29 @@ jobs:
         run: |
           mkdir -p workspace
           cd workspace
-          wget -N --no-check-certificate https://download.01.org/intel-linux-overlay/ubuntu/pool/main/q/qemu/qemu_8.2.1+ppa1-noble9.debian.tar.xz
-          mkdir qemu_8.2.1+ppa1-noble9.debian
-          tar -xf 'qemu_8.2.1+ppa1-noble9.debian.tar.xz' -C 'qemu_8.2.1+ppa1-noble9.debian'
 
-          wget -N --no-check-certificate https://download.qemu.org/qemu-8.2.1.tar.xz
-          tar -xf qemu-8.2.1.tar.xz
-          cd qemu-8.2.1
+          git clone https://github.com/intel/Intel-distribution-of-QEMU.git
+          cd Intel-distribution-of-QEMU
+          git checkout 0e33000c917458cd1c6d884377d6442d50b14a58
+          git format-patch -50
+          ls -la
+
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/9.1.0-gfx-sriov)" ]; then
+            echo "::warning file=kubevirt-patch/README.md::The 9.1.0-gfx-sriov branch has new commits which are not included here. Consider updating the README and this workflow."
+          fi
+
+          cd ..
+          wget -N https://download.qemu.org/qemu-9.1.0.tar.xz
+          tar -xf qemu-9.1.0.tar.xz
+          cd qemu-9.1.0
           git init
+          ls -la
 
-          cp  -r ../qemu_8.2.1+ppa1-noble9.debian/debian/patches/sriov/ .
+          mkdir sriov
+          cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
+          ls -la sriov/
 
-          git apply ./sriov/*.patch
+          git apply sriov/*.patch
 
           ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
           perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
@@ -79,7 +90,7 @@ jobs:
           set -e
           cd /src
           rm -rf build
-          ./configure --prefix=/usr --enable-kvm --disable-xen --enable-libusb --enable-debug-info --enable-debug  --enable-sdl --enable-vhost-net --enable-spice --disable-debug-tcg  --enable-opengl  --enable-gtk  --enable-virtfs --target-list=x86_64-softmmu --audio-drv-list=pa --firmwarepath=/usr/share/qemu-firmware:/usr/share/ipxe/qemu:/usr/share/seavgabios:/usr/share/seabios:/usr/share/qemu-kvm/ --disable-spice --disable-docs
+          ./configure --prefix=/usr --enable-kvm --disable-xen --enable-libusb --enable-debug-info --enable-debug  --enable-sdl --enable-vhost-net --enable-spice --disable-debug-tcg  --enable-opengl  --enable-gtk  --enable-virtfs --target-list=x86_64-softmmu --audio-drv-list=pa --firmwarepath=/usr/share/qemu-firmware:/usr/share/ipxe/qemu:/usr/share/seavgabios:/usr/share/seabios:/usr/share/qemu-kvm/ --disable-spice --disable-smartcard --disable-libnfs -Ddocs=disabled --disable-docs
           mkdir -p build
           cd build
           ninja
@@ -103,13 +114,13 @@ jobs:
         with:
           name: qemu-artifact
           path: |
-            workspace/qemu-8.2.1/build/qemu-system-x86_64
+            workspace/qemu-9.1.0/build/qemu-system-x86_64
 
       - name: trivy qemu source scan
         continue-on-error: true
         shell: bash
         run: |
-          cd workspace/qemu-8.2.1
+          cd workspace/qemu-9.1.0
           trivy --version
           which trivy
           trivy image --download-db-only
@@ -123,22 +134,22 @@ jobs:
         with:
           name: trivy-code-scan-results-core
           path: |
-              workspace/qemu-8.2.1/trivy_code_scan_qemu.html
+              workspace/qemu-9.1.0/trivy_code_scan_qemu.html
 
       - name: ClamAV QEMU Antivirus Scan
         continue-on-error: true
         shell: bash
         run: |
-          echo "Starting ClamAV scan on workspace/qemu-8.2.1/build/..."
+          echo "Starting ClamAV scan on workspace/qemu-9.1.0/build/..."
 
           docker run --rm \
-            --mount type=bind,source=./workspace/qemu-8.2.1/build/,target=/scandir \
+            --mount type=bind,source=./workspace/qemu-9.1.0/build/,target=/scandir \
             clamav/clamav:stable \
             clamscan --recursive --log=/scandir/clamav-scan-report.log \
             /scandir
 
           SCAN_EXIT_CODE=$?
-          sudo chown $USER:$USER workspace/qemu-8.2.1/build/clamav-scan-report.log 2>/dev/null || true
+          sudo chown $USER:$USER workspace/qemu-9.1.0/build/clamav-scan-report.log 2>/dev/null || true
 
           if [ $SCAN_EXIT_CODE -ne 0 ]; then
             echo "ClamAV scan failed or found issues"
@@ -149,7 +160,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: antivirus-qemu
-          path: workspace/qemu-8.2.1/build/clamav-scan-report.log
+          path: workspace/qemu-9.1.0/build/clamav-scan-report.log
 
   kubevirt-build-and-scan:
     needs: qemu-build-and-scan
@@ -262,6 +273,7 @@ jobs:
           cd $EDV_HOME/workspace/kubevirt-artifacts
 
           cp $EDV_HOME/workspace/kubevirt/_out/manifests/release/kubevirt-operator.yaml .
+          cp $EDV_HOME/workspace/kubevirt/_out/manifests/release/kubevirt-cr.yaml .
           cp $EDV_HOME/kubevirt-patch/kubevirt-cr-gfx-sriov.yaml .
 
           # Modify the generated operator yaml to specify images by tag, rather than sha256
