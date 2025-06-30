@@ -133,7 +133,7 @@ This file contains steps to launch virtual machines using a system service.
 - If the `idv-init` service fails to start, check the service logs using the following command:
   
   ```bash
-  journalctl --user -xeu idv-init.service
+  sudo journalctl -t idv-init-service
   ```
   Ensure that all required files are present in `/usr/bin/idv`.
 
@@ -141,6 +141,6 @@ This file contains steps to launch virtual machines using a system service.
 - If the VMs do not launch after starting the `idv-launcher` service, check the service logs using the following command:
 
   ```bash
-  sudo journalctl -t idv-services
+  sudo journalctl -t idv-launcher-service
   ```  
   Ensure that the `vm.conf` file is correctly configured and all required files (e.g., firmware and qcow2 files) are present and the file paths are valid.
