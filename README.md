@@ -11,6 +11,15 @@ Intel's Single Root I/O Virtualization (SR-IOV) for graphics is a technology tha
 
 ### How it works
 
+- A physical function (PF) manages the entire GPU on the host system.
+- Virtual functions (VFs) are created from the PF and assigned to individual VMs.
+- Each VF provides a dedicated and isolated path for data transfer to and from the VM, bypassing the host's hypervisor for improved performance.
+
+### Key Features
+
+- **Improved performance:** Direct access to the GPU hardware for each VM reduces overhead and latency, particularly for tasks like video transcoding and media processing.
+- **Efficient resource utilization:** SR-IOV enables better sharing of GPU resources among multiple VMs, maximizing the utilization of a single physical GPU.
+- **Support for cloud-native environments:** SR-IOV is crucial for enabling GPU acceleration in Kubernetes and other cloud platforms.
 
 ### Hardware requirements:
 SR-IOV for Intel graphics typically requires hardware generation of Alder Lake (12th Gen Intel Core) or newer.
@@ -24,6 +33,7 @@ One can check if your Intel graphics controller supports SR-IOV by executing bel
 - [Edge Desktop Virtualization solution with Intel® Graphics SR-IOV](#edge-desktop-virtualization-solution-with-intel-graphics-sr-iov)
   - [Overview](#overview)
     - [How it works](#how-it-works)
+    - [Key Features](#key-features)
     - [Hardware requirements:](#hardware-requirements)
   - [Table of Contents](#table-of-contents)
   - [Pre-requisites](#pre-requisites)
