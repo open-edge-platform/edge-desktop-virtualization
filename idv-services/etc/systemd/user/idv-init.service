@@ -7,7 +7,7 @@ Type=simple
 Environment=DISPLAY=:0
 ExecStartPre=-/bin/bash -c 'cd /usr/bin/idv/init && /usr/bin/sudo ./setup_display.sh'
 ExecStart=/usr/bin/sudo /usr/bin/X
-ExecStartPost=/bin/bash -c 'sleep 3 && cd /usr/bin/idv/init && /usr/bin/sudo ./setup_sriov_vfs.sh | systemd-cat -t idv-init-service'
+ExecStartPost=/bin/bash -c 'set -o pipefail; sleep 3 && cd /usr/bin/idv/init && /usr/bin/sudo ./setup_sriov_vfs.sh | systemd-cat -t idv-init-service'
 ExecStartPost=/usr/bin/xhost +
 ExecStartPost=/bin/bash -c 'openbox &'
 Restart=on-failure
