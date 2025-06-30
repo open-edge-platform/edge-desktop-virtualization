@@ -278,6 +278,9 @@ jobs:
           cp $EDV_HOME/workspace/kubevirt/_out/manifests/release/kubevirt-cr.yaml .
           cp $EDV_HOME/kubevirt-patch/kubevirt-cr-gfx-sriov.yaml .
 
+          # replace featureGates: [] with featureGates: - GPU - HostDevices - Sidecar
+          sed -i '/featureGates: \[\]/c\      featureGates:\n        - GPU\n        - HostDevices\n        - Sidecar' kubevirt-cr.yaml
+
           # Modify the generated operator yaml to specify images by tag, rather than sha256
           cat kubevirt-operator.yaml | sed '/name: VIRT_API_SHASUM/,/name: KUBEVIRT_VERSION/ { /name: KUBEVIRT_VERSION/!d }' > kubevirt-operator.new.yaml
           perl -p -i -e "s|virt-operator\@sha256.*\$|virt-operator:$EDV_VERSION|g" kubevirt-operator.new.yaml
