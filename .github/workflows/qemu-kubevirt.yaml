@@ -295,8 +295,6 @@ jobs:
           docker save -o virt-launcher.tar localhost:5000/virt-launcher:$EDV_VERSION
           docker save -o virt-operator.tar localhost:5000/virt-operator:$EDV_VERSION
 
-          # tar cvzf intel-idv-kubevirt-$EDV_VERSION.tar.gz *.tar *.yaml
-
           for file in *.tar; do
             zstd --no-progress -T0 -16 -f --long=25 "$file" -o "${file}.zst"
           done
@@ -321,6 +319,11 @@ jobs:
         shell: bash
         run: |
           cd $EDV_HOME/workspace/kubevirt-artifacts
+
+          # Move the manifests back out of the previously-cached release folder so they can be manipulated
+          mv intel-idv-kubevirt-*/*.yaml .
+          # Delete the old previously-cached release folder, which should just contain .zst files at this point
+          rm -rf intel-idv-kubevirt-*
 
           # Extract the old version from the kubevirt-operator file
           OLD_VERSION="$(cat kubevirt-operator.yaml | grep -A 1 KUBEVIRT_VERSION | grep value: | perl -p -e 's|^.*value: (.*)$|\1|g')"
