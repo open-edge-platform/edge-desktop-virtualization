@@ -5,11 +5,6 @@ metadata:
   namespace: kubevirt
 spec:
   configuration:
-    developerConfiguration:
-      featureGates:
-        - GPU
-        - HostDevices
-        - Sidecar
     permittedHostDevices:
       pciHostDevices:
       - pciVendorSelector: "8086:7dd5"
