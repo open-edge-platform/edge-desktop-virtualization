@@ -33,6 +33,6 @@ spec:
       - pciVendorSelector: "8086:a780"
         resourceName: "intel.com/sriov-gpudevice"
         externalResourceProvider: false
-      - pciVendorSelector: "$INTEL_IDV_GPU_VENDOR_ID:$INTEL_IDV_GPU_PRODUCT_ID"
+      - pciVendorSelector: "${INTEL_IDV_GPU_VENDOR_ID}:${INTEL_IDV_GPU_PRODUCT_ID}"
         resourceName: "intel.com/sriov-gpudevice"
         externalResourceProvider: false
