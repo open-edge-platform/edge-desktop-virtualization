@@ -97,7 +97,7 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 -   Upload image, use **.qcow2** or **.img**
     ```sh
 
-    ./virtctl image-upload --uploadproxy-url=https://10.43.51.68 --insecure dv vm1-win11-image --size=100Gi --access-mode=ReadWriteOnce --force-bind --image-path=/home/guest/disk.qcow2 --force-bind
+    kubevirt virt image-upload --uploadproxy-url=https://10.43.51.68 --insecure dv vm1-win11-image --size=100Gi --access-mode=ReadWriteOnce --force-bind --image-path=/home/guest/disk.qcow2 --force-bind
     ```
     To check status
     ```sh
