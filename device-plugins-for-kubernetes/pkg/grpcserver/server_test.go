@@ -14,6 +14,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"sync/atomic"
 
 	"device-plugin/pkg/resources"
 
@@ -251,10 +252,10 @@ func TestStartDevicePlugin_RestartsOnServeError(t *testing.T) {
 	defer os.RemoveAll(filepath.Dir(socket))
 	resource := &mockResource{socketPath: socket, resourceName: "test.com/mock"}
 
-	callCount := 0
+	var callCount int32 // Use atomic counter
 	mockServe := func(res []resources.Resource, reg func(string, string) error) error {
-		callCount++
-		if callCount == 1 {
+		atomic.AddInt32(&callCount, 1) 
+		if atomic.LoadInt32(&callCount) == 1 {
 			return errors.New("simulated error")
 		}
 		// On second call, simulate success
@@ -268,7 +269,7 @@ func TestStartDevicePlugin_RestartsOnServeError(t *testing.T) {
 		close(done)
 	}()
 	time.Sleep(11 * time.Second)
-	if callCount < 2 {
+	if atomic.LoadInt32(&callCount) < 2 { 
 		t.Errorf("StartDevicePlugin did not restart Serve as expected, callCount=%d", callCount)
 	}
 }
