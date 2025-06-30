@@ -344,7 +344,7 @@ The original idea to build within the Centos container comes from this [link](ht
 **On Deployment system**
 
 5.  Ensure Kubernetes is installed and local cluster is running.
-6.  Import the images into the container runtime
+6.  Import the images into the container runtime. If the image files are named `*.tar.zstd`, use `unzstd <file>` to decompress them prior to importing.
     ```sh
     sudo ctr -n k8s.io images import sidecar-shim.tar
     sudo ctr -n k8s.io images import virt-api.tar
