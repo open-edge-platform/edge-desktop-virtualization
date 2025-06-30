@@ -351,8 +351,6 @@ jobs:
           docker save -o virt-launcher.tar localhost:5000/virt-launcher:$EDV_VERSION
           docker save -o virt-operator.tar localhost:5000/virt-operator:$EDV_VERSION
 
-          rm intel-idv-kubevirt*.tar.gz
-
           for file in *.tar; do
             zstd --no-progress -T0 -16 -f --long=25 "$file" -o "${file}.zst"
           done
