@@ -65,7 +65,7 @@ One can check if your Intel graphics controller supports SR-IOV by executing bel
 ### Host OS Options
 
 Host OS has to be enabled with graphics SR-IOV ingredients.
-Below are various options (but not limited) :
+Below are various options (but not limited to) :
 - #### EMT - Intel EMT with [desktop-virtualization Image config](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/70d364596e88ad332637d7073a7a0a445960ca39/toolkit/imageconfigs/edge-image-desktop-virtualization.json)
 - #### Debian - [ThunderSoft SR-IOV](https://github.com/ThunderSoft-SRIOV)
 - #### Ubuntu
