@@ -33,6 +33,10 @@ Intel's Single Root I/O Virtualization (SR-IOV) for graphics is a technology tha
 <p align="center">
 <img align="center" width=50% height=50% src="docs/images/sriov_overview.png" >
 </p>
+<p align="center">
+<em>Graphics SR-IOV Architecture</em>
+</p>
+
 ### Key Features
 
 - **Improved performance:** Direct access to the GPU hardware for each VM reduces overhead and latency, particularly for tasks like video transcoding and media processing.
@@ -81,6 +85,9 @@ Below are the ingredients to achieve Display and Graphics Virtualization pipelin
 
 <p align="center">
 <img width=30% height=30% src="docs/images/edge-desktop-virtualization.png">
+</p>
+<p align="center">
+<em>Desktop Virtualization on K3s/Kubevirt</em>
 </p>
 
 The components marked in red are in scope of this solution. And can be enabled following their respective readme.
