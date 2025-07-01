@@ -81,7 +81,7 @@ Below are various options (but not limited) :
 Below are the ingredients to achieve Display and Graphics Virtualization pipeline using SR-IOV.
 
 <p align="center">
-<img width=50% height=50% src="docs/images/edge-desktop-virtualization.png">
+<img width=30% height=30% src="docs/images/edge-desktop-virtualization.png">
 </p>
 
 The components marked in red are in scope of this solution. And can be enabled following their respective readme.
