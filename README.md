@@ -1,11 +1,11 @@
-# Edge Desktop Virtualization solution with Graphics SR-IOV
+# Desktop Virtualization solution with Graphics SR-IOV
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/edge-desktop-virtualization/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/edge-desktop-virtualization)
 [![CodeQL](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/github-code-scanning/codeql)
 [![Device Plugin: Coverity Scan](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml/badge.svg)](https://github.com/open-edge-platform/edge-desktop-virtualization/actions/workflows/device_plugin_coverity.yaml)
 
-- [Edge Desktop Virtualization solution with Graphics SR-IOV](#edge-desktop-virtualization-solution-with-graphics-sr-iov)
+- [Desktop Virtualization solution with Graphics SR-IOV](#desktop-virtualization-solution-with-graphics-sr-iov)
   - [Overview](#overview)
     - [How it works](#how-it-works)
     - [Key Features](#key-features)
@@ -98,4 +98,4 @@ The components marked in red are in scope of this solution. And can be enabled f
 
 ## References
 [Reference-1](https://cyberus-technology.de/en/articles/vbox-kvm-sriov)
-[Reference-2]()
+[Reference-2](https://www.dfi.com/Uploads/DownloadCenter/5631e304-28b2-4256-975a-5689750b5636/Intel%20iGPU%20(Integrated%20Graphics)%20SR-IOV%20-%20The%20Catalyst%20for%20IoT%20Virtualization%20in%20Factory%20Automation.pdf?timestamp=1676441838.9072)
