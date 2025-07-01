@@ -26,9 +26,10 @@ Intel's Single Root I/O Virtualization (SR-IOV) for graphics is a technology tha
 
 ### How it works
 
-- A physical function (PF) manages the entire GPU on the host system.
+- The Physical Function (PF) is the full-featured physical function of the GPU, managed by the host OS. 
 - Virtual functions (VFs) are created from the PF and assigned to individual VMs.
-- Each VF provides a dedicated and isolated path for data transfer to and from the VM, bypassing the host's hypervisor for improved performance.
+- Each VF provides a dedicated and isolated path for data transfer to and from the VM, bypassing the host's hypervisor for improved performance and reducded latency.
+- PCIe Standard: SR-IOV is a PCI-SIG standard that defines how a single physical PCIe device can be presented as multiple virtual devices. 
 
 <p align="center">
 <img align="center" width=50% height=50% src="docs/images/sriov_overview.png" >
@@ -90,7 +91,8 @@ Below are the ingredients to achieve Display and Graphics Virtualization pipelin
 <em>Desktop Virtualization on K3s/Kubevirt</em>
 </p>
 
-The components marked in red are in scope of this solution. And can be enabled following their respective readme.
+The components marked in red are in scope of this solution. 
+The display and graphics virtualization pipeline on k3s/kubevirt can be realized by following build and installation of below components.
 
 ### [IDV Services](idv-services/README.md)
 ### [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
@@ -104,3 +106,5 @@ The components marked in red are in scope of this solution. And can be enabled f
 - [Reference-2](https://www.dfi.com/Uploads/DownloadCenter/5631e304-28b2-4256-975a-5689750b5636/Intel%20iGPU%20(Integrated%20Graphics)%20SR-IOV%20-%20The%20Catalyst%20for%20IoT%20Virtualization%20in%20Factory%20Automation.pdf?timestamp=1676441838.9072)
 - [Reference-3](https://www.intel.com/content/www/us/en/secure/content-details/782115/intelligent-desktop-virtualization-idv.html?wapkw=intelligent%20desktop%20virtualization&DocID=782115)
 - [Reference-4](https://www.intel.com/content/www/us/en/secure/content-details/657261/sr-iov-based-graphics-virtualization.html?wapkw=intelligent%20desktop%20virtualization&DocID=657261)
+- [References-5](https://github.com/intel/kubevirt-gfx-sriov)
+- [References-6](https://dgpu-docs.intel.com/devices/hardware-table.html)
