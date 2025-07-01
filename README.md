@@ -18,7 +18,7 @@
     - [Generate Virtual Machine qcow2 with required drivers for SR-IOV](#generate-virtual-machine-qcow2-with-required-drivers-for-sr-iov)
       - [Windows](#windows)
       - [Ubuntu](#ubuntu)
-    - [K3s/Kubevirt Pipeline](#k3skubevirt-pipeline)
+    - [K3s/Kubevirt Solution stack for Edge Desktop Virtualization](#k3skubevirt-solution-stack-for-edge-desktop-virtualization)
       - [IDV Services](#idv-services)
       - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
       - [Kubevirt Patch](#kubevirt-patch)
@@ -36,6 +36,8 @@ Intel's Single Root I/O Virtualization (SR-IOV) for graphics is a technology tha
 - A physical function (PF) manages the entire GPU on the host system.
 - Virtual functions (VFs) are created from the PF and assigned to individual VMs.
 - Each VF provides a dedicated and isolated path for data transfer to and from the VM, bypassing the host's hypervisor for improved performance.
+
+![Graphics SR-IOV architecture](docs/images/sr-iov.png "Graphics SR-IOV Architecture ")
 
 ### Key Features
 
@@ -78,7 +80,13 @@ Below options (but not limited) :
 #### [Windows](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-windows-vm.md#microsoft-windows-11-vm)
 #### [Ubuntu](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-ubuntu-vm.md)
 
-### K3s/Kubevirt Pipeline
+### K3s/Kubevirt Solution stack for Edge Desktop Virtualization
+
+Below are the ingredients to achieve Display and Graphics Virtualization pipeline using SR-IOV.
+
+![Architecture](docs/images/edge-desktop-virtualization.png "Architecture ")
+
+The components marked in red are in scope of this solution. And can be enabled following their respective readme.
 
 #### [IDV Services](idv-services/README.md)
 #### [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
