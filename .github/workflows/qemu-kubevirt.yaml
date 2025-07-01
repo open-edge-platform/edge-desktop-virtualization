@@ -19,6 +19,12 @@ on:
       - main
     tags:
       - "*"
+  workflow_dispatch:
+    inputs:
+      disable_cache:
+        description: "Run workflow without cache"
+        required: false
+        default: "false"
 
 jobs:
   qemu-build-and-scan:
@@ -43,6 +49,7 @@ jobs:
       - name: Cache QEMU source & build directory
         id: cache-qemu
         uses: actions/cache@v4
+        if: ${{ inputs.disable_cache != 'true' }}
         env:
           cache-name: cache-qemu
         with:
@@ -52,7 +59,7 @@ jobs:
           key: "qemu-binary-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/README.md') }}"
 
       - name: Build and patch QEMU
-        if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
         # Each logical block here is copied exactly from a code block in kubevirt-patch/README.md
         run: |
           mkdir -p workspace
@@ -184,6 +191,7 @@ jobs:
       - name: Cache Kubevirt output artifacts
         id: cache-kubevirt
         uses: actions/cache@v4
+        if: ${{ inputs.disable_cache != 'true' }}
         env:
           cache-name: cache-kubevirt
         with:
@@ -198,7 +206,7 @@ jobs:
       # These steps delete many unnecessary files from the actions runner so that enough space is available
       # These pieces are only run if a kubevirt build needs to be done
       - name: Disable man-db to make package install and removal faster
-        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
           sudo dpkg-reconfigure man-db
@@ -219,20 +227,20 @@ jobs:
       ######################################################################################################3
 
       - name: Run local docker registry
-        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
         run: |
           # Run a local registry
           docker run -d -p 5000:5000 --name registry registry:2.7
 
       - name: Download QEMU artifact
-        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
         uses: actions/download-artifact@v4
         with:
           artifact-ids: ${{ needs.qemu-build-and-scan.outputs.qemu-artifact-id }}
           path: . # Will unpack into a folder with the name used in upload-artifact, containing the binary
 
       - name: Build and patch kubevirt
-        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
         # Each logical block here is copied exactly from a code block in kubevirt-patch/README.md
         run: |
           mkdir -p $EDV_HOME/workspace
@@ -268,7 +276,7 @@ jobs:
           df -h
 
       - name: Export kubevirt build artifacts to output directory
-        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
         shell: bash
         run: |
           mkdir -p $EDV_HOME/workspace/kubevirt-artifacts
@@ -321,7 +329,7 @@ jobs:
       # However, they will have the old tag - whatever the tag was when they were built last
       # Need to re-tag them and import them into docker so they're usable by subsequent steps
       - name: Reload and re-tag cached images
-        if: ${{ steps.cache-kubevirt.outputs.cache-hit == 'true' }}
+        if: ${{ steps.cache-kubevirt.outputs.cache-hit == 'true' && inputs.disable_cache != 'true' }}
         shell: bash
         run: |
           cd $EDV_HOME/workspace/kubevirt-artifacts
