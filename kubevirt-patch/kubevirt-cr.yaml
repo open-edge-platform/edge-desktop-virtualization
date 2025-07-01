@@ -1,0 +1,181 @@
+---
+apiVersion: kubevirt.io/v1
+kind: KubeVirt
+metadata:
+  name: kubevirt
+  namespace: kubevirt
+spec:
+  certificateRotateStrategy: {}
+  configuration:
+    developerConfiguration:
+      featureGates:
+        - GPU
+        - HostDevices
+        - Sidecar
+    permittedHostDevices:
+      pciHostDevices:
+      - pciVendorSelector: "8086:7dd5"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:7d45"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:7d40"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:7d55"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a780"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a781"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a788"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a789"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a78a"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a782"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a78b"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a783"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7a0"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7a1"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7a8"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7aa"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7ab"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7ac"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7ad"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a7a9"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:a721"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4680"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4690"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4688"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4688"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:468a"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:468b"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4682"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4692"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4693"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46d3"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46d4"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46d0"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46d1"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46d2"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4626"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:4628"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:462a"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46a2"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46b3"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46c2"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46a3"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46b2"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46c3"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46a0"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46b0"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46c0"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46a6"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46a8"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46aa"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46a1"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46b1"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "8086:46c1"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+      - pciVendorSelector: "${INTEL_IDV_GPU_VENDOR_ID}:${INTEL_IDV_GPU_PRODUCT_ID}"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
+  customizeComponents: {}
+  imagePullPolicy: IfNotPresent
+  workloadUpdateStrategy: {}

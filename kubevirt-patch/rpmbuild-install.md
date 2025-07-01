@@ -34,7 +34,6 @@ System should be installed with rpm build environment.
    ```sh
    sudo ls -la /var/lib/rancher/k3s/server/manifests/
    -rw-r--r--.  1 root root       3515 Jun 23 06:03 device-plugin.yaml
-   -rw-r--r--.  1 root root       1037 Jun 24 12:38 kubevirt-cr-gfx-sriov.yaml
    -rw-r--r--.  1 root root        288 Jun  5 11:31 kubevirt-cr.yaml
    -rw-r--r--.  1 root root     467574 Jun  3 14:54 kubevirt-operator.yaml
    ```
@@ -89,7 +88,6 @@ System should be installed with rpm build environment.
     ```sh
     kubectl apply -f kubevirt-operator.yaml
     kubectl apply -f kubevirt-cr.yaml
-    kubectl apply -f kubevirt-cr-gfx-sriov.yaml
     kubectl apply -f intel-idv-device-plugin.yaml
     ```
 7.  Verify Deployment
@@ -117,7 +115,7 @@ System should be installed with rpm build environment.
 8.  Enable Virt-Handler to discover Graphics VFs
     Update KubeVirt custom resource configuration to enable virt-handler to discover graphics VFs on the host. All discovered VFs will be published as *allocatable* resource
 
-    **Update Graphics Device ID in `kubevirt-cr-gfx-sriov.yaml` if not found**
+    **Update Graphics Device ID in `kubevirt-cr.yaml` if not found**
       - Read the Device ID of Intel Graphics Card from Host, Ex: for RPL
         ```sh
         $ cat /sys/devices/pci0000\:00/0000\:00\:02.0/device
@@ -133,7 +131,7 @@ System should be installed with rpm build environment.
 
     Apply the YAML changes
     ```sh
-    kubectl apply -f manifests/kubevirt-cr-gfx-sriov.yaml
+    kubectl apply -f manifests/kubevirt-cr.yaml
     ```
 
     **Check for presence of `intel.com/sriov-gpudevices` resource**

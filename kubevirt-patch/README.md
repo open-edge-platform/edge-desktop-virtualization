@@ -420,7 +420,7 @@ The original idea to build within the Centos container comes from this [link](ht
 10.  Enable Virt-Handler to discover Graphics VFs
      Update KubeVirt custom resource configuration to enable virt-handler to discover graphics VFs on the host. All discovered VFs will be published as *allocatable* resource
 
-     **Update Graphics Device ID in `kubevirt-cr-gfx-sriov.yaml` if not found**
+     **Update Graphics Device ID in `kubevirt-cr.yaml` if not found**
      - Read the Device ID of Intel Graphics Card from Host, Ex: for RPL
          ```sh
          $ cat /sys/devices/pci0000\:00/0000\:00\:02.0/device
@@ -436,7 +436,7 @@ The original idea to build within the Centos container comes from this [link](ht
 
      Apply the YAML changes
      ```sh
-     kubectl apply -f manifests/kubevirt-cr-gfx-sriov.yaml
+     kubectl apply -f manifests/kubevirt-cr.yaml
      ```
 
      **Check for presence of `intel.com/sriov-gpudevices` resource**
