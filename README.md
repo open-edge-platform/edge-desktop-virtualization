@@ -18,13 +18,13 @@
     - [Generate Virtual Machine qcow2 with required drivers for SR-IOV](#generate-virtual-machine-qcow2-with-required-drivers-for-sr-iov)
       - [Windows](#windows)
       - [Ubuntu](#ubuntu)
-    - [K3s/Kubevirt Solution stack for Edge Desktop Virtualization](#k3skubevirt-solution-stack-for-edge-desktop-virtualization)
-      - [IDV Services](#idv-services)
-      - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
-      - [Kubevirt Patch](#kubevirt-patch)
-      - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
-    - [Discrete Helm charts](#discrete-helm-charts)
-    - [Single Helm deployment](#single-helm-deployment)
+  - [K3s/Kubevirt Solution stack for Edge Desktop Virtualization](#k3skubevirt-solution-stack-for-edge-desktop-virtualization)
+    - [IDV Services](#idv-services)
+    - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
+    - [Kubevirt Patch](#kubevirt-patch)
+    - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
+      - [Discrete Helm charts](#discrete-helm-charts)
+      - [Single Helm deployment](#single-helm-deployment)
 
 
 ## Overview
@@ -80,7 +80,7 @@ Below options (but not limited) :
 #### [Windows](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-windows-vm.md#microsoft-windows-11-vm)
 #### [Ubuntu](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-ubuntu-vm.md)
 
-### K3s/Kubevirt Solution stack for Edge Desktop Virtualization
+## K3s/Kubevirt Solution stack for Edge Desktop Virtualization
 
 Below are the ingredients to achieve Display and Graphics Virtualization pipeline using SR-IOV.
 
@@ -88,9 +88,9 @@ Below are the ingredients to achieve Display and Graphics Virtualization pipelin
 
 The components marked in red are in scope of this solution. And can be enabled following their respective readme.
 
-#### [IDV Services](idv-services/README.md)
-#### [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
-#### [Kubevirt Patch](kubevirt-patch/README.md)
-#### Sample Application : VM deployment Helm charts
-   ### [Discrete Helm charts](sample-application/discrete/README.md)
-   ### [Single Helm deployment](sample-application/single/README.md)
+### [IDV Services](idv-services/README.md)
+### [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
+### [Kubevirt Patch](kubevirt-patch/README.md)
+### Sample Application : VM deployment Helm charts
+   #### [Discrete Helm charts](sample-application/discrete/README.md)
+   #### [Single Helm deployment](sample-application/single/README.md)
