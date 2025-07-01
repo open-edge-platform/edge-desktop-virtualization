@@ -25,6 +25,7 @@
     - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
       - [Discrete Helm charts](#discrete-helm-charts)
       - [Single Helm deployment](#single-helm-deployment)
+  - [References](#references)
 
 
 ## Overview
@@ -94,3 +95,7 @@ The components marked in red are in scope of this solution. And can be enabled f
 ### Sample Application : VM deployment Helm charts
    #### [Discrete Helm charts](sample-application/discrete/README.md)
    #### [Single Helm deployment](sample-application/single/README.md)
+
+## References
+[Reference-1](https://cyberus-technology.de/en/articles/vbox-kvm-sriov)
+[Reference-2]()
