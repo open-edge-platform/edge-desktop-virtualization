@@ -1,9 +1,11 @@
+---
 apiVersion: kubevirt.io/v1
 kind: KubeVirt
 metadata:
   name: kubevirt
   namespace: kubevirt
 spec:
+  certificateRotateStrategy: {}
   configuration:
     developerConfiguration:
       featureGates:
@@ -174,3 +176,6 @@ spec:
       - pciVendorSelector: "${INTEL_IDV_GPU_VENDOR_ID}:${INTEL_IDV_GPU_PRODUCT_ID}"
         resourceName: "intel.com/sriov-gpudevice"
         externalResourceProvider: false
+  customizeComponents: {}
+  imagePullPolicy: IfNotPresent
+  workloadUpdateStrategy: {}
