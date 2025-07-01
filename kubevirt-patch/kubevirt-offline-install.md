@@ -58,7 +58,6 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     ```sh
     kubectl apply -f kubevirt-operator.yaml
     kubectl apply -f kubevirt-cr.yaml
-    kubectl apply -f kubevirt-cr-gfx-sriov.yaml
     kubectl apply -f intel-idv-device-plugin.yaml
     ```
 7.  Verify Deployment
@@ -86,7 +85,7 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
 8.  Enable Virt-Handler to discover Graphics VFs
     Update KubeVirt custom resource configuration to enable virt-handler to discover graphics VFs on the host. All discovered VFs will be published as *allocatable* resource
 
-    **Update Graphics Device ID in `kubevirt-cr-gfx-sriov.yaml` if not found**
+    **Update Graphics Device ID in `kubevirt-cr.yaml` if not found**
       - Read the Device ID of Intel Graphics Card from Host, Ex: for RPL
         ```sh
         $ cat /sys/devices/pci0000\:00/0000\:00\:02.0/device
@@ -102,7 +101,7 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
 
     Apply the YAML changes
     ```sh
-    kubectl apply -f manifests/kubevirt-cr-gfx-sriov.yaml
+    kubectl apply -f manifests/kubevirt-cr.yaml
     ```
 
     **Check for presence of `intel.com/sriov-gpudevices` resource**

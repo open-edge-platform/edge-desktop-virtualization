@@ -80,6 +80,15 @@ function setup_sriov_vf() {
               fi
           done
       done
+
+      # Check if all expected VFs are enumerated
+      vf_count=$(ls /sys/class/drm/card0/device/ | grep -c '^virtfn')
+      if [[ "$vf_count" -ne "$totalvfs" ]]; then
+          echo "Error: Only $vf_count out of $totalvfs VFs were enumerated. SR-IOV setup failed."
+          exit 1
+      fi
+      echo "All $vf_count VFs successfully enumerated."
+
       echo "SR-IOV VF setup completed successfully"
   else
       echo "SR-IOV VFs are already enabled"
