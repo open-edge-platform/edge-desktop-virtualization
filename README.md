@@ -14,6 +14,10 @@
     - [Host OS Options](#host-os-options)
     - [Generate Virtual Machine qcow2 with required drivers for SR-IOV](#generate-virtual-machine-qcow2-with-required-drivers-for-sr-iov)
   - [K3s/Kubevirt Solution stack for Edge Desktop Virtualization](#k3skubevirt-solution-stack-for-edge-desktop-virtualization)
+    - [IDV Services](#idv-services)
+    - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
+    - [Kubevirt Patch](#kubevirt-patch)
+    - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
   - [References](#references)
 
 
@@ -79,13 +83,13 @@ Below are the ingredients to achieve Display and Graphics Virtualization pipelin
 
 The components marked in red are in scope of this solution. And can be enabled following their respective readme.
 
-- ### [IDV Services](idv-services/README.md)
-- ### [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
-- ### [Kubevirt Patch](kubevirt-patch/README.md)
-- ### Sample Application : VM deployment Helm charts
+### [IDV Services](idv-services/README.md)
+### [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
+### [Kubevirt Patch](kubevirt-patch/README.md)
+### Sample Application : VM deployment Helm charts
    - #### [Discrete Helm charts](sample-application/discrete/README.md)
    - #### [Single Helm deployment](sample-application/single/README.md)
 
 ## References
-[Reference-1](https://cyberus-technology.de/en/articles/vbox-kvm-sriov)
-[Reference-2](https://www.dfi.com/Uploads/DownloadCenter/5631e304-28b2-4256-975a-5689750b5636/Intel%20iGPU%20(Integrated%20Graphics)%20SR-IOV%20-%20The%20Catalyst%20for%20IoT%20Virtualization%20in%20Factory%20Automation.pdf?timestamp=1676441838.9072)
+- [Reference-1](https://cyberus-technology.de/en/articles/vbox-kvm-sriov)
+- [Reference-2](https://www.dfi.com/Uploads/DownloadCenter/5631e304-28b2-4256-975a-5689750b5636/Intel%20iGPU%20(Integrated%20Graphics)%20SR-IOV%20-%20The%20Catalyst%20for%20IoT%20Virtualization%20in%20Factory%20Automation.pdf?timestamp=1676441838.9072)
