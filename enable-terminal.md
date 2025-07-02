@@ -1,4 +1,4 @@
-Original Author : Byron Marohn
+Original Author : Byron Marohn (byron.marohn@intel.com)
 # Launching terminal via keybind with openbox
 
 ## Packages needed
