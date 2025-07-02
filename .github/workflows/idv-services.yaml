@@ -1,0 +1,63 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: "IDV Services: Build, Trivy & ClamAV Scan"
+run-name: "Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
+
+# Only run at most 1 workflow concurrently per PR, unlimited for branches
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+jobs:
+  idv-services:
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # All history, not just latest commit
+          ref: ${{ github.event.pull_request.head.sha }} # Check out the actual commit, not a fake merge commit
+
+      - name: Setup Tools & Common Variables
+        uses: ./.github/actions/setup-tools
+
+      - name: create idv-services release tarball
+        working-directory: idv-services
+        run: |
+          
+          ls -hal
+          
+          mkdir intel-idv-services-$EDV_VERSION
+          mkdir -p intel-idv-services-$EDV_VERSION/init
+          mkdir -p intel-idv-services-$EDV_VERSION/launcher
+
+          cp autologin.conf ./intel-idv-services-$EDV_VERSION
+          cp etc/systemd/user/*.service ./intel-idv-services-$EDV_VERSION
+          cp launcher/*.* ./intel-idv-services-$EDV_VERSION/launcher
+          cp init/*.* ./intel-idv-services-$EDV_VERSION/init
+
+          ls -hal
+          tar cvzf intel-idv-services-$EDV_VERSION.tar.gz intel-idv-services-$EDV_VERSION
+          ls -hal
+
+      - name: Upload idv-services release tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: idv-services-artifacts
+          path: |
+              idv-services/idv-services-artifacts/intel-idv-services-${{ env.EDV_VERSION }}.tar.gz
