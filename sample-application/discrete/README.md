@@ -6,7 +6,7 @@ This directory contains mapped Sidecar and Virtual Machine Deployment charts.
 2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using CDI.
    - *deployment/discrete/helm-win11_[connector]*
 3. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using PVC.
-   - - *deployment/discrete/pvc/helm-win11_[connector]*
+   - *deployment/discrete/pvc/helm-win11_[connector]*
 
 **Mapping of Sidecar script with VM deployment Helm chart**
 
@@ -87,7 +87,7 @@ Allocated resources:
 ```
 
 ## 1. Storing VM Images 
-### 1.1 Upload VM bootimage to CDI incase of CDI based deployment
+### 1.1 Upload VM bootimage to CDI, for CDI based deployment
 Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 
 -   Get IP of CDI
@@ -113,7 +113,7 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
     vm4-win11-image   Succeeded   N/A                   15d
     ```
 
-### 1.2 Save VM image for PVC deployment
+### 1.2 Save VM image for PVC based deployment
 Ex. for `vm1` the image path to keep VM disk image is `/opt/vm_imgs/vm1/` as `disk.img`
 
 ## 2. Edit Sidecar script to attach USB peripherals to Virtual Machine
