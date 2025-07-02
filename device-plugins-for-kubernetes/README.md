@@ -12,7 +12,7 @@
   - [Verify setup](#verify-setup)
   - [Usage](#usage)
 
-This repository contains a device plugin for MaverikFlats that exposes five custom resources: `intel.com/x11`, `intel.com/udma`, `intel.com/vfio`, `intel.com/igpu` and `intel.com/usb`. This plugin allows you to request these resources in your pod specifications, enabling the mounting of necessary drivers/devices.
+This repository contains a device plugin that exposes five custom resources: `intel.com/x11`, `intel.com/udma`, `intel.com/vfio`, `intel.com/igpu` and `intel.com/usb`. This plugin allows you to request these resources in your pod specifications, enabling the mounting of necessary drivers/devices.
 
 ## Overview
 
