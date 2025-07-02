@@ -46,10 +46,15 @@ jobs:
           mkdir -p intel-idv-services-$EDV_VERSION/init
           mkdir -p intel-idv-services-$EDV_VERSION/launcher
 
-          cp autologin.conf ./intel-idv-services-$EDV_VERSION
-          cp etc/systemd/user/*.service ./intel-idv-services-$EDV_VERSION
-          cp launcher/*.* ./intel-idv-services-$EDV_VERSION/launcher
-          cp init/*.* ./intel-idv-services-$EDV_VERSION/init
+          cp autologin.conf intel-idv-services-$EDV_VERSION
+          cp etc/systemd/user/*.service intel-idv-services-$EDV_VERSION
+          cp launcher/*.* intel-idv-services-$EDV_VERSION/launcher
+          cp init/*.* intel-idv-services-$EDV_VERSION/init
+
+          cd intel-idv-services-$EDV_VERSION
+          ls -hal
+
+          cd ..
 
           ls -hal
           tar cvzf intel-idv-services-$EDV_VERSION.tar.gz intel-idv-services-$EDV_VERSION
@@ -60,4 +65,5 @@ jobs:
         with:
           name: idv-services artifacts
           path: |
+              ls -hal
               idv-services/idv-services-artifacts/intel-idv-services-${{ env.EDV_VERSION }}.tar.gz
