@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-name: "IDV Services: Build, Trivy & ClamAV Scan"
+name: "IDV Services: Create Package"
 run-name: "Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
 
 # Only run at most 1 workflow concurrently per PR, unlimited for branches
@@ -47,10 +47,10 @@ jobs:
           mkdir -p intel-idv-services-$EDV_VERSION/init
           mkdir -p intel-idv-services-$EDV_VERSION/launcher
 
-          cp ../idv-services/autologin.conf intel-idv-services-$EDV_VERSION
-          cp ../idv-services/etc/systemd/user/*.service intel-idv-services-$EDV_VERSION
-          cp ../idv-services/launcher/*.* intel-idv-services-$EDV_VERSION/launcher
-          cp ../idv-services/init/*.* intel-idv-services-$EDV_VERSION/init
+          cp ../autologin.conf intel-idv-services-$EDV_VERSION
+          cp ../etc/systemd/user/*.service intel-idv-services-$EDV_VERSION
+          cp ../launcher/*.* intel-idv-services-$EDV_VERSION/launcher
+          cp ../init/*.* intel-idv-services-$EDV_VERSION/init
 
           ls -hal
           tar cvzf intel-idv-services-$EDV_VERSION.tar.gz intel-idv-services-$EDV_VERSION
