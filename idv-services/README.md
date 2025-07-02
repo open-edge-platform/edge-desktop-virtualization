@@ -8,7 +8,7 @@ IDV service is collection of 2 services:
   - [Modify VM configuration](#modify-vm-configuration)
   - [Run IDV services via an RPM package](#run-idv-services-via-an-rpm-package)
   - [Manual steps to run IDV service](#manual-steps-to-run-idv-service)
-    - [Step 1: Run script to copy necessary files to `/usr/bin` directory](#step-1-run-script-to-copy-necessary-files-to-usrbin-directory)
+    - [Step 1: Run scripts to copy necessary files and set sudo permissions](#step-1-run-scripts-to-copy-necessary-files-and-set-sudo-permissions)
     - [Step 2: Enable and start `idv-init` service](#step-2-enable-and-start-idv-init-service)
     - [Step 3: Enable and start `idv-launcher` service](#step-3-enable-and-start-idv-launcher-service)
   - [Enable auto-login for the `guest` user](#enable-auto-login-for-the-guest-user)
@@ -47,7 +47,7 @@ IDV service is collection of 2 services:
 
 - If you prefer not to use the RPM package, follow these steps:
 
-  ### Step 1: Run script to copy necessary files to `/usr/bin` directory
+  ### Step 1: Run scripts to copy necessary files and set sudo permissions
 
   - Run the `copy_files.sh` file with superuser privileges using the following command
 
@@ -56,6 +56,13 @@ IDV service is collection of 2 services:
     sudo ./copy_files.sh
     ```
     This copies all the scripts and services to appropriate directories.
+
+  - Run the following command to set up permissions for running scripts:
+
+    ```bash
+    sudo chmod +x setup_permissions.sh
+    sudo ./setup_permissions.sh
+    ```
 
   ### Step 2: Enable and start `idv-init` service
 
