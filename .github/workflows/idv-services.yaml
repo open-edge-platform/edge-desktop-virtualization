@@ -58,6 +58,6 @@ jobs:
       - name: Upload idv-services release tarball
         uses: actions/upload-artifact@v4
         with:
-          name: idv-services-artifacts
+          name: idv-services artifacts
           path: |
               idv-services/idv-services-artifacts/intel-idv-services-${{ env.EDV_VERSION }}.tar.gz
