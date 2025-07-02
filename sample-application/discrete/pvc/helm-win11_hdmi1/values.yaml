@@ -1,0 +1,13 @@
+virtualMachines:
+  - name: win11-vm1
+    namespace: default
+    storage: 60Gi
+    hostPath: /opt/vm_imgs/vm1/
+    storageClassName: local-path
+    cpuCores: 3
+    memory: 12288Mi
+    gpuDeviceName: intel.com/sriov-gpudevice
+    secureBoot: false
+    usePVC: false
+    rdpPort: 3390
+    cdiDv: vm1-win11-image

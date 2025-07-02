@@ -3,20 +3,22 @@
 This directory contains mapped Sidecar and Virtual Machine Deployment charts.
 1. Sidecar scripts, patches Libvirt XML with QEMU Commandline parameters inside Virt-Launcher pod.
    - *deployment/discrete/sidecar/[connector].yaml*
-2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3).
+2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using CDI.
    - *deployment/discrete/helm-win11_[connector]*
+3. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using PVC.
+   - - *deployment/discrete/pvc/helm-win11_[connector]*
 
 **Mapping of Sidecar script with VM deployment Helm chart**
 
 Each VM has been configured with 3 CPU, 12GB RAM, 60 GB Disk space.\
 Refer `deployment/discrete/helm-win11_[connector]/values.yaml` to edit
 
-| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port |
-| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: |
-| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     |
-| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     |
-| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     |
-| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     |
+| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for PVC based)    |
+| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: | :---------------------------------------: |
+| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     | /opt/vm_imgs/vm1/disk.img                 |
+| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     | /opt/vm_imgs/vm2/disk.img                 |
+| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     | /opt/vm_imgs/vm3/disk.img                 |
+| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     | /opt/vm_imgs/vm4/disk.img                 |
 
 **Verify Kubevirt, Device-plugin, SR-IOV GPU Passthrough and Hugepage before deploying VM**
 ```sh
@@ -84,7 +86,8 @@ Allocated resources:
 .
 ```
 
-## 1. Upload VM bootimage to CDI
+## 1. Storing VM Images 
+### 1.1 Upload VM bootimage to CDI incase of CDI based deployment
 Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 
 -   Get IP of CDI
@@ -109,7 +112,10 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
     vm3-win11-image   Succeeded   N/A                   16d
     vm4-win11-image   Succeeded   N/A                   15d
     ```
-  
+
+### 1.2 Save VM image for PVC deployment
+Ex. for `vm1` the image path to keep VM disk image is `/opt/vm_imgs/vm1/` as `disk.img`
+
 ## 2. Edit Sidecar script to attach USB peripherals to Virtual Machine
 
 Get the list of USB devices connected to Host machine
@@ -183,10 +189,17 @@ sidecar-script-hdmi2   1      16d
 ```
 
 ## 4. Deploy Virtual Machine
+### For CDI based deployment
 ```sh
 cd deployment/discrete/helm-win11_hdmi1
 helm install vm1 .
 ```
+### For PVC based deployment
+```sh
+cd deployment/discrete/pvc/helm-win11_hdmi1
+helm install vm1 .
+```
+
 Output
 ```sh
 NAME: vm1
