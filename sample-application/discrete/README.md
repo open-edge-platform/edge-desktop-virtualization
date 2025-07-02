@@ -15,10 +15,10 @@ Refer `deployment/discrete/helm-win11_[connector]/values.yaml` to edit
 
 | VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for PVC based)    |
 | :-----: | :------: | :--------: | :--------------: | :-------------: | :------: | :---------------------------------------: |
-| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     | /opt/vm_imgs/vm1/disk.img                 |
-| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     | /opt/vm_imgs/vm2/disk.img                 |
-| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     | /opt/vm_imgs/vm3/disk.img                 |
-| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     | /opt/vm_imgs/vm4/disk.img                 |
+| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     | /opt/user-apps/vm_imgs/vm1/disk.img                 |
+| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     | /opt/user-apps/vm_imgs/vm2/disk.img                 |
+| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     | /opt/user-apps/vm_imgs/vm3/disk.img                 |
+| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     | /opt/user-apps/vm_imgs/vm4/disk.img                 |
 
 **Verify Kubevirt, Device-plugin, SR-IOV GPU Passthrough and Hugepage before deploying VM**
 ```sh
@@ -114,7 +114,7 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
     ```
 
 ### 1.2 Save VM image for PVC based deployment
-Ex. for `vm1` the image path to keep VM disk image is `/opt/vm_imgs/vm1/` as `disk.img`
+Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm1/` as `disk.img`
 
 ## 2. Edit Sidecar script to attach USB peripherals to Virtual Machine
 

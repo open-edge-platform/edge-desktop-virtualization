@@ -2,7 +2,7 @@ virtualMachines:
   - name: win11-vm4
     namespace: default
     storage: 150Gi
-    hostPath: /opt/vm_imgs/vm4/
+    hostPath: /opt/user-apps/vm_imgs/vm4/
     storageClassName: local-path
     cpuCores: 3
     memory: 12288Mi

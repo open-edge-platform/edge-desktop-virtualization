@@ -2,7 +2,7 @@ virtualMachines:
   - name: win11-vm3
     namespace: default
     storage: 60Gi
-    hostPath: /opt/vm_imgs/vm3/
+    hostPath: /opt/user-apps/vm_imgs/vm3/
     storageClassName: local-path
     cpuCores: 3
     memory: 12288Mi
