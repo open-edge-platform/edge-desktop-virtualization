@@ -87,7 +87,7 @@ Allocated resources:
 ```
 
 ## 1. Storing VM Images 
-### 1.1 Upload VM bootimage to CDI, for CDI based deployment
+### For CDI based deployment, upload VM bootimage to CDI
 Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 
 -   Get IP of CDI
@@ -113,7 +113,7 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
     vm4-win11-image   Succeeded   N/A                   15d
     ```
 
-### 1.2 Save VM image for PVC based deployment
+### For PVC based deployment
 Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm1/` as `disk.img`
 
 ## 2. Edit Sidecar script to attach USB peripherals to Virtual Machine
