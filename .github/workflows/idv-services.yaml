@@ -39,7 +39,8 @@ jobs:
       - name: create idv-services release tarball
         working-directory: idv-services
         run: |
-          
+          mkdir idv-services-artifacts
+          cd idv-services-artifacts
           ls -hal
           
           mkdir intel-idv-services-$EDV_VERSION
@@ -50,11 +51,6 @@ jobs:
           cp etc/systemd/user/*.service intel-idv-services-$EDV_VERSION
           cp launcher/*.* intel-idv-services-$EDV_VERSION/launcher
           cp init/*.* intel-idv-services-$EDV_VERSION/init
-
-          cd intel-idv-services-$EDV_VERSION
-          ls -hal
-
-          cd ..
 
           ls -hal
           tar cvzf intel-idv-services-$EDV_VERSION.tar.gz intel-idv-services-$EDV_VERSION
