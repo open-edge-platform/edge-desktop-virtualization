@@ -1,8 +1,19 @@
 # Contributing
 
+### Contribution Flow
+
+The following diagram outlines the general workflow for pull requests made to the Edge Desktop Virtualization repository:
+
+<p align="center">
+<img width=50% height=50% src="docs/images/submit-changes.drawio.png">
+</p>
+<p align="center">
+<em>Desktop Virtualization Contribution Flow</em>
+</p>
+
 ### License
 
-<PROJECT NAME> is licensed under the terms in [LICENSE]<link to license file in repo>. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms.
+<Edge Desktop Virtualization> is licensed under the terms in [LICENSE](./LICENSES/). By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms.
 
 ### Sign your work
 

@@ -19,6 +19,9 @@
     - [Kubevirt Patch](#kubevirt-patch)
     - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
   - [References](#references)
+  - [Getting Help](#getting-help)
+  - [Contributions](#contributions)
+  - [License](#license)
 
 ## Overview
 
@@ -108,3 +111,21 @@ The display and graphics virtualization pipeline on k3s/kubevirt can be realized
 - [Reference-4](https://www.intel.com/content/www/us/en/secure/content-details/657261/sr-iov-based-graphics-virtualization.html?wapkw=intelligent%20desktop%20virtualization&DocID=657261)
 - [References-5](https://github.com/intel/kubevirt-gfx-sriov)
 - [References-6](https://dgpu-docs.intel.com/devices/hardware-table.html)
+
+## Getting Help
+
+if you encounter bugs, have feature requests, or need assistance, [file a Github issue](https://github.com/open-edge-platform/edge-desktop-virtualization/issues)
+
+For security-related concerns, please refer to [SECURITY.md](./SECURITY.md).
+
+## Contributions
+
+Edge Desktop Virtualization is open source and always welcomes an active community to support adding new features, optimizing, and improving security.
+
+To learn how to contribute to the project, see the [Contributor's Guide](./CONTRIBUTING.md).
+
+## License
+
+For license related information refer [LICENSES](./LICENSES/)
+
+Last Updated Date: June 02, 2025
