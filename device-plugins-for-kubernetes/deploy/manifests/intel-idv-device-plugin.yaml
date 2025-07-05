@@ -14,7 +14,7 @@ spec:
     spec:
       initContainers:
         - name: set-permissions
-          image: busybox:glibc
+          image: 'localhost:5000/busybox:glibc'
           imagePullPolicy: IfNotPresent
           command:
             - sh
