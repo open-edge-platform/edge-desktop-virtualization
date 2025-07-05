@@ -4,14 +4,17 @@
 
 # Table of Contents
 
-1. [Steps to setup idv services on an immutable EMT image](#steps-to-setup-idv-services-on-an-immutable-emt-image)
-2. [Steps to setup idv services on a mutable EMT image](#steps-to-setup-idv-services-on-a-mutable-emt-image)
-    1. [Modify VM Configuration](#modify-vm-configuration)
-    2. [Reload System Daemon](#reload-system-daemon)
-    3. [Enable IDV Services](#enable-idv-services)
-    4. [Start `idv-init.service`](#start-idv-init-service)
-    5. [Start `idv-launcher.service`](#start-idv-launcher-service)
-3. [Troubleshooting](#troubleshooting)
+- [This document contains steps to enable and start idv services on an EMT image.](#this-document-contains-steps-to-enable-and-start-idv-services-on-an-emt-image)
+- [Table of Contents](#table-of-contents)
+    - [Steps to setup idv services on an immutable EMT image](#steps-to-setup-idv-services-on-an-immutable-emt-image)
+    - [Steps to setup idv services on a mutable EMT image](#steps-to-setup-idv-services-on-a-mutable-emt-image)
+  - [Modify VM configuration](#modify-vm-configuration)
+  - [Reload system daemon](#reload-system-daemon)
+  - [Setup Permissions for Running Scripts](#setup-permissions-for-running-scripts)
+  - [Enable idv services](#enable-idv-services)
+  - [Start `idv-init` service](#start-idv-init-service)
+  - [Start `idv-launcher` service](#start-idv-launcher-service)
+    - [Troubleshooting](#troubleshooting)
 
 ### Steps to setup idv services on an immutable EMT image
 
@@ -34,12 +37,21 @@
   systemctl --user daemon-reload
   ```
 
+## Setup Permissions for Running Scripts
+- Run the following command to set up permissions for running scripts:
+
+```bash
+sudo chmod +x setup_permissions.sh
+sudo ./setup_permissions.sh
+```
+
 ## Enable idv services
 
-- Run the following command to enable `idv-init.service` and `idv-launcher.service`
+- Run the following commands to enable `idv-init.service` and `idv-launcher.service`
   
   ```bash
-  systemctl --user preset-all
+  systemctl --user enable idv-init.service
+  systemctl --user enable idv-launcher.service
   ```
 
 ## Start `idv-init` service

@@ -1,18 +1,19 @@
-# Desktop Virtualization solution with graphics SR-IOV
+# IDV Services
+IDV service is collection of 2 services:
+1. init-service : It initializes the SRIOV configurations required on host system.
+2. launcher-service : It launches the Virtual Machine with required configuration.
 
-This file contains steps to launch virtual machines using a system service.
-
-## Table of Contents
-1. [Virtual machine configuration file](#virtual-machine-configuration-file)
-2. [Modify VM configuration](#modify-vm-configuration)
-3. [Run IDV services via an RPM package](#run-idv-services-via-an-rpm-package)
-4. [Manual steps to run IDV service](#manual-steps-to-run-idv-service)
-  - [Run script to copy necessary files to `/usr/bin` directory](#step-1-run-script-to-copy-necessary-files-to-usrbin-directory)
-  - [Enable and start `idv-init` service](#step-2-enable-and-start-idv-init-service)
-  - [Enable and start `idv-launcher` service](#step-3-enable-and-start-idv-launcher-service)
-5. [Enable auto-login for the `guest` user](#enable-auto-login-for-the-guest-user)
-6. [Post-Reboot Instructions](#post-reboot-instructions)
-7. [Troubleshooting](#troubleshooting)
+- [IDV Services](#idv-services)
+  - [Virtual machine configuration file](#virtual-machine-configuration-file)
+  - [Modify VM configuration](#modify-vm-configuration)
+  - [Run IDV services via an RPM package](#run-idv-services-via-an-rpm-package)
+  - [Manual steps to run IDV service](#manual-steps-to-run-idv-service)
+    - [Step 1: Run scripts to copy necessary files and set sudo permissions](#step-1-run-scripts-to-copy-necessary-files-and-set-sudo-permissions)
+    - [Step 2: Enable and start `idv-init` service](#step-2-enable-and-start-idv-init-service)
+    - [Step 3: Enable and start `idv-launcher` service](#step-3-enable-and-start-idv-launcher-service)
+  - [Enable auto-login for the `guest` user](#enable-auto-login-for-the-guest-user)
+  - [Post-Reboot Instructions](#post-reboot-instructions)
+  - [Troubleshooting](#troubleshooting)
 
 ## Virtual machine configuration file 
 
@@ -46,7 +47,7 @@ This file contains steps to launch virtual machines using a system service.
 
 - If you prefer not to use the RPM package, follow these steps:
 
-  ## Step 1: Run script to copy necessary files to `/usr/bin` directory
+  ### Step 1: Run scripts to copy necessary files and set sudo permissions
 
   - Run the `copy_files.sh` file with superuser privileges using the following command
 
@@ -56,7 +57,14 @@ This file contains steps to launch virtual machines using a system service.
     ```
     This copies all the scripts and services to appropriate directories.
 
-  ## Step 2: Enable and start `idv-init` service
+  - Run the following command to set up permissions for running scripts:
+
+    ```bash
+    sudo chmod +x setup_permissions.sh
+    sudo ./setup_permissions.sh
+    ```
+
+  ### Step 2: Enable and start `idv-init` service
 
     The `idv-init` service initializes the environment by enumerating SR-IOV virtual functions, starting the X server. This is a prerequisite for launching the virtual machines.
 
@@ -79,7 +87,7 @@ This file contains steps to launch virtual machines using a system service.
       ```
     **Note**: After starting the idv-init service, the screen will go blank because X is running. Ensure you have SSH access to the machine for the next steps.
 
-  ## Step 3: Enable and start `idv-launcher` service
+  ### Step 3: Enable and start `idv-launcher` service
 
     The `idv-launcher` service launches the configured virtual machines in their respective monitors.
 
@@ -133,7 +141,7 @@ This file contains steps to launch virtual machines using a system service.
 - If the `idv-init` service fails to start, check the service logs using the following command:
   
   ```bash
-  journalctl --user -xeu idv-init.service
+  sudo journalctl -t idv-init-service
   ```
   Ensure that all required files are present in `/usr/bin/idv`.
 
@@ -141,6 +149,6 @@ This file contains steps to launch virtual machines using a system service.
 - If the VMs do not launch after starting the `idv-launcher` service, check the service logs using the following command:
 
   ```bash
-  sudo journalctl -t idv-services
+  sudo journalctl -t idv-launcher-service
   ```  
   Ensure that the `vm.conf` file is correctly configured and all required files (e.g., firmware and qcow2 files) are present and the file paths are valid.
