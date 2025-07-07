@@ -19,8 +19,8 @@
 - To set up `idv-init` and `idv-launcher` services on an immutable image, the following has to be done via `cloud-init` - 
   1. Run the [setup_display](init/setup_display.sh) script to add xorg configuration files.
   2. Run the [setup permissions](setup_permissions.sh) script to set up permissions for running scripts.
-  3. Enable auto-login for the user that is created. Refer to [Enable auto-login](README.md#enable-auto-login-for-the-guest-user)
-  4. Enable `idv-init.service` and `idv-launcher.service`. Refer to the [Enable IDV Services](#enable-idv-services) section for the commands to be run to enable both the services. Set the value of `AUTOLOGIN_USER` in the `autologin.conf` to the user that is created.
+  3. Enable auto-login for the user that is created. Refer to the [Enable auto-login](README.md#enable-auto-login-for-the-guest-user) section for detailed instructions.
+  4. Enable `idv-init.service` and `idv-launcher.service`. Refer to the [Enable IDV Services](#enable-idv-services) section for the commands to be run to enable both the services.
   5. Start `idv-init.service` and `idv-launcher.service`. Refer to the [Start `idv-init.service`](#start-idv-init-service) and [Start `idv-launcher.service`](#start-idv-launcher-service) sections for the commands to be run to start each service.
 
 ## Steps to set up idv services on a mutable EMT image
