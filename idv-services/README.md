@@ -33,7 +33,7 @@ IDV service is collection of 2 services:
 | `vm1_winrdp`        | WinRDP port (Set this only for Windows VM)       | `3389`                                    |
 | `vm1_winrm`         | WinRM port (Set this only for Windows VM)        | `5986`                                    |
 
-- `vm1_usb` should be a comma separated list of USB devices to attach to the VM in the format: <hostbus>-<hostport>, where hostbus is the bus number and hostport is the end port to which the device is attached.
+- `vm1_usb` should be a comma separated list of USB devices to attach to the VM in the format: `<hostbus>-<hostport>`, where hostbus is the bus number and hostport is the end port to which the device is attached.
 
 ## Modify VM configuration
 
@@ -112,15 +112,15 @@ IDV service is collection of 2 services:
 
 ## Enable auto-login for the `guest` user
 
-- To, enable auto-login for the `guest` user, place the [autologin.conf](autologin.conf) file in the `/etc/systemd/system/getty@tty1.service.d` directory. Run the following command from the `idv-services/` directory - 
+- To enable auto-login for the `guest` user, place the [autologin.conf](autologin.conf) file in the `/etc/systemd/system/getty@tty1.service.d` directory. If using a different username, modify the value of the `AUTOLOGIN_USER` field in the `autologin.conf` file. Run the following command from the `idv-services/` directory - 
   
   ```bash
-  # Create `getty@tty1.service.d` if it doesn't exist
-  sudo mkdir /etc/systemd/system/getty@tty1.service.d
+  # Create the `getty@tty1.service.d` directory if it doesn't exist
+  sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
   sudo cp autologin.conf /etc/systemd/system/getty@tty1.service.d/
   ```
 
-  **Note**: When autologin is enabled for the `guest` user, they will be automatically logged in after each reboot.
+  **Note**: When auto-login is enabled for the `guest` user, they will be automatically logged in after each reboot.
 
 ## Post-Reboot Instructions
 
@@ -129,10 +129,10 @@ IDV service is collection of 2 services:
   ```bash
   sudo ./setup_permissions.sh
   ```
-  - Once this script is executed, the IDV services (idv-int.service and idv-launcher.service) should start automatically. Verify their status using:
+  - Once this script is executed, the IDV services (idv-init.service and idv-launcher.service) should start automatically. Verify their status using:
   
   ```bash
-  systemctl --user status idv-int.service
+  systemctl --user status idv-init.service
   systemctl --user status idv-launcher.service
   ```
 

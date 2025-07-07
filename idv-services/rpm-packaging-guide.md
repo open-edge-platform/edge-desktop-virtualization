@@ -22,17 +22,18 @@ This guide provides step-by-step instructions to package and run IDV services us
 8. [Troubleshooting](#troubleshooting)
 
 
-### Modify VM configuration
+## Modify VM configuration
 
 - Refer to the [Modify VM configuration file](modify-vm-config-file.md) for details on how to modify the VM configuration file.
 
-### Install existing RPM package
+## Install existing RPM package
 
 - If you have an existing RPM package, move to [Install RPM package](#install-rpm-package) section. 
 
-### Steps to Package and Install IDV Services
+## Steps to Package and Install IDV Services
 
-## Step 1: Create a Tar File
+### Step 1: Create a Tar File
+
 - Run the following commands to create a tar file for the IDV solution:
 
 ```bash
@@ -42,7 +43,7 @@ sudo tar -czf intel-idv-services-0.1.tar.gz intel-idv-services-0.1/
 sudo chmod +x intel-idv-services-0.1.tar.gz
 ```
 
-## Step 2: Copy Files to RPM SOURCES
+### Step 2: Copy Files to RPM SOURCES
 
 ```bash
 sudo chmod +x setup_rpm_source.sh
@@ -50,7 +51,8 @@ sudo chmod +x setup_rpm_source.sh
 ```
 > **Note**: **Do not** run the above with sudo.
 
-## Step 3: Setup Permissions for Running Scripts
+### Step 3: Setup Permissions for Running Scripts
+
 - Run the following command to set up permissions for running scripts:
 
 ```bash
@@ -58,7 +60,8 @@ sudo chmod +x setup_permissions.sh
 sudo ./setup_permissions.sh
 ```
 
-## Step 4: Setup RPM Environment
+### Step 4: Setup RPM Environment
+
   ### Step 4.1: Install RPM
 
     ```bash
@@ -83,7 +86,7 @@ sudo ./setup_permissions.sh
     echo '%_topdir %(echo $HOME)/rpmbuild' > ~/.rpmmacros
     ```
 
-## Step 5: Build the RPM Package
+### Step 5: Build the RPM Package
 
   ```bash
   rpmbuild -ba ~/rpmbuild/SPECS/intel-idv-services.spec
@@ -91,7 +94,7 @@ sudo ./setup_permissions.sh
   - If successful, the RPM package will be created in the `~/rpmbuild/RPMS/noarch/` directory. Make a note of the path of RPM package for further steps.
   > **Note**: If the build fails, check the .spec file for syntax errors or missing dependencies. 
 
-### Install RPM package
+## Install RPM package
 
   ```bash
   sudo rpm -ivh <path-to-rpm-package>
@@ -109,11 +112,11 @@ sudo ./setup_permissions.sh
   - After installation, verify that the services are installed, enabled, and running:
 
     ```bash
-    systemctl --user status idv-int.service
+    systemctl --user status idv-init.service
     systemctl --user status idv-launcher.service
     ```
 
-### Modify VM configuration post RPM installation
+## Modify VM configuration post RPM installation
 
 - If you want to modify the VM configuration file after installing the RPM package:
   1. Stop and disable `idv-launcher.service`:
@@ -124,7 +127,7 @@ sudo ./setup_permissions.sh
     ```
   
   2. Edit the `launcher/vm.conf` file:
-      - Refer the [Modify VM configuration file](modify-vm-config-file.md) for details on how to modify the VM configuration file.
+    - Refer to the [Modify VM configuration file](modify-vm-config-file.md) for details on how to modify the VM configuration file.
 
 
   3. Re-enable and start `idv-launcher.service`:
@@ -133,7 +136,7 @@ sudo ./setup_permissions.sh
     systemctl --user start idv-launcher.service
     ```
 
-### Uninstall RPM Package
+## Uninstall RPM Package
 
 - To uninstall the RPM package, run:
 
@@ -141,23 +144,23 @@ sudo ./setup_permissions.sh
   sudo rpm -e intel-idv-services
   ```
 
-### Post-Reboot Instructions
+## Post-Reboot Instructions
 
 - If the machine is rebooted, navigate to the `idv-services/` directory and run the following command to reset permissions:
 
   ```bash
   sudo ./setup_permissions.sh
   ```
-  - Once this script is executed, the IDV services (idv-int.service and idv-launcher.service) should start automatically. Verify their status using:
+  - Once this script is executed, the IDV services (idv-init.service and idv-launcher.service) should start automatically. Verify their status using:
   
   ```bash
-  systemctl --user status idv-int.service
+  systemctl --user status idv-init.service
   systemctl --user status idv-launcher.service
   ```
 
-### Troubleshooting
+## Troubleshooting
 
-- If the `idv-init` service fails to start, check the service journalctl using the following command:
+- If the `idv-init` service fails to start, check the journalctl logs using the following command:
 
   ```bash
   sudo journalctl -t idv-init-service
