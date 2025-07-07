@@ -1,13 +1,11 @@
-# This document contains steps to enable and start idv services on an EMT image.
+# IDV Services Setup Guide for EMT Images
 
+## Overview
 - If you are using an EMT image with the prebuilt `intel-idv-services` package, you can follow this guide to start the IDV services.
 
-# Table of Contents
-
-- [This document contains steps to enable and start idv services on an EMT image.](#this-document-contains-steps-to-enable-and-start-idv-services-on-an-emt-image)
-- [Table of Contents](#table-of-contents)
-    - [Steps to setup idv services on an immutable EMT image](#steps-to-setup-idv-services-on-an-immutable-emt-image)
-    - [Steps to setup idv services on a mutable EMT image](#steps-to-setup-idv-services-on-a-mutable-emt-image)
+## Table of Contents
+  - [Steps to set up idv services on an immutable EMT image](#steps-to-set-up-idv-services-on-an-immutable-emt-image)
+  - [Steps to set up idv services on a mutable EMT image](#steps-to-set-up-idv-services-on-a-mutable-emt-image)
   - [Modify VM configuration](#modify-vm-configuration)
   - [Reload system daemon](#reload-system-daemon)
   - [Setup Permissions for Running Scripts](#setup-permissions-for-running-scripts)
@@ -16,28 +14,33 @@
   - [Start `idv-launcher` service](#start-idv-launcher-service)
     - [Troubleshooting](#troubleshooting)
 
-### Steps to setup idv services on an immutable EMT image
+## Steps to set up idv services on an immutable EMT image
 
-- To setup `idv-init` and `idv-launcher` services on an immutable image, the following has to be done via `cloud-init` - 
+- To set up `idv-init` and `idv-launcher` services on an immutable image, the following has to be done via `cloud-init` - 
   1. Run the [setup_display](init/setup_display.sh) script to add xorg configuration files.
-  2. Enable `idv-init.service` and `idv-launcher.service`. Refer the [Enable IDV Services](#enable-idv-services) section for the commands to be run to enable both the services.
-  3. Start `idv-init.service` and `idv-launcher.service`. Refer the [Start `idv-init.service`](#start-idv-init-service) and [Start `idv-launcher.service`](#start-idv-launcher-service) sections for the commands to be run to start each service.
+  2. Run the [setup permissions](setup_permissions.sh) script to set up permissions for running scripts.
+  3. Enable auto-login for the user that is created. Refer to the [Enable auto-login](README.md#enable-auto-login-for-the-guest-user) section for detailed instructions.
+  4. Enable `idv-init.service` and `idv-launcher.service`. Refer to the [Enable IDV Services](#enable-idv-services) section for the commands to be run to enable both the services.
+  5. Start `idv-init.service` and `idv-launcher.service`. Refer to the [Start `idv-init.service`](#start-idv-init-service) and [Start `idv-launcher.service`](#start-idv-launcher-service) sections for the commands to be run to start each service.
 
-### Steps to setup idv services on a mutable EMT image
+## Steps to set up idv services on a mutable EMT image
 
-## Modify VM configuration
+- For a mutable EMT image, follow these steps to configure and start the IDV services:
 
-- Refer to the [Modify VM configuration file](modify-vm-config-file.md) for details on how to modify the VM configuration file.
+### Modify VM configuration
 
-## Reload system daemon
+- Modify the VM configuration file located at `/usr/bin/idv/launcher/vm.conf` to specify VM settings such as memory, CPU cores, and display connectors. For detailed instructions, refer to the [Modify VM configuration file](modify-vm-config-file.md) guide.
 
-- Run the following command to reload system-daemon
+### Reload system daemon
+
+- Run the following command to reload system daemon
     
   ```bash
   systemctl --user daemon-reload
   ```
 
-## Setup Permissions for Running Scripts
+### Setup Permissions for Running Scripts
+
 - Run the following command to set up permissions for running scripts:
 
 ```bash
@@ -45,7 +48,7 @@ sudo chmod +x setup_permissions.sh
 sudo ./setup_permissions.sh
 ```
 
-## Enable idv services
+### Enable idv services
 
 - Run the following commands to enable `idv-init.service` and `idv-launcher.service`
   
@@ -54,7 +57,7 @@ sudo ./setup_permissions.sh
   systemctl --user enable idv-launcher.service
   ```
 
-## Start `idv-init` service
+### Start `idv-init` service
 
   The `idv-init` service initializes the environment by enumerating SR-IOV virtual functions, starting the X server. This is a prerequisite for launching the virtual machines.
 
@@ -71,7 +74,7 @@ sudo ./setup_permissions.sh
   ```
   **Note**: After starting the idv-init service, the screen will go blank because X is running. Ensure you have SSH access to the machine for the next steps.
 
-## Start `idv-launcher` service
+### Start `idv-launcher` service
 
   The `idv-launcher` service launches the configured virtual machines in their respective monitors.
 
@@ -90,7 +93,7 @@ sudo ./setup_permissions.sh
 
 **Note**: Autologin is enabled for the `guest` user. If the `idv-init` and `idv-launcher` services were enabled in the previous steps, they will automatically start upon autologin of the `guest` user.
 
-### Troubleshooting
+## Troubleshooting
 
 - If the `idv-init` service fails to start, check the service logs using the following command:
   
