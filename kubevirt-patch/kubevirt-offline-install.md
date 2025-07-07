@@ -1,23 +1,28 @@
 # Kubevirt installation using TAR files
-This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node. Hence tagged the version as v1.5.0_DV and is shared as a [Kubevirt TAR](link_to_kubevier_tar)
+This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node.
 
 Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-device-plugin-v0.1.tar.gz) to support enabling Display Virtualization on local display of edge node
 
 ## Steps
 1.  Ensure Kubernetes is installed and local cluster is running.
-2.  Download [Kubevirt TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-kubevirt-v0.1.tar.gz) and [Device-Plugin TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-device-plugin-v0.1.tar.gz) to the host system
+2.  Download and copy the latest TAR files of Kubevirt and Device-Plugin from [release](https://github.com/open-edge-platform/edge-desktop-virtualization/releases) to the host system
 3.  Extract TAR files
     ```sh
     mkdir -p ~/display-virtualization
 
-    tar -xzvf kubevirt.tar.gz ~/display-virtualization
-    tar -xzvf dv-device-plugin.tar.gz ~/display-virtualization
+    tar -xzvf intel-idv-kubevirt*.tar.gz ~/display-virtualization
+    tar -xzvf intel-idv-device-plugin*.tar.gz ~/display-virtualization
 
-    cd ~/display-virtualization
+    cd ~/display-virtualization/intel-idv-kubevirt*
+    zstd -d *.zst
+
+    cd ..
+    cd ~/display-virtualization/intel-idv-device-plugin*
     zstd -d *.zst
     ```
 4.  Import the images into the container runtime
     ```sh
+    cd ~/display-virtualization/intel-idv-kubevirt*
     sudo ctr -n k8s.io images import sidecar-shim.tar
     sudo ctr -n k8s.io images import virt-api.tar
     sudo ctr -n k8s.io images import virt-controller.tar
@@ -25,12 +30,14 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     sudo ctr -n k8s.io images import virt-launcher.tar
     sudo ctr -n k8s.io images import virt-operator.tar
 
+    cd ~/display-virtualization/intel-idv-device-plugin*
     sudo ctr -n k8s.io images import device-plugin.tar
     sudo ctr -n k8s.io images import busybox.tar
     ```
 
     Alternatively 
     ```sh
+    cd ~/display-virtualization/intel-idv-kubevirt*
     sudo k3s ctr i import virt-operator.tar
     sudo k3s ctr i import virt-api.tar
     sudo k3s ctr i import virt-controller.tar
@@ -38,6 +45,7 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     sudo k3s ctr i import virt-launcher.tar
     sudo k3s ctr i import sidecar-shim.tar
 
+    cd ~/display-virtualization/intel-idv-device-plugin*
     sudo k3s ctr i import device-plugin.tar
     sudo k3s ctr i import busybox.tar
     ```
@@ -56,8 +64,11 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     ```
 6.  Deploy Kubevirt and Device Plugin
     ```sh
+    cd ~/display-virtualization/intel-idv-kubevirt*
     kubectl apply -f kubevirt-operator.yaml
     kubectl apply -f kubevirt-cr.yaml
+
+    cd ~/display-virtualization/intel-idv-device-plugin*
     kubectl apply -f intel-idv-device-plugin.yaml
     ```
 7.  Verify Deployment
