@@ -5,7 +5,7 @@ System should be installed with rpm build environment.
 
 ## Build
 
-1. Download and copy the [Kubevirt TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-kubevirt-v0.1.tar.gz) and [Device-Plugin TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-device-plugin-v0.1.tar.gz) to `SOURCES`
+1. Download and copy the latest TAR files of Kubevirt and Device-Plugin from [release](https://github.com/open-edge-platform/edge-desktop-virtualization/releases) to `SOURCES`
 2. Copy the intel-idv-desktop-virtualization-k3s.spec to `SPECS`
 3. Build the RPM
    ```sh
