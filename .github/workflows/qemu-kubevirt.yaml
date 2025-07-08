@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches:
@@ -35,7 +38,8 @@ jobs:
       qemu-artifact-id: ${{ steps.upload-qemu.outputs.artifact-id }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0 # All history, not just latest commit
@@ -48,7 +52,8 @@ jobs:
 
       - name: Cache QEMU source & build directory
         id: cache-qemu
-        uses: actions/cache@v4
+        # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         if: ${{ inputs.disable_cache != 'true' }}
         env:
           cache-name: cache-qemu
@@ -118,7 +123,8 @@ jobs:
 
       - name: Upload qemu-system-x86_64 artifact
         id: upload-qemu
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: qemu-artifact
           path: |
@@ -138,7 +144,8 @@ jobs:
           trivy fs . --format template --template "@trivy-html.tpl" --exit-code 1 --severity MEDIUM,HIGH,CRITICAL -o "trivy_code_scan_qemu.html"
 
       - name: Upload trivy reports
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: trivy-code-scan-results-core
           path: |
@@ -165,7 +172,8 @@ jobs:
           fi
 
       - name: Upload QEMU Antivirus Report
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: antivirus-qemu
           path: workspace/qemu-9.1.0/build/clamav-scan-report.log
@@ -177,7 +185,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0 # All history, not just latest commit
@@ -190,7 +199,8 @@ jobs:
 
       - name: Cache Kubevirt output artifacts
         id: cache-kubevirt
-        uses: actions/cache@v4
+        # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         if: ${{ inputs.disable_cache != 'true' }}
         env:
           cache-name: cache-kubevirt
@@ -234,7 +244,8 @@ jobs:
 
       - name: Download QEMU artifact
         if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
-        uses: actions/download-artifact@v4
+        # download-artifact@v4.3.0 released 2025 April 24. SHA pinned for enhanced security
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           artifact-ids: ${{ needs.qemu-build-and-scan.outputs.qemu-artifact-id }}
           path: . # Will unpack into a folder with the name used in upload-artifact, containing the binary
@@ -373,7 +384,8 @@ jobs:
           ls -hal
 
       - name: Upload kubevirt artifacts
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: kubevirt-artifacts
           path: |
@@ -402,7 +414,8 @@ jobs:
           trivy image --quiet --format spdx-json --output trivy_virt-operator.spdx.json   "localhost:5000/virt-operator:$EDV_VERSION"
 
       - name: Upload Trivy Image Report
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: Trivy kubevirt image scan
           path: |
