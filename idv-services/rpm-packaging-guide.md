@@ -37,10 +37,10 @@ This guide provides step-by-step instructions to package and run IDV services us
 - Run the following commands to create a tar file for the IDV solution:
 
 ```bash
-sudo mkdir intel-idv-services-0.1
-sudo cp -r autologin.conf etc/systemd/user/idv-init.service etc/systemd/user/idv-launcher.service init/ launcher/ intel-idv-services-0.1/
-sudo tar -czf intel-idv-services-0.1.tar.gz intel-idv-services-0.1/
-sudo chmod +x intel-idv-services-0.1.tar.gz
+sudo mkdir intel-idv-services-1.0.0-rc1
+sudo cp -r autologin.conf etc/systemd/user/idv-init.service etc/systemd/user/idv-launcher.service init/ launcher/ intel-idv-services-1.0.0-rc1/
+sudo tar -czf intel-idv-services-1.0.0-rc1.tar.gz intel-idv-services-1.0.0-rc1/
+sudo chmod +x intel-idv-services-1.0.0-rc1.tar.gz
 ```
 
 ### Step 2: Copy Files to RPM SOURCES
@@ -99,22 +99,65 @@ sudo ./setup_permissions.sh
   ```bash
   sudo rpm -ivh <path-to-rpm-package>
   ```
-  
-  **Note**: If the output of above command contains a message something similar to -
 
-    ```ini
-    Reload daemon failed: Transport endpoint is not connected
-    Failed to start jobs: Transport endpoint is not connected
+  **Note**: The following error messages may appear during installation, but can be safely ignored:
+  ```ini
+  Reload daemon failed: Transport endpoint is not connected
+  Failed to start jobs: Transport endpoint is not connected
+  ```
+
+## Reload system daemon
+
+- Run the following command to reload system daemon
+    
+  ```bash
+  systemctl --user daemon-reload
+  ```
+  
+## Enable idv services
+
+- Run the following commands to enable `idv-init.service` and `idv-launcher.service`
+  
+  ```bash
+  systemctl --user enable idv-init.service
+  systemctl --user enable idv-launcher.service
+  ```
+
+## Start `idv-init` service
+
+  The `idv-init` service initializes the environment by enumerating SR-IOV virtual functions, starting the X server. This is a prerequisite for launching the virtual machines.
+
+- Run the following command to start `idv-init` service
+    
+    ```bash
+    systemctl --user start idv-init.service
     ```
-  
-    Please verify the status of the service using the commands below. If the services have started, VMs will be launched in their respective monitors.
 
-  - After installation, verify that the services are installed, enabled, and running:
+- Verify that the service is running:
+
+  ```bash
+  systemctl --user status idv-init.service
+  ```
+  **Note**: After starting the idv-init service, the screen will go blank because X is running. Ensure you have SSH access to the machine for the next steps.
+
+## Start `idv-launcher` service
+
+  The `idv-launcher` service launches the configured virtual machines in their respective monitors.
+
+  - Run the following command to start `idv-launcher` service
+    
+    ```bash
+    systemctl --user start idv-launcher.service
+    ```
+
+  - Verify that the service is running:
 
     ```bash
-    systemctl --user status idv-init.service
     systemctl --user status idv-launcher.service
     ```
+    **Note**: Once the idv-launcher service starts, all the VMs should be launched in respective monitors.
+
+**Note**: Autologin is enabled for the `guest` user. If the `idv-init` and `idv-launcher` services were enabled in the previous steps, they will automatically start upon autologin of the `guest` user.
 
 ## Modify VM configuration post RPM installation
 
