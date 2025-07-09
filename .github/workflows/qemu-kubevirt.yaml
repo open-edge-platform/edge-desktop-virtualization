@@ -37,6 +37,11 @@ jobs:
     outputs:
       qemu-artifact-id: ${{ steps.upload-qemu.outputs.artifact-id }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
       - name: Checkout Code
         # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -184,6 +189,11 @@ jobs:
       contents: read
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
       - name: Checkout Code
         # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
