@@ -599,6 +599,9 @@ jobs:
           echo "Contents of $(pwd):"
           ls -hal
 
+          # Disable unneccessary warning for OSS project maintainers
+          export TRIVY_DISABLE_VEX_NOTICE=true
+
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
 
           # Define a function to handle scanning, converting, and setting environment variables
@@ -694,8 +697,8 @@ jobs:
           evaluate_scan_result() {
             IMAGE_NAME="$1"
             IMAGE_NAME_UPPERCASE="${IMAGE_NAME^^}"
-            STATUS="TRIVY_${IMAGE_NAME_UPPERCASE}_STATE"
-            DESCRIPTION="TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS"
+            STATUS="${TRIVY_${IMAGE_NAME_UPPERCASE}_STATE}"
+            DESCRIPTION="${TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS}"
 
             if [[ "${STATUS}" != "success" ]]; then
               echo "${DESCRIPTION}"
