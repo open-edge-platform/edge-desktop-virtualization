@@ -550,54 +550,23 @@ jobs:
       - name: Unpack and Load Kubevirt Images
         shell: bash
         run: |
-          # TODO
-          echo "Contents of $(pwd):"
-          ls -hal
-
+          # Unpack the kubevirt artifacts
           cd workspace/kubevirt-artifacts
-
-          # TODO
-          echo "Contents of $(pwd):"
-          ls -hal
-
-          # Extract the tar.gz file
           tar -xvzf intel-idv-kubevirt-${{ env.EDV_VERSION }}.tar.gz
-          # TODO
-          echo "Contents of $(pwd):"
-          ls -hal
-
-          # Navigate to the extracted directory
           cd intel-idv-kubevirt-${{ env.EDV_VERSION }}
-          # TODO
-          echo "Contents of $(pwd):"
-          ls -hal
 
           # Uncompress the zst files and load them into Docker
           for file in *.zst; do
             uncompressed_file="${file%.zst}"
             zstd -d "$file" -o "$uncompressed_file"
-            # TODO
-            echo "Contents of $(pwd):"
-            ls -hal
             docker load -i "$uncompressed_file"
           done
-
-          # TODO
-          echo "Contents of $(pwd):"
-          ls -hal
 
       - name: Trivy Image Scan
         shell: bash
         run: |
           mkdir -p workspace/kubevirt-trivy
-          # TODO
-          echo "Contents of $(pwd):"
-          ls -hal
-
           cd workspace/kubevirt-trivy
-          # TODO
-          echo "Contents of $(pwd):"
-          ls -hal
 
           # Disable unneccessary warning for OSS project maintainers
           export TRIVY_DISABLE_VEX_NOTICE=true
@@ -612,9 +581,6 @@ jobs:
 
             echo "Scanning $DOCKER_IMAGE..."
             trivy image "$DOCKER_IMAGE" --format json -o "${IMAGE_NAME}_raw_results.json"
-            # TODO
-            echo "Contents of $(pwd):"
-            ls -hal
 
             # Convert raw results to full HTML report
             TRIVY_ALL_TYPES_STATUS=0
@@ -622,10 +588,6 @@ jobs:
               -o "${IMAGE_NAME}.html" \
               --exit-code 1 \
               "${IMAGE_NAME}_raw_results.json" || TRIVY_ALL_TYPES_STATUS=$?
-
-            # TODO
-            echo "Contents of $(pwd):"
-            ls -hal
 
             # Convert raw results to filtered HTML report (Critical/High/Medium)
             TRIVY_MEDIUM_OR_HIGHER_STATUS=0
@@ -637,9 +599,6 @@ jobs:
 
             # Generate SPDX JSON file
             trivy image --quiet --format spdx-json --output "${IMAGE_NAME}.spdx.json" "$DOCKER_IMAGE"
-            # TODO
-            echo "Contents of $(pwd):"
-            ls -hal
 
             # Summarize results on GitHub for quick access
             echo "# Trivy $IMAGE_NAME Scan Results" >> $GITHUB_STEP_SUMMARY
@@ -699,15 +658,17 @@ jobs:
         shell: bash
         run: |
           evaluate_scan_result() {
-            IMAGE_NAME="$1"
-            IMAGE_NAME_UPPERCASE="${IMAGE_NAME^^}"
-            STATUS_VAR=TRIVY_${IMAGE_NAME_UPPERCASE}_STATE
-            STATUS="$(eval echo \$$STATUS_VAR)"
-            DESCRIPTION_VAR=TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS
-            DESCRIPTION="$(eval echo \$$DESCRIPTION_VAR)"
+            local image_name="$1"
+            local status_var="TRIVY_${image_name^^}_STATE"
+            local description_var="TRIVY_${image_name^^}_STATUS"
 
-            if [[ "${STATUS}" != "success" ]]; then
-              echo "${DESCRIPTION}"
+            # Retrieve the values of the variables
+            local status="${!status_var}"
+            local description="${!description_var}"
+
+            # Print and exit if the scan failed
+            if [[ "$status" != "success" ]]; then
+              echo "$description"
               exit 1
             fi
           }
