@@ -678,18 +678,18 @@ jobs:
         with:
           name: Trivy kubevirt image scan
           path: |
-            workspace/kubevirt-trivy/trivy_sidecar-shim.html
-            workspace/kubevirt-trivy/trivy_virt-api.html
-            workspace/kubevirt-trivy/trivy_virt-controller.html
-            workspace/kubevirt-trivy/trivy_virt-handler.html
-            workspace/kubevirt-trivy/trivy_virt-launcher.html
-            workspace/kubevirt-trivy/trivy_virt-operator.html
-            workspace/kubevirt-trivy/trivy_sidecar-shim.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-api.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-controller.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-handler.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-launcher.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-operator.spdx.json
+            workspace/kubevirt-trivy/sidecar-shim.html
+            workspace/kubevirt-trivy/virt-api.html
+            workspace/kubevirt-trivy/virt-controller.html
+            workspace/kubevirt-trivy/virt-handler.html
+            workspace/kubevirt-trivy/virt-launcher.html
+            workspace/kubevirt-trivy/virt-operator.html
+            workspace/kubevirt-trivy/sidecar-shim.spdx.json
+            workspace/kubevirt-trivy/virt-api.spdx.json
+            workspace/kubevirt-trivy/virt-controller.spdx.json
+            workspace/kubevirt-trivy/virt-handler.spdx.json
+            workspace/kubevirt-trivy/virt-launcher.spdx.json
+            workspace/kubevirt-trivy/virt-operator.spdx.json
 
       - name: Evaluate Scan Results
         shell: bash
@@ -698,9 +698,9 @@ jobs:
             IMAGE_NAME="$1"
             IMAGE_NAME_UPPERCASE="${IMAGE_NAME^^}"
             STATUS_VAR=TRIVY_${IMAGE_NAME_UPPERCASE}_STATE
-            STATUS="${!STATUS_VAR}"
+            STATUS="$(eval echo \$$STATUS_VAR)"
             DESCRIPTION_VAR=TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS
-            DESCRIPTION="${!DESCRIPTION_VAR}"
+            DESCRIPTION="$(eval echo \$$DESCRIPTION_VAR)"
 
             if [[ "${STATUS}" != "success" ]]; then
               echo "${DESCRIPTION}"
