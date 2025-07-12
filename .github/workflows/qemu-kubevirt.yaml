@@ -295,11 +295,13 @@ jobs:
 
           echo "All scans passed successfully."
 
-  kubevirt-build-and-scan:
+  kubevirt-build:
     needs: qemu-build
     permissions:
       contents: read
     runs-on: ubuntu-24.04
+    outputs:
+      kubevirt-artifact-id: ${{ steps.upload-kubevirt.outputs.artifact-id }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
@@ -506,6 +508,7 @@ jobs:
           ls -hal
 
       - name: Upload kubevirt artifacts
+        id: upload-kubevirt
         # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -513,27 +516,143 @@ jobs:
           path: |
             workspace/kubevirt-artifacts/intel-idv-kubevirt-${{ env.EDV_VERSION }}.tar.gz
 
+  kubevirt-scan:
+    needs: kubevirt-build
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # All history, not just latest commit
+          ref: ${{ github.event.pull_request.head.sha }} # Check out the actual commit, not a fake merge commit
+
+      - name: Setup Tools & Common Variables
+        uses: ./.github/actions/setup-tools
+        with:
+          go: "false"
+          trivy: "true"
+
+      - name: Download Kubevirt artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.kubevirt-build.outputs.kubevirt-artifact-id }}
+          path: workspace/kubevirt-artifacts
+
+      - name: Unpack and Load Kubevirt Images
+        shell: bash
+        run: |
+          #TODO
+          ls
+          pwd
+          cd workspace/kubevirt-artifacts
+          #TODO
+          ls workspace
+          pwd
+          #TODO
+          ls workspace/kubevirt-artifacts
+          pwd
+
+          # Extract the tar.gz file
+          #TODO
+          tar -xvzf intel-idv-kubevirt-${{ env.EDV_VERSION }}.tar.gz
+          ls #TODO
+          pwd #TODO
+
+          # Navigate to the extracted directory
+          cd intel-idv-kubevirt-${{ env.EDV_VERSION }}
+          ls #TODO
+          pwd #TODO
+
+          # Uncompress the zst files and load them into Docker
+          for file in *.zst; do
+            uncompressed_file="${file%.zst}"
+            zstd -d "$file" -o "$uncompressed_file"
+            ls #TODO
+            pwd #TODO
+            docker load -i "$uncompressed_file"
+          done
+
       - name: Trivy Image Scan
-        continue-on-error: true
         shell: bash
         run: |
           mkdir -p workspace/kubevirt-trivy
+          ls #TODO
+          pwd #TODO
           cd workspace/kubevirt-trivy
+          ls #TODO
+          pwd #TODO
 
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
-          trivy image "localhost:5000/sidecar-shim:$EDV_VERSION"     --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_sidecar-shim.html
-          trivy image "localhost:5000/virt-api:$EDV_VERSION"         --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-api.html
-          trivy image "localhost:5000/virt-controller:$EDV_VERSION"  --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-controller.html
-          trivy image "localhost:5000/virt-handler:$EDV_VERSION"     --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-handler.html
-          trivy image "localhost:5000/virt-launcher:$EDV_VERSION"    --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-launcher.html
-          trivy image "localhost:5000/virt-operator:$EDV_VERSION"    --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-operator.html
 
-          trivy image --quiet --format spdx-json --output trivy_sidecar-shim.spdx.json    "localhost:5000/sidecar-shim:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-api.spdx.json        "localhost:5000/virt-api:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-controller.spdx.json "localhost:5000/virt-controller:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-handler.spdx.json    "localhost:5000/virt-handler:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-launcher.spdx.json   "localhost:5000/virt-launcher:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-operator.spdx.json   "localhost:5000/virt-operator:$EDV_VERSION"
+          # Define a function to handle scanning, converting, and setting environment variables
+          scan_and_process_image() {
+            IMAGE_NAME="$1"
+            IMAGE_NAME_UPPERCASE="${IMAGE_NAME^^}"
+            DOCKER_IMAGE="$2"
+
+            echo "Scanning $DOCKER_IMAGE..."
+            trivy image "$DOCKER_IMAGE" --format json -o "${IMAGE_NAME}_raw_results.json"
+            ls #TODO
+            pwd #TODO
+
+            # Convert raw results to full HTML report
+            TRIVY_ALL_TYPES_STATUS=0
+            trivy convert --format template --template "@trivy-html.tpl" \
+            ls #TODO
+            pwd #TODO
+            ls #TODO
+            pwd #TODO
+              -o "${IMAGE_NAME}_results.html" \
+              --exit-code 1 \
+              "${IMAGE_NAME}_raw_results.json" || TRIVY_ALL_TYPES_STATUS=$?
+
+            # Convert raw results to filtered HTML report (Critical/High/Medium)
+            TRIVY_MEDIUM_OR_HIGHER_STATUS=0
+            trivy convert --format template --template "@trivy-html.tpl" \
+              -o "${IMAGE_NAME}_filtered_results.html" \
+              --exit-code 1 \
+              --severity CRITICAL,HIGH,MEDIUM \
+              "${IMAGE_NAME}_raw_results.json" || TRIVY_MEDIUM_OR_HIGHER_STATUS=$?
+
+            # Generate SPDX JSON file
+            trivy image --quiet --format spdx-json --output "${IMAGE_NAME}.spdx.json" "$DOCKER_IMAGE"
+            ls #TODO
+            pwd #TODO
+
+            # Set environment variables based on scan results
+            if [[ $TRIVY_ALL_TYPES_STATUS -eq 0 ]]; then
+              echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected"
+              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=No vulnerabilities detected" >> $GITHUB_ENV
+              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=success" >> $GITHUB_ENV
+            elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 && $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 0 ]]; then
+              echo "Trivy scan for $DOCKER_IMAGE completed with only low-severity vulnerabilities detected"
+              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected low-severity vulnerable dependencies. See report artifacts for details." >> $GITHUB_ENV
+              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=success" >> $GITHUB_ENV
+            elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 && $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 1 ]]; then
+              echo "Trivy scan for $DOCKER_IMAGE completed with medium-or-higher vulnerabilities detected"
+              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected medium, high, or critical vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
+              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=failure" >> $GITHUB_ENV
+            else
+              echo "Trivy scan for $DOCKER_IMAGE failed."
+              exit $TRIVY_ALL_TYPES_STATUS
+            fi
+
+            # Summarize results on GitHub for quick access
+            echo "# Trivy $IMAGE_NAME Scan Results" >> $GITHUB_STEP_SUMMARY
+            echo "$(trivy convert --format table "${IMAGE_NAME}_raw_results.json")" >> $GITHUB_STEP_SUMMARY
+          }
+
+          # Call the function for each image
+          scan_and_process_image "sidecar-shim" "localhost:5000/sidecar-shim:$EDV_VERSION"
+          scan_and_process_image "virt-api" "localhost:5000/virt-api:$EDV_VERSION"
+          scan_and_process_image "virt-controller" "localhost:5000/virt-controller:$EDV_VERSION"
+          scan_and_process_image "virt-handler" "localhost:5000/virt-handler:$EDV_VERSION"
+          scan_and_process_image "virt-launcher" "localhost:5000/virt-launcher:$EDV_VERSION"
+          scan_and_process_image "virt-operator" "localhost:5000/virt-operator:$EDV_VERSION"
 
       - name: Upload Trivy Image Report
         # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
@@ -553,3 +672,28 @@ jobs:
             workspace/kubevirt-trivy/trivy_virt-handler.spdx.json
             workspace/kubevirt-trivy/trivy_virt-launcher.spdx.json
             workspace/kubevirt-trivy/trivy_virt-operator.spdx.json
+
+      - name: Evaluate Scan Results
+        shell: bash
+        run: |
+          evaluate_scan_result() {
+            IMAGE_NAME="$1"
+            IMAGE_NAME_UPPERCASE="${IMAGE_NAME^^}"
+            STATUS="TRIVY_${IMAGE_NAME_UPPERCASE}_STATE"
+            DESCRIPTION="TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS"
+
+            if [[ "${STATUS}" != "success" ]]; then
+              echo "${DESCRIPTION}"
+              exit 1
+            fi
+          }
+
+          # Evaluate each image's scan results
+          evaluate_scan_result "sidecar-shim"
+          evaluate_scan_result "virt-api"
+          evaluate_scan_result "virt-controller"
+          evaluate_scan_result "virt-handler"
+          evaluate_scan_result "virt-launcher"
+          evaluate_scan_result "virt-operator"
+
+          echo "All scans passed successfully."
