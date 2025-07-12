@@ -641,27 +641,31 @@ jobs:
             echo "Contents of $(pwd):"
             ls -hal
 
+            # Summarize results on GitHub for quick access
+            echo "# Trivy $IMAGE_NAME Scan Results" >> $GITHUB_STEP_SUMMARY
+
             # Set environment variables based on scan results
             if [[ $TRIVY_ALL_TYPES_STATUS -eq 0 ]]; then
               echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected"
+              echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
               echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=No vulnerabilities detected" >> $GITHUB_ENV
               echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=success" >> $GITHUB_ENV
-            elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 && $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 0 ]]; then
-              echo "Trivy scan for $DOCKER_IMAGE completed with only low-severity vulnerabilities detected"
-              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected low-severity vulnerable dependencies. See report artifacts for details." >> $GITHUB_ENV
-              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=success" >> $GITHUB_ENV
-            elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 && $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 1 ]]; then
-              echo "Trivy scan for $DOCKER_IMAGE completed with medium-or-higher vulnerabilities detected"
-              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected medium, high, or critical vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
-              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=failure" >> $GITHUB_ENV
+            elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 ]]; then
+              if [[ $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 0 ]]; then
+                echo "Trivy scan for $DOCKER_IMAGE completed with only low-severity vulnerabilities detected"
+                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected low-severity vulnerable dependencies. See report artifacts for details." >> $GITHUB_ENV
+                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=success" >> $GITHUB_ENV
+              else
+                echo "Trivy scan for $DOCKER_IMAGE completed with medium-or-higher vulnerabilities detected"
+                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected medium, high, or critical vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
+                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=failure" >> $GITHUB_ENV
+              fi
+              echo "$(trivy convert --format table "${IMAGE_NAME}_raw_results.json")" >> $GITHUB_STEP_SUMMARY
             else
               echo "Trivy scan for $DOCKER_IMAGE failed."
+              echo "Trivy scan failed" >> $GITHUB_STEP_SUMMARY
               exit $TRIVY_ALL_TYPES_STATUS
             fi
-
-            # Summarize results on GitHub for quick access
-            echo "# Trivy $IMAGE_NAME Scan Results" >> $GITHUB_STEP_SUMMARY
-            echo "$(trivy convert --format table "${IMAGE_NAME}_raw_results.json")" >> $GITHUB_STEP_SUMMARY
           }
 
           # Call the function for each image
