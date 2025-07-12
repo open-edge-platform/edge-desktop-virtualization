@@ -218,28 +218,33 @@ jobs:
             --severity CRITICAL,HIGH,MEDIUM \
             trivy_raw_results.json || TRIVY_MEDIUM_OR_HIGHER_STATUS=$?
 
+          # Summarize results on github for quick access
+          echo "# Trivy QEMU Scan Results" >> $GITHUB_STEP_SUMMARY
+
           # Create a status check using the API to indicate whether vulnerabilities are detected or not
           # Only fail this specific build step if the scan itself fails - need it to succeed so that artifacts are uploaded
           if [[ $TRIVY_ALL_TYPES_STATUS -eq 0 ]]; then
             echo "Trivy scan completed with no vulnerabilities detected"
             echo "TRIVY_QEMU_STATUS=No vulnerabilities detected" >> $GITHUB_ENV
             echo "TRIVY_QEMU_STATE=success" >> $GITHUB_ENV
-          elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 && $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 0 ]]; then
-            echo "Trivy scan completed with only low-severity vulnerabilities detected"
-            echo "TRIVY_QEMU_STATUS=Trivy detected low-severity vulnerable dependencies. See report artifacts for details." >> $GITHUB_ENV
-            echo "TRIVY_QEMU_STATE=success" >> $GITHUB_ENV
-          elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 && $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 1 ]]; then
-            echo "Trivy scan completed with medium-or-higher vulnerabilities detected"
-            echo "TRIVY_QEMU_STATUS=Trivy detected medium, high, or critical vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
-            echo "TRIVY_QEMU_STATE=failure" >> $GITHUB_ENV
+            echo "Trivy scan completed with no vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 ]]; then
+            if $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 0 ]]; then
+              echo "Trivy scan completed with only low-severity vulnerabilities detected"
+              echo "TRIVY_QEMU_STATUS=Trivy detected low-severity vulnerable dependencies. See report artifacts for details." >> $GITHUB_ENV
+              echo "TRIVY_QEMU_STATE=success" >> $GITHUB_ENV
+            else
+              echo "Trivy scan completed with medium-or-higher vulnerabilities detected"
+              echo "TRIVY_QEMU_STATUS=Trivy detected medium, high, or critical vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
+              echo "TRIVY_QEMU_STATE=failure" >> $GITHUB_ENV
+            fi
+            echo "$(trivy convert --format table trivy_raw_results.json)" >> $GITHUB_STEP_SUMMARY
           else
             echo "Trivy scan failed."
+            echo "Trivy scan failed" >> $GITHUB_STEP_SUMMARY
             exit $TRIVY_ALL_TYPES_STATUS
           fi
 
-          # Summarize results on github for quick access
-          echo "# Trivy QEMU Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo "$(trivy convert --format table trivy_raw_results.json)" >> $GITHUB_STEP_SUMMARY
       - name: Upload trivy reports
         # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -540,7 +545,7 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           artifact-ids: ${{ needs.kubevirt-build.outputs.kubevirt-artifact-id }}
-          path: workspace/kubevirt-artifacts
+          path: workspace
 
       - name: Unpack and Load Kubevirt Images
         shell: bash
