@@ -619,7 +619,7 @@ jobs:
             # Convert raw results to full HTML report
             TRIVY_ALL_TYPES_STATUS=0
             trivy convert --format template --template "@trivy-html.tpl" \
-              -o "${IMAGE_NAME}_results.html" \
+              -o "${IMAGE_NAME}.html" \
               --exit-code 1 \
               "${IMAGE_NAME}_raw_results.json" || TRIVY_ALL_TYPES_STATUS=$?
 
@@ -697,8 +697,10 @@ jobs:
           evaluate_scan_result() {
             IMAGE_NAME="$1"
             IMAGE_NAME_UPPERCASE="${IMAGE_NAME^^}"
-            STATUS="${TRIVY_${IMAGE_NAME_UPPERCASE}_STATE}"
-            DESCRIPTION="${TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS}"
+            STATUS_VAR=TRIVY_${IMAGE_NAME_UPPERCASE}_STATE
+            STATUS="${!STATUS_VAR}"
+            DESCRIPTION_VAR=TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS
+            DESCRIPTION="${!DESCRIPTION_VAR}"
 
             if [[ "${STATUS}" != "success" ]]; then
               echo "${DESCRIPTION}"
