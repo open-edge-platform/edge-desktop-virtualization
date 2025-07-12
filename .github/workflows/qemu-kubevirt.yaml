@@ -545,46 +545,54 @@ jobs:
       - name: Unpack and Load Kubevirt Images
         shell: bash
         run: |
-          #TODO
-          ls
-          pwd
+          # TODO
+          echo "Contents of $(pwd):"
+          ls -hal
+
           cd workspace/kubevirt-artifacts
-          #TODO
-          ls workspace
-          pwd
-          #TODO
-          ls workspace/kubevirt-artifacts
-          pwd
+
+          # TODO
+          echo "Contents of $(pwd):"
+          ls -hal
 
           # Extract the tar.gz file
-          #TODO
           tar -xvzf intel-idv-kubevirt-${{ env.EDV_VERSION }}.tar.gz
-          ls #TODO
-          pwd #TODO
+          # TODO
+          echo "Contents of $(pwd):"
+          ls -hal
 
           # Navigate to the extracted directory
           cd intel-idv-kubevirt-${{ env.EDV_VERSION }}
-          ls #TODO
-          pwd #TODO
+          # TODO
+          echo "Contents of $(pwd):"
+          ls -hal
 
           # Uncompress the zst files and load them into Docker
           for file in *.zst; do
             uncompressed_file="${file%.zst}"
             zstd -d "$file" -o "$uncompressed_file"
-            ls #TODO
-            pwd #TODO
+            # TODO
+            echo "Contents of $(pwd):"
+            ls -hal
             docker load -i "$uncompressed_file"
           done
+
+          # TODO
+          echo "Contents of $(pwd):"
+          ls -hal
 
       - name: Trivy Image Scan
         shell: bash
         run: |
           mkdir -p workspace/kubevirt-trivy
-          ls #TODO
-          pwd #TODO
+          # TODO
+          echo "Contents of $(pwd):"
+          ls -hal
+
           cd workspace/kubevirt-trivy
-          ls #TODO
-          pwd #TODO
+          # TODO
+          echo "Contents of $(pwd):"
+          ls -hal
 
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
 
@@ -596,19 +604,20 @@ jobs:
 
             echo "Scanning $DOCKER_IMAGE..."
             trivy image "$DOCKER_IMAGE" --format json -o "${IMAGE_NAME}_raw_results.json"
-            ls #TODO
-            pwd #TODO
+            # TODO
+            echo "Contents of $(pwd):"
+            ls -hal
 
             # Convert raw results to full HTML report
             TRIVY_ALL_TYPES_STATUS=0
             trivy convert --format template --template "@trivy-html.tpl" \
-            ls #TODO
-            pwd #TODO
-            ls #TODO
-            pwd #TODO
               -o "${IMAGE_NAME}_results.html" \
               --exit-code 1 \
               "${IMAGE_NAME}_raw_results.json" || TRIVY_ALL_TYPES_STATUS=$?
+
+            # TODO
+            echo "Contents of $(pwd):"
+            ls -hal
 
             # Convert raw results to filtered HTML report (Critical/High/Medium)
             TRIVY_MEDIUM_OR_HIGHER_STATUS=0
@@ -620,8 +629,9 @@ jobs:
 
             # Generate SPDX JSON file
             trivy image --quiet --format spdx-json --output "${IMAGE_NAME}.spdx.json" "$DOCKER_IMAGE"
-            ls #TODO
-            pwd #TODO
+            # TODO
+            echo "Contents of $(pwd):"
+            ls -hal
 
             # Set environment variables based on scan results
             if [[ $TRIVY_ALL_TYPES_STATUS -eq 0 ]]; then
