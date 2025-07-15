@@ -153,6 +153,7 @@ jobs:
     needs: qemu-build
     permissions:
       contents: read
+      security-events: write
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
@@ -220,6 +221,12 @@ jobs:
             --severity CRITICAL,HIGH,MEDIUM \
             trivy_raw_results.json || TRIVY_MEDIUM_OR_HIGHER_STATUS=$?
 
+          # Generate SARIF output for GitHub Security tab
+          trivy convert \
+            --format sarif \
+            -o "trivy_code_scan_qemu.sarif" \
+            trivy_raw_results.json
+
           # Summarize results on github for quick access
           echo "# Trivy QEMU Scan Results" >> $GITHUB_STEP_SUMMARY
 
@@ -254,6 +261,14 @@ jobs:
           name: trivy-qemu-results
           path: |
               workspace/qemu-9.1.0/trivy_code_scan_qemu.html
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        # Only upload main-branch builds to the Security tab
+        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
+        # upload-sarif@v3.29.2 released 2025 June 30. SHA pinned for enhanced security
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: 'workspace/qemu-9.1.0/trivy_code_scan_qemu.sarif'
 
       - name: ClamAV QEMU Antivirus Scan
         shell: bash
@@ -294,7 +309,12 @@ jobs:
         run: |
           if [[ "$TRIVY_QEMU_STATE" != "success" ]]; then
             echo "$TRIVY_QEMU_STATUS"
-            exit 1
+            # Only fail this build stage if the workflow isn't running on the main branch
+            # Main branch Trivy errors will be uploaded directly to the GitHub Security tab.
+            # Don't want vulnerable dependencies to imply that the overall build isn't healthy
+            if [[ "$WORKFLOW_IS_MAIN" != "true" ]]; then
+              exit 1
+            fi
           elif [[ "$CLAMAV_QEMU_STATE" != "success" ]]; then
             echo "$CLAMAV_QEMU_STATUS"
             exit 1
@@ -529,6 +549,7 @@ jobs:
     needs: kubevirt-build
     permissions:
       contents: read
+      security-events: write
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
@@ -602,6 +623,12 @@ jobs:
               --severity CRITICAL,HIGH,MEDIUM \
               "${IMAGE_NAME}_raw_results.json" || TRIVY_MEDIUM_OR_HIGHER_STATUS=$?
 
+            # Generate SARIF output for GitHub Security tab
+            trivy convert \
+              --format sarif \
+              -o "${IMAGE_NAME}.sarif" \
+              "${IMAGE_NAME}_raw_results.json"
+
             # Generate SPDX JSON file
             trivy image --quiet --format spdx-json --output "${IMAGE_NAME}.spdx.json" "$DOCKER_IMAGE"
 
@@ -659,6 +686,47 @@ jobs:
             workspace/kubevirt-trivy/virt-launcher.spdx.json
             workspace/kubevirt-trivy/virt-operator.spdx.json
 
+      # Unfortunately, upload-sarif deprecated a feature that lets you upload all of these files together.
+      # Now they need to be done one-by-one with an explicitly different category
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - sidecar-shim
+        # Only upload main-branch builds to the Security tab
+        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
+        # upload-sarif@v3.29.2 released 2025 June 30. SHA pinned for enhanced security
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/sidecar-shim.sarif
+          category: kubevirt-sidecar-shim
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-api
+        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-api.sarif
+          category: kubevirt-virt-api
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-controller
+        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-controller.sarif
+          category: kubevirt-virt-controller
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-handler
+        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-handler.sarif
+          category: kubevirt-virt-handler
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-launcher
+        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-launcher.sarif
+          category: kubevirt-virt-launcher
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-operator
+        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-operator.sarif
+          category: kubevirt-virt-operator
+
       - name: Evaluate Scan Results
         shell: bash
         run: |
@@ -676,7 +744,12 @@ jobs:
             # Print and exit if the scan failed
             if [[ "$status" != "success" ]]; then
               echo "$description"
-              exit 1
+              # Only fail this build stage if the workflow isn't running on the main branch
+              # Main branch Trivy errors will be uploaded directly to the GitHub Security tab.
+              # Don't want vulnerable dependencies to imply that the overall build isn't healthy
+              if [[ "$WORKFLOW_IS_MAIN" != "true" ]]; then
+                exit 1
+              fi
             fi
           }
 
