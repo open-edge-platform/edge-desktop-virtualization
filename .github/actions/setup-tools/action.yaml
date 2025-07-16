@@ -45,6 +45,15 @@ runs:
         echo "EDV_VERSION=$EDV_VERSION"
         echo "EDV_VERSION=$EDV_VERSION" >> $GITHUB_ENV
 
+    - name: Set WORKFLOW_IS_MAIN variable
+      shell: bash
+      run: |
+        if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+          echo "WORKFLOW_IS_MAIN=true" >> $GITHUB_ENV
+        else
+          echo "WORKFLOW_IS_MAIN=false" >> $GITHUB_ENV
+        fi
+
     - name: Set EDV_HOME to the checked-out edge-desktop-virtualization source code
       shell: bash
       run: |
