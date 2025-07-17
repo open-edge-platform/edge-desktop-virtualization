@@ -87,6 +87,7 @@ function setup_sriov_vf() {
       sudo modprobe video || echo "Error: Failed to load video module"
 
       # set the numvfs and bind the VFs to vfio_pci driver
+      echo '1' | sudo tee -a /sys/devices/pci0000:00/0000:00:02.0/drm/card0/prelim_iov/pf/auto_provisioning
       echo "Setting numvfs and binding VFs to vfio_pci driver"
       echo '0' | sudo tee /sys/bus/pci/devices/0000:00:02.0/sriov_drivers_autoprobe
       echo "$NUMVFS" | sudo tee /sys/class/drm/card0/device/sriov_numvfs
@@ -106,7 +107,7 @@ function setup_sriov_vf() {
       fi
       echo "IOV Path: $iov_path"
 
-      for (( i = 1; i <= totalvfs; i++ )); do
+      for (( i = 1; i <= NUMVFS; i++ )); do
           for gt in gt gt0 gt1; do
               if [[ -d "${iov_path}/vf$i/$gt" ]]; then
                   echo "Configuring VF $i for $gt"
