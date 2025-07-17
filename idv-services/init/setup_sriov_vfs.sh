@@ -53,6 +53,7 @@ function setup_sriov_vf() {
 
       # set the numvfs and bind the VFs to vfio_pci driver
       echo "Setting numvfs and binding VFs to vfio_pci driver"
+      echo '1' | sudo tee -a /sys/devices/pci0000:00/0000:00:02.0/drm/card0/prelim_iov/pf/auto_provisioning
       echo '0' | sudo tee /sys/bus/pci/devices/0000:00:02.0/sriov_drivers_autoprobe
       echo "$totalvfs" | sudo tee /sys/class/drm/card0/device/sriov_numvfs
       echo '1' | sudo tee /sys/bus/pci/devices/0000:00:02.0/sriov_drivers_autoprobe
