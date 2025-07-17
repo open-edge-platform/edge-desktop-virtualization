@@ -16,6 +16,47 @@ DOORBELL_SPARE_PF=32
 # set the default value for VF scheduling parameters
 VFSCHED_EXECQ=25
 VFSCHED_TIMEOUT=500000
+NUMVFS=$(cat /sys/class/drm/card0/device/sriov_totalvfs)
+VENDOR=$(cat /sys/bus/pci/devices/0000:00:02.0/vendor)
+DEVICE=$(cat /sys/bus/pci/devices/0000:00:02.0/device)
+
+function remove_sriov_vf() {
+  echo -e "Remove provisioning dev-id: $DEVICE\n"
+  echo '0' | tee -a /sys/class/drm/card0/device/sriov_numvfs
+  echo $VENDOR $DEVICE | tee -a /sys/bus/pci/drivers/vfio-pci/remove_id
+  rmmod vfio-pci
+}
+
+function validate_sriov_vf(){
+  TotalVFs=`lspci | grep -i vga | cut -b 1-7 | cut -d "." -f2 | tail -n 1`
+  if [[ $TotalVFs != $NUMVFS ]]; then
+    echo -e "SRIOV enumeration failed."
+    exit 1
+    else
+      echo -e "[$TotalVFs] VFs enumerated successfully."
+  fi
+}
+
+function validate_vfio(){
+  vfioDev=`ls /dev/vfio/`
+  count=0
+
+  for vfioDevNum in $vfioDev;
+    do
+      if [[ $vfioDevNum =~ ^[0-9]+$ ]]; then
+        ((count++))
+        echo "VFIO DeviceNum: $vfioDevNum"
+      fi
+    done
+
+    if [[ $count !=  $NUMVFS ]]; then
+      echo -e "VFIO Device Create Failed"
+      remove_sriov_vf
+      exit 1
+    else
+      echo -e "VFIO[$count] device created successfully."
+    fi
+}
 
 function setup_sriov_vf() {
   # Setup iGPU SRIOV VF
@@ -28,15 +69,9 @@ function setup_sriov_vf() {
       # VFs are not yet configured
       echo "VFs are not yet configured"
       # get the total number of VFs, vendor ID, device ID and DRM driver of the iGPU
-      local totalvfs
-      totalvfs=$(cat /sys/class/drm/card0/device/sriov_totalvfs)
-      local vendor
-      vendor=$(cat /sys/bus/pci/devices/0000:00:02.0/vendor)
-      local device
-      device=$(cat /sys/bus/pci/devices/0000:00:02.0/device)
       local drm_drv
       drm_drv=$(lspci -D -k -s 00:02.0 | grep "Kernel driver in use" | awk -F ':' '{print $2}' | xargs)
-      echo "Total VFs: $totalvfs, Vendor: $vendor, Device: $device, DRM Driver: $drm_drv"
+      echo "Total VFs: $NUMVFS, Vendor: $VENDOR, Device: $DEVICE, DRM Driver: $drm_drv"
 
       if [[ "$drm_drv" == "xe" ]]; then
           # DRM driver in use is “xe”, configure spare resources for “xe” driver
@@ -53,14 +88,13 @@ function setup_sriov_vf() {
 
       # set the numvfs and bind the VFs to vfio_pci driver
       echo "Setting numvfs and binding VFs to vfio_pci driver"
-      echo '1' | sudo tee -a /sys/devices/pci0000:00/0000:00:02.0/drm/card0/prelim_iov/pf/auto_provisioning
       echo '0' | sudo tee /sys/bus/pci/devices/0000:00:02.0/sriov_drivers_autoprobe
-      echo "$totalvfs" | sudo tee /sys/class/drm/card0/device/sriov_numvfs
+      echo "$NUMVFS" | sudo tee /sys/class/drm/card0/device/sriov_numvfs
       echo '1' | sudo tee /sys/bus/pci/devices/0000:00:02.0/sriov_drivers_autoprobe
 
       sudo modprobe vfio-pci || echo "Error: Failed to load vfio-pci module"
 
-      echo "$vendor $device" | sudo tee /sys/bus/pci/drivers/vfio-pci/new_id
+      echo "$VENDOR $DEVICE" | sudo tee /sys/bus/pci/drivers/vfio-pci/new_id
 
       # configure for “i915” driver
       local iov_path
@@ -82,13 +116,9 @@ function setup_sriov_vf() {
           done
       done
 
-      # Check if all expected VFs are enumerated
-      vf_count=$(ls /sys/class/drm/card0/device/ | grep -c '^virtfn')
-      if [[ "$vf_count" -ne "$totalvfs" ]]; then
-          echo "Error: Only $vf_count out of $totalvfs VFs were enumerated. SR-IOV setup failed."
-          exit 1
-      fi
-      echo "All $vf_count VFs successfully enumerated."
+      # Check if all VFs are enumerated and vfios' are bound
+      validate_sriov_vf
+      validate_vfio
 
       echo "SR-IOV VF setup completed successfully"
   else
