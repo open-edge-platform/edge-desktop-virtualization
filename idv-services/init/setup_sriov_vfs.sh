@@ -31,9 +31,10 @@ function validate_sriov_vf(){
   TotalVFs=`lspci | grep -i vga | cut -b 1-7 | cut -d "." -f2 | tail -n 1`
   if [[ $TotalVFs != $NUMVFS ]]; then
     echo -e "SRIOV enumeration failed."
+    remove_sriov_vf
     exit 1
-    else
-      echo -e "[$TotalVFs] VFs enumerated successfully."
+  else
+    echo -e "[$TotalVFs] VFs enumerated successfully."
   fi
 }
 
