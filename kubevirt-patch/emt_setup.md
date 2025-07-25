@@ -45,11 +45,12 @@ sudo vi /etc/udev/rules.d/99-usb-qemu.rules
 ```
 Add
 ```
-SUBSYSTEM=="usb", MODE="0664", GROUP="qemu"
+ACTION=="add", SUBSYSTEM=="usb", MODE="0664", GROUP="qemu", OWNER="qemu"
 ```
 Apply changes
 ```
 sudo udevadm control --reload-rules
+sudo udevadm trigger
 ```
 Unplug and re-plug the USB devices you plan to attach to VMs, then check the permissions are set correctly:
 ```
