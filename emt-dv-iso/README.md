@@ -2,12 +2,12 @@
 # Building EMT ISO with Desktop Virtualization (graphics SR-IOV)
 
 - [Building EMT ISO with Desktop Virtualization (graphics SR-IOV)](#building-emt-iso-with-desktop-virtualization-graphics-sr-iov)
-  - [Using Standalone (One-click) Build Script](#using-standalone-one-click-build-script)
+  - [Option-1 : Standalone (One-click) Build Script](#option-1--standalone-one-click-build-script)
     - [Run the script with default parameters](#run-the-script-with-default-parameters)
     - [Run the scripts with custom parameters](#run-the-scripts-with-custom-parameters)
     - [ISO file will be generated in the same path](#iso-file-will-be-generated-in-the-same-path)
     - [Refer the demo below](#refer-the-demo-below)
-  - [Manual Steps](#manual-steps)
+  - [Option-2 : Manual Steps](#option-2--manual-steps)
     - [Pre-requisite](#pre-requisite)
     - [Step 1: clone the EMT repo](#step-1-clone-the-emt-repo)
     - [Step 2: Checkout the tag](#step-2-checkout-the-tag)
@@ -18,9 +18,9 @@
       - [Clean build](#clean-build)
       - [Working with Proxies](#working-with-proxies)
 
-## Using Standalone (One-click) Build Script
+## Option-1 : Standalone (One-click) Build Script
 
-> Prerequisite : Ubuntu 22.04 or Ubuntu 24.04
+> **Prerequisite** : Ubuntu 22.04 or Ubuntu 24.04
 
 ### Run the script with default parameters
 ```sh
@@ -54,7 +54,7 @@ sudo ./build_idv_iso.sh -t 3.0.20250718 -f ./idv.json
 
 https://github.com/user-attachments/assets/8e3f609b-9632-4ea6-807d-1560856a20db
 
-## Manual Steps
+## Option-2 : Manual Steps
 
 The image configuration is part of this repo [here](./idv.json)
 
