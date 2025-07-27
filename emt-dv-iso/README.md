@@ -6,7 +6,7 @@
     - [Run the script with default parameters](#run-the-script-with-default-parameters)
     - [Run the scripts with custom parameters](#run-the-scripts-with-custom-parameters)
     - [ISO file will be generated in the same path](#iso-file-will-be-generated-in-the-same-path)
-    - [Refer the demo below](#refer-the-demo-below)
+    - [Demo : One-click EMT IDV ISO build script](#demo--one-click-emt-idv-iso-build-script)
   - [Option-2 : Manual Steps](#option-2--manual-steps)
     - [Pre-requisite](#pre-requisite)
     - [Step 1: clone the EMT repo](#step-1-clone-the-emt-repo)
@@ -17,6 +17,8 @@
     - [Troubleshoot](#troubleshoot)
       - [Clean build](#clean-build)
       - [Working with Proxies](#working-with-proxies)
+  - [Option-3 : Github Actions](#option-3--github-actions)
+    - [Demo : EMT IDV ISO generation as part of github actions/workflow](#demo--emt-idv-iso-generation-as-part-of-github-actionsworkflow)
 
 ## Option-1 : Standalone (One-click) Build Script
 
@@ -50,7 +52,7 @@ sudo ./build_idv_iso.sh -t 3.0.20250718 -f ./idv.json
 <em></em>
 </p>
 
-### Refer the demo below
+### Demo : One-click EMT IDV ISO build script
 
 https://github.com/user-attachments/assets/8e3f609b-9632-4ea6-807d-1560856a20db
 
@@ -99,17 +101,28 @@ sudo make iso -j8 REBUILD_TOOLS=y REBUILD_PACKAGES=n CONFIG_FILE=./imageconfigs/
 
 #### Clean build
 
-> For re-building with any other tags, its recommended to start clean and repeat above Steps 1 to 5.
-> ```sh
-> cd edge-microvisor-toolkit
-> sudo make -C toolkit clean
-> ```
+For re-building with any other tags, its recommended to start clean and repeat above Steps 1 to 5.
+ ```sh
+cd edge-microvisor-toolkit
+sudo make -C toolkit clean
+```
 
 #### Working with Proxies
 
-> If you are behind proxies and have them set, use -E option with all make commands
-> For ex :
-> ```
-> sudo -E make toolchain REBUILD_TOOLS=y
-> sudo -E make iso -j8 REBUILD_TOOLS=y REBUILD_PACKAGES=n CONFIG_FILE=./imageconfigs/idv.json
-> ```
+If you are behind proxies and have them set, use -E option with all make commands
+For ex :
+```
+sudo -E make toolchain REBUILD_TOOLS=y
+sudo -E make iso -j8 REBUILD_TOOLS=y REBUILD_PACKAGES=n CONFIG_FILE=./imageconfigs/idv.json
+```
+
+## Option-3 : Github Actions
+
+Generation of EMT IDV ISO can be part of github actions/workflow.
+
+[Reference workflow file](https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/main/.github/workflows/idv-iso-builder.yaml)
+
+### Demo : EMT IDV ISO generation as part of github actions/workflow
+
+
+
