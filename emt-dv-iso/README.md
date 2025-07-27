@@ -30,7 +30,7 @@ sudo ./build_idv_iso.sh
 ```
 Command line arguments are optional. Below default values will be used :
 - Latest emt release tag : [3.0.20250718](https://github.com/open-edge-platform/edge-microvisor-toolkit/releases/tag/3.0.20250718)
-- [idv.json](https://github.com/open-edge-platform/edge-desktop-virtualization/blob/main/emt-dv-iso/idv.json)
+- [idv.json](https://github.com/open-edge-platform/edge-desktop-virtualization/blob/emt-dv-iso/emt-dv-iso/idv.json)
 
 ### Run the scripts with custom parameters
 
