@@ -45,12 +45,7 @@ sudo ./build_idv_iso.sh -t 3.0.20250718 -f ./idv.json
 
 ### ISO file will be generated in the same path
 
-<p align="left">
-<img align="center" width=50% height=50% src="docs/emt-idv-iso-out.png" >
-</p>
-<p align="center">
-<em></em>
-</p>
+<img width="736" height="175" alt="emt-idv-iso-out" src="https://github.com/user-attachments/assets/6666543c-1fa3-4517-93ba-82350b55be2b" />
 
 ### Demo : One-click EMT IDV ISO build script
 
