@@ -221,7 +221,6 @@ jobs:
           # Summarize results on github for quick access
           echo "# Trivy QEMU Scan Results" >> $GITHUB_STEP_SUMMARY
 
-          # Create a status check using the API to indicate whether vulnerabilities are detected or not
           # Only fail this specific build step if the scan itself fails - need it to succeed so that artifacts are uploaded
           if [[ $TRIVY_STATUS -eq 0 ]]; then
             echo "Trivy scan completed with no vulnerabilities detected"
@@ -573,8 +572,6 @@ jobs:
           # Define a function to handle scanning, converting, and setting environment variables
           scan_and_process_image() {
             IMAGE_NAME="$1"
-            # Image names can contain -'s but environment variables can't. Translate to uppercase & substitute -'s with _'s
-            IMAGE_NAME_UPPERCASE="$(echo "$IMAGE_NAME" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')"
             DOCKER_IMAGE="$2"
 
             echo "Scanning $DOCKER_IMAGE..."
@@ -603,10 +600,8 @@ jobs:
             if [[ $TRIVY_STATUS -eq 0 ]]; then
               echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected"
               echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
-              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=No vulnerabilities detected" >> $GITHUB_ENV
             elif [[ $TRIVY_STATUS -eq 1 ]]; then
               echo "Trivy scan for $DOCKER_IMAGE detected vulnerabilities"
-              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
               echo "$(trivy convert --format table "${IMAGE_NAME}_raw_results.json")" >> $GITHUB_STEP_SUMMARY
             else
               echo "Trivy scan for $DOCKER_IMAGE failed."
@@ -675,23 +670,3 @@ jobs:
         with:
           sarif_file: workspace/kubevirt-trivy/virt-operator.sarif
           category: kubevirt-virt-operator
-
-      - name: Evaluate Scan Results
-        shell: bash
-        run: |
-          evaluate_scan_result() {
-            local image_name="$1"
-            # Image names can contain -'s but environment variables can't. Translate to uppercase & substitute -'s with _'s
-            local image_name_upper="$(echo "$image_name" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')"
-            local description_var="TRIVY_${image_name_upper}_STATUS"
-
-            echo "${!description_var}"
-          }
-
-          # Evaluate each image's scan results
-          evaluate_scan_result "sidecar-shim"
-          evaluate_scan_result "virt-api"
-          evaluate_scan_result "virt-controller"
-          evaluate_scan_result "virt-handler"
-          evaluate_scan_result "virt-launcher"
-          evaluate_scan_result "virt-operator"
