@@ -59,7 +59,8 @@ jobs:
         id: cache-qemu
         # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
-        if: ${{ inputs.disable_cache != 'true' }}
+        # Always disable cache for tagged runs, runs on the main branch, or when disable_cache is explicitly set to true
+        if: ${{ ! (github.ref_type == 'tag' || github.ref == 'refs/heads/main' || inputs.disable_cache == 'true') }}
         env:
           cache-name: cache-qemu
         with:
@@ -211,7 +212,8 @@ jobs:
         id: cache-kubevirt
         # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
-        if: ${{ inputs.disable_cache != 'true' }}
+        # Always disable cache for tagged runs, runs on the main branch, or when disable_cache is explicitly set to true
+        if: ${{ ! (github.ref_type == 'tag' || github.ref == 'refs/heads/main' || inputs.disable_cache == 'true') }}
         env:
           cache-name: cache-kubevirt
         with:
