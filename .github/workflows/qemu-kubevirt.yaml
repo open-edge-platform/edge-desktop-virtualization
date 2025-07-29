@@ -205,21 +205,12 @@ jobs:
             --skip-files 'roms/u-boot/test/py/requirements.txt'
 
           # Implementation note: Using || to set the exit code in this way prevents this action component from exiting early when an expected error happens
-          TRIVY_ALL_TYPES_STATUS=0
+          TRIVY_STATUS=0
           trivy convert \
             --format template --template "@trivy-html.tpl" \
             -o "trivy_code_scan_qemu.html" \
             --exit-code 1 \
-            trivy_raw_results.json || TRIVY_ALL_TYPES_STATUS=$?
-
-          TRIVY_MEDIUM_OR_HIGHER_STATUS=0
-          trivy convert \
-            --format template \
-            --template "@trivy-html.tpl" \
-            -o "trivy_code_scan_qemu_filtered.html" \
-            --exit-code 1 \
-            --severity CRITICAL,HIGH,MEDIUM \
-            trivy_raw_results.json || TRIVY_MEDIUM_OR_HIGHER_STATUS=$?
+            trivy_raw_results.json || TRIVY_STATUS=$?
 
           # Generate SARIF output for GitHub Security tab
           trivy convert \
@@ -232,26 +223,18 @@ jobs:
 
           # Create a status check using the API to indicate whether vulnerabilities are detected or not
           # Only fail this specific build step if the scan itself fails - need it to succeed so that artifacts are uploaded
-          if [[ $TRIVY_ALL_TYPES_STATUS -eq 0 ]]; then
+          if [[ $TRIVY_STATUS -eq 0 ]]; then
             echo "Trivy scan completed with no vulnerabilities detected"
             echo "TRIVY_QEMU_STATUS=No vulnerabilities detected" >> $GITHUB_ENV
-            echo "TRIVY_QEMU_STATE=success" >> $GITHUB_ENV
             echo "Trivy scan completed with no vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
-          elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 ]]; then
-            if $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 0 ]]; then
-              echo "Trivy scan completed with only low-severity vulnerabilities detected"
-              echo "TRIVY_QEMU_STATUS=Trivy detected low-severity vulnerable dependencies. See report artifacts for details." >> $GITHUB_ENV
-              echo "TRIVY_QEMU_STATE=success" >> $GITHUB_ENV
-            else
-              echo "Trivy scan completed with medium-or-higher vulnerabilities detected"
-              echo "TRIVY_QEMU_STATUS=Trivy detected medium, high, or critical vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
-              echo "TRIVY_QEMU_STATE=failure" >> $GITHUB_ENV
-            fi
+          elif [[ $TRIVY_STATUS -eq 1 ]]; then
+            echo "Trivy scan detected vulnerabilities"
+            echo "TRIVY_QEMU_STATUS=Trivy detected vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
             echo "$(trivy convert --format table trivy_raw_results.json)" >> $GITHUB_STEP_SUMMARY
           else
             echo "Trivy scan failed."
             echo "Trivy scan failed" >> $GITHUB_STEP_SUMMARY
-            exit $TRIVY_ALL_TYPES_STATUS
+            exit $TRIVY_STATUS
           fi
 
       - name: Upload trivy reports
@@ -263,8 +246,6 @@ jobs:
               workspace/qemu-9.1.0/trivy_code_scan_qemu.html
 
       - name: Upload Trivy scan results to GitHub Security tab
-        # Only upload main-branch builds to the Security tab
-        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
         # upload-sarif@v3.29.2 released 2025 June 30. SHA pinned for enhanced security
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
@@ -275,22 +256,22 @@ jobs:
         run: |
           echo "Starting ClamAV scan on workspace/qemu-9.1.0/build/..."
 
-          SCAN_EXIT_CODE=0
+          CLAMAV_STATUS=0
           docker run --rm \
             --mount type=bind,source=./workspace/qemu-9.1.0/build/,target=/scandir \
             clamav/clamav:stable \
             clamscan --recursive --log=/scandir/clamav-scan-report.log \
-            /scandir || SCAN_EXIT_CODE=$?
+            /scandir || CLAMAV_STATUS=$?
 
           sudo chown $USER:$USER workspace/qemu-9.1.0/build/clamav-scan-report.log 2>/dev/null || true
 
-          if [ $SCAN_EXIT_CODE -ne 0 ]; then
+          if [ $CLAMAV_STATUS -ne 0 ]; then
             echo "QEMU ClamAV scan failed or found issues"
             echo "CLAMAV_QEMU_STATUS=Issues detected during antivirus scan" >> $GITHUB_ENV
             echo "CLAMAV_QEMU_STATE=failure" >> $GITHUB_ENV
           else
             echo "QEMU ClamAV scan completed successfully with no issues detected"
-            echo "CLAMAV_QEMU_STATUS=No issues detected" >> $GITHUB_ENV
+            echo "CLAMAV_QEMU_STATUS=No issues detected during antivirus scan" >> $GITHUB_ENV
             echo "CLAMAV_QEMU_STATE=success" >> $GITHUB_ENV
           fi
 
@@ -307,20 +288,11 @@ jobs:
       - name: Evaluate Scan Results
         shell: bash
         run: |
-          if [[ "$TRIVY_QEMU_STATE" != "success" ]]; then
-            echo "$TRIVY_QEMU_STATUS"
-            # Only fail this build stage if the workflow isn't running on the main branch
-            # Main branch Trivy errors will be uploaded directly to the GitHub Security tab.
-            # Don't want vulnerable dependencies to imply that the overall build isn't healthy
-            if [[ "$WORKFLOW_IS_MAIN" != "true" ]]; then
-              exit 1
-            fi
-          elif [[ "$CLAMAV_QEMU_STATE" != "success" ]]; then
-            echo "$CLAMAV_QEMU_STATUS"
+          echo "$TRIVY_QEMU_STATUS"
+          echo "$CLAMAV_QEMU_STATUS"
+          if [[ "$CLAMAV_QEMU_STATE" != "success" ]]; then
             exit 1
           fi
-
-          echo "All scans passed successfully."
 
   kubevirt-build:
     needs: qemu-build
@@ -577,8 +549,8 @@ jobs:
         run: |
           # Unpack the kubevirt artifacts
           cd workspace/kubevirt-artifacts
-          tar -xvzf intel-idv-kubevirt-${{ env.EDV_VERSION }}.tar.gz
-          cd intel-idv-kubevirt-${{ env.EDV_VERSION }}
+          tar -xvzf "intel-idv-kubevirt-${EDV_VERSION}.tar.gz"
+          cd "intel-idv-kubevirt-${EDV_VERSION}"
 
           # Uncompress the zst files and load them into Docker
           for file in *.zst; do
@@ -609,19 +581,11 @@ jobs:
             trivy image "$DOCKER_IMAGE" --format json -o "${IMAGE_NAME}_raw_results.json"
 
             # Convert raw results to full HTML report
-            TRIVY_ALL_TYPES_STATUS=0
+            TRIVY_STATUS=0
             trivy convert --format template --template "@trivy-html.tpl" \
               -o "${IMAGE_NAME}.html" \
               --exit-code 1 \
-              "${IMAGE_NAME}_raw_results.json" || TRIVY_ALL_TYPES_STATUS=$?
-
-            # Convert raw results to filtered HTML report (Critical/High/Medium)
-            TRIVY_MEDIUM_OR_HIGHER_STATUS=0
-            trivy convert --format template --template "@trivy-html.tpl" \
-              -o "${IMAGE_NAME}_filtered_results.html" \
-              --exit-code 1 \
-              --severity CRITICAL,HIGH,MEDIUM \
-              "${IMAGE_NAME}_raw_results.json" || TRIVY_MEDIUM_OR_HIGHER_STATUS=$?
+              "${IMAGE_NAME}_raw_results.json" || TRIVY_STATUS=$?
 
             # Generate SARIF output for GitHub Security tab
             trivy convert \
@@ -636,26 +600,18 @@ jobs:
             echo "# Trivy $IMAGE_NAME Scan Results" >> $GITHUB_STEP_SUMMARY
 
             # Set environment variables based on scan results
-            if [[ $TRIVY_ALL_TYPES_STATUS -eq 0 ]]; then
+            if [[ $TRIVY_STATUS -eq 0 ]]; then
               echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected"
               echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
               echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=No vulnerabilities detected" >> $GITHUB_ENV
-              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=success" >> $GITHUB_ENV
-            elif [[ $TRIVY_ALL_TYPES_STATUS -eq 1 ]]; then
-              if [[ $TRIVY_MEDIUM_OR_HIGHER_STATUS -eq 0 ]]; then
-                echo "Trivy scan for $DOCKER_IMAGE completed with only low-severity vulnerabilities detected"
-                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected low-severity vulnerable dependencies. See report artifacts for details." >> $GITHUB_ENV
-                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=success" >> $GITHUB_ENV
-              else
-                echo "Trivy scan for $DOCKER_IMAGE completed with medium-or-higher vulnerabilities detected"
-                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected medium, high, or critical vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
-                echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATE=failure" >> $GITHUB_ENV
-              fi
+            elif [[ $TRIVY_STATUS -eq 1 ]]; then
+              echo "Trivy scan for $DOCKER_IMAGE detected vulnerabilities"
+              echo "TRIVY_${IMAGE_NAME_UPPERCASE}_STATUS=Trivy detected vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
               echo "$(trivy convert --format table "${IMAGE_NAME}_raw_results.json")" >> $GITHUB_STEP_SUMMARY
             else
               echo "Trivy scan for $DOCKER_IMAGE failed."
               echo "Trivy scan failed" >> $GITHUB_STEP_SUMMARY
-              exit $TRIVY_ALL_TYPES_STATUS
+              exit $TRIVY_STATUS
             fi
           }
 
@@ -689,39 +645,32 @@ jobs:
       # Unfortunately, upload-sarif deprecated a feature that lets you upload all of these files together.
       # Now they need to be done one-by-one with an explicitly different category
       - name: Upload Trivy SARIF Results to GitHub Security Tab - sidecar-shim
-        # Only upload main-branch builds to the Security tab
-        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
         # upload-sarif@v3.29.2 released 2025 June 30. SHA pinned for enhanced security
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
           sarif_file: workspace/kubevirt-trivy/sidecar-shim.sarif
           category: kubevirt-sidecar-shim
       - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-api
-        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
           sarif_file: workspace/kubevirt-trivy/virt-api.sarif
           category: kubevirt-virt-api
       - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-controller
-        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
           sarif_file: workspace/kubevirt-trivy/virt-controller.sarif
           category: kubevirt-virt-controller
       - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-handler
-        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
           sarif_file: workspace/kubevirt-trivy/virt-handler.sarif
           category: kubevirt-virt-handler
       - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-launcher
-        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
           sarif_file: workspace/kubevirt-trivy/virt-launcher.sarif
           category: kubevirt-virt-launcher
       - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-operator
-        if: ${{ env.WORKFLOW_IS_MAIN == 'true' }}
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
           sarif_file: workspace/kubevirt-trivy/virt-operator.sarif
@@ -734,23 +683,9 @@ jobs:
             local image_name="$1"
             # Image names can contain -'s but environment variables can't. Translate to uppercase & substitute -'s with _'s
             local image_name_upper="$(echo "$image_name" | tr '[:lower:]' '[:upper:]' | sed 's/-/_/g')"
-            local status_var="TRIVY_${image_name_upper}_STATE"
             local description_var="TRIVY_${image_name_upper}_STATUS"
 
-            # Retrieve the values of the variables
-            local status="${!status_var}"
-            local description="${!description_var}"
-
-            # Print and exit if the scan failed
-            if [[ "$status" != "success" ]]; then
-              echo "$description"
-              # Only fail this build stage if the workflow isn't running on the main branch
-              # Main branch Trivy errors will be uploaded directly to the GitHub Security tab.
-              # Don't want vulnerable dependencies to imply that the overall build isn't healthy
-              if [[ "$WORKFLOW_IS_MAIN" != "true" ]]; then
-                exit 1
-              fi
-            fi
+            echo "${!description_var}"
           }
 
           # Evaluate each image's scan results
@@ -760,5 +695,3 @@ jobs:
           evaluate_scan_result "virt-handler"
           evaluate_scan_result "virt-launcher"
           evaluate_scan_result "virt-operator"
-
-          echo "All scans passed successfully."
