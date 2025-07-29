@@ -2,121 +2,121 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: win11-vm1-bootdisk-pv
+  name: cdisk-vm1-bootdisk-pv
 spec:
   capacity:
-    storage: 60Gi
+    storage: 60Gi # Adjust VM disk size as needed
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /opt/user-apps/vm_imgs/create-disk-vm/  # Path to your specific boot image
+    path: /opt/disk_imgs/create-cdisk-vm/  # Path to your specific boot image
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    app/name: win11-vm1
-  name: win11-vm1-bootdisk
+    app/name: cdisk-vm1
+  name: cdisk-vm1-bootdisk
   namespace: default
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 60Gi
+      storage: 60Gi # Adjust VM disk size as needed
   storageClassName: ""
-  volumeName: win11-vm1-bootdisk-pv
+  volumeName: cdisk-vm1-bootdisk-pv
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: win11-vm1-iso1-pv
+  name: cdisk-vm1-iso1-pv
 spec:
   capacity:
-    storage: 10Gi  # Adjust size as needed for the ISO
+    storage: 5Gi
   accessModes:
     - ReadOnlyMany
   hostPath:
-    path: /home/guest/disk_imgs/iso/win11-iso-disk  # Path to your first ISO image
+    path: /opt/disk_imgs/iso/os-iso-disk  # Path to your Windows/Ubuntu ISO disk image
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    app/name: win11-vm1
-  name: win11-vm1-iso1
+    app/name: cdisk-vm1
+  name: cdisk-vm1-iso1
   namespace: default
 spec:
   accessModes:
   - ReadOnlyMany
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi
   storageClassName: ""
-  volumeName: win11-vm1-iso1-pv
+  volumeName: cdisk-vm1-iso1-pv
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: win11-vm1-iso2-pv
+  name: cdisk-vm1-iso2-pv
 spec:
   capacity:
-    storage: 10Gi  # Adjust size as needed for the ISO
+    storage: 5Gi
   accessModes:
     - ReadOnlyMany
   hostPath:
-    path: /home/guest/disk_imgs/iso/virtio-iso-disk  # Path to your second ISO image
+    path: /opt/disk_imgs/iso/virtio-iso-disk  # Path to your second ISO image, Virtio ISO disk image
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    app/name: win11-vm1
-  name: win11-vm1-iso2
+    app/name: cdisk-vm1
+  name: cdisk-vm1-iso2
   namespace: default
 spec:
   accessModes:
   - ReadOnlyMany
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi
   storageClassName: ""
-  volumeName: win11-vm1-iso2-pv
+  volumeName: cdisk-vm1-iso2-pv
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: win11-vm1-folder-pv
+  name: cdisk-vm1-folder-pv
 spec:
   capacity:
-    storage: 10Gi  # Adjust size as needed for the folder
+    storage: 5Gi
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: /home/guest/disk_imgs/iso/drivers  # Path to your folder
+    path: /opt/disk_imgs/iso/drivers  # Path to your folder disk image ISO
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    app/name: win11-vm1
-  name: win11-vm1-folder
+    app/name: cdisk-vm1
+  name: cdisk-vm1-folder
   namespace: default
 spec:
   accessModes:
   - ReadWriteMany
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi
   storageClassName: ""
-  volumeName: win11-vm1-folder-pv
+  volumeName: cdisk-vm1-folder-pv
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app/name: win11-vm1
-  name: win11-vm1-rdp
+    app/name: cdisk-vm1
+  name: cdisk-vm1-rdp
   namespace: default
 spec:
   externalTrafficPolicy: Cluster
@@ -126,15 +126,15 @@ spec:
     protocol: TCP
     targetPort: 3389
   selector:
-    app/name: win11-vm1
+    app/name: cdisk-vm1
   type: LoadBalancer
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app/name: win11-vm1
-  name: win11-vm1-ssh
+    app/name: cdisk-vm1
+  name: cdisk-vm1-ssh
   namespace: default
 spec:
   ports:
@@ -143,15 +143,15 @@ spec:
     protocol: TCP
     targetPort: 22
   selector:
-    app/name: win11-vm1
+    app/name: cdisk-vm1
   type: NodePort
 ---
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   labels:
-    app/name: win11-vm1
-  name: win11-vm1-vm
+    app/name: cdisk-vm1
+  name: cdisk-vm1-vm
   namespace: default
 spec:
   runStrategy: Always
@@ -160,7 +160,7 @@ spec:
       annotations:
         hooks.kubevirt.io/hookSidecars: '[{"args": ["--version", "v1alpha2"], "configMap": {"name": "sidecar-script-hdmi1", "key": "my_script.sh", "hookPath": "/usr/bin/onDefineDomain"}}]'
       labels:
-        app/name: win11-vm1
+        app/name: cdisk-vm1
     spec:
       domain:
         cpu:
@@ -225,13 +225,13 @@ spec:
       volumes:
       - name: bootdisk
         persistentVolumeClaim:
-          claimName: win11-vm1-bootdisk
+          claimName: cdisk-vm1-bootdisk
       - name: iso1
         persistentVolumeClaim:
-          claimName: win11-vm1-iso1
+          claimName: cdisk-vm1-iso1
       - name: iso2
         persistentVolumeClaim:
-          claimName: win11-vm1-iso2
+          claimName: cdisk-vm1-iso2
       - name: folder
         persistentVolumeClaim:
-          claimName: win11-vm1-folder
+          claimName: cdisk-vm1-folder

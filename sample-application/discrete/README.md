@@ -1,4 +1,4 @@
-# Deployment of Virtual Machines and sidecar using individual helm charts
+# Deployment of Virtual Machines and Sidecar(ConfigMap) using individual helm charts
 
 This directory contains mapped Sidecar and Virtual Machine Deployment charts.
 1. Sidecar scripts, patches Libvirt XML with QEMU Commandline parameters inside Virt-Launcher pod.
@@ -13,8 +13,8 @@ This directory contains mapped Sidecar and Virtual Machine Deployment charts.
 Each VM has been configured with 3 CPU, 12GB RAM, 60 GB Disk space.\
 Refer `deployment/discrete/helm-win11_[connector]/values.yaml` to edit
 
-| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for PVC based)    |
-| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: | :---------------------------------------: |
+| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for PVC based)              |
+| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: | :-------------------------------------------------: |
 | vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     | /opt/user-apps/vm_imgs/vm1/disk.img                 |
 | vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     | /opt/user-apps/vm_imgs/vm2/disk.img                 |
 | vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     | /opt/user-apps/vm_imgs/vm3/disk.img                 |
@@ -85,8 +85,39 @@ Allocated resources:
 .
 .
 ```
+## 1. Create VM Disk Image
+Creating VM Disk image using PVC, manifest is provided in `deployment/discrete/create-bootdisk-manifest/vm1.yaml`
 
-## 1. Storing VM Images 
+**Pre-requisites:**
+- Windows/Ubuntu ISO for installation 
+- Virtio ISO for drivers (For Windows guest VM bootdisk creation)
+- GPU & ZeroCopy drivers (For Windows guest VM bootdisk creation) - Create ISO file with the drivers
+- SR-IOV scripts (For Ubuntu guest VM bootdisk creation) - Create ISO file with these scripts
+
+1.  Convert the ISO files to RAW disk image
+    ```sh
+    qemu-img convert -f raw -O raw file.iso disk.img
+    ```
+2.  Place the RAW disk images derived from above ISO files in these locations
+    | Image                       | PersistantVolume Name  | Path to store RAW disk Image                        |
+    | :-------------------------: | :--------------------: | :-------------------------------------------------: |
+    | Windows/Ubuntu ISO          | cdisk-vm1-iso1-pv      | /opt/disk_imgs/iso/os-iso-disk/disk.img             |
+    | Virtio ISO                  | cdisk-vm1-iso2-pv      | /opt/disk_imgs/iso/virtio-iso-disk/disk.img         |
+    | Drivers/SR-IOV scripts ISO  | cdisk-vm1-folder-pv    | /opt/disk_imgs/iso/drivers/disk.img                 |
+3.  Primary display considered in manifest is HDMI-1, hence deploy the Sidecar configmap of HDMI-1 and then apply manifest
+    ```sh
+    kubectl apply -f deployment/discrete/sidecar/hdmi1.yaml
+    kubectl apply -f deployment/discrete/create-bootdisk-manifest/vm1.yaml
+    ```
+4.  Now you should see prompt to install OS on HDMI-1, now continue installation
+5.  Once after OS installation is complete, shutdown the VM, remove the manifest
+    ```sh
+    kubectl delete -f deployment/discrete/create-bootdisk-manifest/vm1.yaml
+    kubectl delete -f deployment/discrete/sidecar/hdmi1.yaml
+    ```
+6.  Copy the disk.img from `/opt/disk_imgs/create-cdisk-vm/disk.img` to desired location to deploy
+
+## 2. Storing VM Images 
 ### For CDI based deployment, upload VM bootimage to CDI
 Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 
@@ -116,7 +147,7 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 ### For PVC based deployment
 Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm1/` as `disk.img`
 
-## 2. Edit Sidecar script to attach USB peripherals to Virtual Machine
+## 3. Edit Sidecar script to attach USB peripherals to Virtual Machine
 
 Get the list of USB devices connected to Host machine
 ```sh
@@ -167,7 +198,7 @@ Ex. in *deployment/discrete/sidecar/hdmi1.yaml* is mapped with
 <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=3.1'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=3.2'/>
 ```
 
-## 3. Deploy Sidecar
+## 4. Deploy Sidecar
 ```sh
 kubectl apply -f deployment/discrete/sidecar/hdmi1.yaml
 ```
@@ -188,7 +219,7 @@ sidecar-script-hdmi1   1      18d
 sidecar-script-hdmi2   1      16d
 ```
 
-## 4. Deploy Virtual Machine
+## 5. Deploy Virtual Machine
 ### For CDI based deployment
 ```sh
 cd deployment/discrete/helm-win11_hdmi1
@@ -251,7 +282,7 @@ Allocated resources:
 .
 ```
 
-## 5. GPU, DV Driver and Windows Cumulative Update Installation
+## 6. GPU, DV Driver and Windows Cumulative Update Installation
 1. Install Windows Cumulative Update.
    - For Windows 10, download [2023-05 Cumulative Update for Windows 10 Version 21H2 for x64-based Systems (KB5026361)](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2023/05/windows10.0-kb5026361-x64_961f439d6b20735f067af766e1813936bf76cb94.msu)
    - For Windows 11, download [2023-10 Cumulative Update Preview for Windows 11 Version 22H2 for x64-based Systems (KB5031455)](https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/e3472ba5-22b6-46d5-8de2-db78395b3209/public/windows11.0-kb5031455-x64_d1c3bafaa9abd8c65f0354e2ea89f35470b10b65.msu)
