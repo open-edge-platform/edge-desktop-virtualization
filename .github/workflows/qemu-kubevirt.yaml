@@ -57,9 +57,11 @@ jobs:
 
       - name: Cache QEMU source & build directory
         id: cache-qemu
+        # The cache is disabled for release builds which zizmor can't accurately detect
         # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
-        if: ${{ inputs.disable_cache != 'true' }}
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # zizmor: ignore[cache-poisoning]
+        # Always disable cache for tagged runs, runs on the main branch, or when disable_cache is explicitly set to true
+        if: ${{ ! (github.ref_type == 'tag' || github.ref == 'refs/heads/main' || inputs.disable_cache == 'true') }}
         env:
           cache-name: cache-qemu
         with:
@@ -209,9 +211,11 @@ jobs:
 
       - name: Cache Kubevirt output artifacts
         id: cache-kubevirt
+        # The cache is disabled for release builds which zizmor can't accurately detect
         # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
-        if: ${{ inputs.disable_cache != 'true' }}
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # zizmor: ignore[cache-poisoning]
+        # Always disable cache for tagged runs, runs on the main branch, or when disable_cache is explicitly set to true
+        if: ${{ ! (github.ref_type == 'tag' || github.ref == 'refs/heads/main' || inputs.disable_cache == 'true') }}
         env:
           cache-name: cache-kubevirt
         with:

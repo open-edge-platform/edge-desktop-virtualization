@@ -47,8 +47,10 @@ jobs:
 
       - name: Load coverity from cache
         id: cache-coverity
+        if: github.ref_type != 'tag'
+        # The cache is disabled for tags which zizmor can't accurately detect. This cache is not used at all for release artifacts.
         # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # zizmor: ignore[cache-poisoning]
         env:
           cache-name: cache-coverity
         with:
