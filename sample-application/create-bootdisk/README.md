@@ -3,38 +3,32 @@ This step is to create VM Disk image using Kubevirt, this is a one time activity
 
 Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
 
-**Pre-requisites:**
-
 [Multi-OS with Graphics SR-IOV Virtualization on Ubuntu*](https://www.intel.com/content/www/us/en/secure/content-details/762237/13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake-p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu-user-guide.html?wapkw=multi-os%20graphics%20SRIOV&DocID=762237) [User Guide](https://cdrdv2.intel.com/v1/dl/getContent/762237?explicitVersion=true)
 
-- For Windows Guest VM Image 
-  - Windows 10/11 ISO
-  - Virtio ISO for drivers
-  - GPU & ZeroCopy drivers - Create ISO file with the drivers
-
-- For Ubuntu Guest VM Image
-  - Ubuntu 22.04/24.04 ISO
-  - SR-IOV scripts - Create ISO file with these scripts
-
 ## Windows Guest VM creation
+
+**Pre-requisites:**
+  - Windows 10/11 ISO
+  - [Virtio ISO](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archivevirtio/virtio-win-0.1.240-1/virtio-win.iso) for drivers
+  - Latest [Intel GPU]() & [Zero Copy](https://github.com/intel/Display-Virtualization-for-Windows-OS/releases/tag/zerocopy-version-1918) drivers - Create ISO file with the drivers / Download directly on VM when Ethernet driver is installed and connects to internet
 
 1.  Convert the ISO files to RAW disk image
     ```sh
     qemu-img convert -f raw -O raw file.iso disk.img
     ```
 2.  Place the RAW disk images derived from above ISO files in these locations
-    | Image                       | PersistantVolume Name  | Path to store RAW disk Image                        |
-    | :-------------------------: | :--------------------: | :-------------------------------------------------: |
-    | Windows ISO                 | cdisk-vm1-iso1-pv      | /opt/disk_imgs/iso/os-iso-disk/disk.img             |
-    | Virtio ISO                  | cdisk-vm1-iso2-pv      | /opt/disk_imgs/iso/virtio-iso-disk/disk.img         |
-    | Drivers/SR-IOV scripts ISO  | cdisk-vm1-folder-pv    | /opt/disk_imgs/iso/drivers/disk.img                 |
+    | Image                           | PersistantVolume Name  | Path to store RAW disk Image                        |
+    | :-----------------------------: | :--------------------: | :-------------------------------------------------: |
+    | Windows ISO                     | cdisk-vm1-iso1-pv      | /opt/disk_imgs/iso/os-iso-disk/disk.img             |
+    | Virtio ISO                      | cdisk-vm1-iso2-pv      | /opt/disk_imgs/iso/virtio-iso-disk/disk.img         |
+    | Drivers ISO (If ISO is created) | cdisk-vm1-folder-pv    | /opt/disk_imgs/iso/drivers/disk.img                 |
 3.  Primary display considered in manifest is HDMI-1, hence deploy the Sidecar configmap of HDMI-1 and then apply manifest
     ```sh
     kubectl apply -f sample-application/discrete/sidecar/hdmi1.yaml
     kubectl apply -f sample-application/create-bootdisk/manifest/vm1.yaml
     ```
 4.  Now you should see prompt to install OS on HDMI-1, now continue installation
-5.  Refer User Guide PDF Section `5.2.1 Windows* Guest VM Manual Setup`
+5.  Refer Multi-OS with Graphics SR-IOV Virtualization on Ubuntu User Guide PDF Section `5.2.1 Windows* Guest VM Manual Setup`
     -  Continue from Section `5.2.1.2 Create Windows* Guest VM Image from ISO` > `Step 2 Follow the Windows installation steps until you see the Windows Setup screen`.
     -  And complete installtion till `Section 5.2.1.12 Resume Windows Update` 
 6.  Once after OS installation is complete, shutdown the VM, remove the manifest
@@ -42,8 +36,12 @@ Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
     kubectl delete -f sample-application/create-bootdisk/manifest/vm1.yaml
     kubectl delete -f sample-application/discrete/sidecar/hdmi1.yaml
     ```
-7.  Copy the disk.img from `/opt/disk_imgs/create-vm-bootdisk/disk.img` to desired location to deploy
+7.  Copy the `disk.img` from `/opt/disk_imgs/create-vm-bootdisk` to desired location to deploy
 
 ## Ubuntu Guest VM creation
+
+**Pre-requisites:**
+  - Ubuntu 22.04/24.04 ISO
+  - SR-IOV scripts - Create ISO file with these scripts
 
 **WIP**
