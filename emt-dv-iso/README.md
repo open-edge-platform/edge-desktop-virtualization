@@ -76,7 +76,7 @@ git checkout tags/<tag_name>
 
 ### Step 3: Copy the idv.json to edge-microvisor-toolkit/toolkit/imageconfigs/
 ```sh
-wget https://github.com/open-edge-platform/edge-desktop-virtualization/blob/main/emt-dv-iso/idv.json
+wget https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/emt-dv-iso/emt-dv-iso/idv.json
 cp idv.json toolkit/imageconfigs/
 ```
 > One can copy any custom idv.json file as per the requirement.
@@ -115,7 +115,7 @@ sudo -E make iso -j8 REBUILD_TOOLS=y REBUILD_PACKAGES=n CONFIG_FILE=./imageconfi
 
 Generation of EMT IDV ISO can be part of github actions/workflow.
 
-[Reference workflow file](https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/main/.github/workflows/idv-iso-builder.yaml)
+[Reference workflow file](https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/emt-dv-iso/.github/workflows/idv-iso-builder.yaml)
 
 ### Demo : EMT IDV ISO generation as part of github actions/workflow
 
