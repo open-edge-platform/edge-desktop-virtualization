@@ -85,38 +85,6 @@ Allocated resources:
 .
 .
 ```
-## 1. Create VM Disk Image
-Creating VM Disk image using PVC, manifest is provided in `deployment/discrete/create-bootdisk-manifest/vm1.yaml`
-
-**Pre-requisites:**
-- Windows/Ubuntu ISO for installation 
-- Virtio ISO for drivers (For Windows guest VM bootdisk creation)
-- GPU & ZeroCopy drivers (For Windows guest VM bootdisk creation) - Create ISO file with the drivers
-- SR-IOV scripts (For Ubuntu guest VM bootdisk creation) - Create ISO file with these scripts
-
-1.  Convert the ISO files to RAW disk image
-    ```sh
-    qemu-img convert -f raw -O raw file.iso disk.img
-    ```
-2.  Place the RAW disk images derived from above ISO files in these locations
-    | Image                       | PersistantVolume Name  | Path to store RAW disk Image                        |
-    | :-------------------------: | :--------------------: | :-------------------------------------------------: |
-    | Windows/Ubuntu ISO          | cdisk-vm1-iso1-pv      | /opt/disk_imgs/iso/os-iso-disk/disk.img             |
-    | Virtio ISO                  | cdisk-vm1-iso2-pv      | /opt/disk_imgs/iso/virtio-iso-disk/disk.img         |
-    | Drivers/SR-IOV scripts ISO  | cdisk-vm1-folder-pv    | /opt/disk_imgs/iso/drivers/disk.img                 |
-3.  Primary display considered in manifest is HDMI-1, hence deploy the Sidecar configmap of HDMI-1 and then apply manifest
-    ```sh
-    kubectl apply -f deployment/discrete/sidecar/hdmi1.yaml
-    kubectl apply -f deployment/discrete/create-bootdisk-manifest/vm1.yaml
-    ```
-4.  Now you should see prompt to install OS on HDMI-1, now continue installation
-5.  Once after OS installation is complete, shutdown the VM, remove the manifest
-    ```sh
-    kubectl delete -f deployment/discrete/create-bootdisk-manifest/vm1.yaml
-    kubectl delete -f deployment/discrete/sidecar/hdmi1.yaml
-    ```
-6.  Copy the disk.img from `/opt/disk_imgs/create-cdisk-vm/disk.img` to desired location to deploy
-
 ## 2. Storing VM Images 
 ### For CDI based deployment, upload VM bootimage to CDI
 Ex. for `vm1` the image name in CDI is `vm1-win11-image`

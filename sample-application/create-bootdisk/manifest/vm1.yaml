@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /opt/disk_imgs/create-cdisk-vm/  # Path to your specific boot image
+    path: /opt/disk_imgs/create-vm-bootdisk/  # Path to your specific boot image
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
