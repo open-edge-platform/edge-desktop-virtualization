@@ -23,6 +23,7 @@
                 "ntfs-3g",
                 "ntfs-3g-system-compression",
                 "ntfs-3g-libs",
+                "wpa_supplicant",
                 "igt-gpu-tools"
 	        ],
             "KernelCommandLine": {
