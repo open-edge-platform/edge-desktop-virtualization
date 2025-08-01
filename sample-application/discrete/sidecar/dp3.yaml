@@ -7,6 +7,6 @@ data:
     #!/bin/sh
     tempFile=`mktemp`
     echo $4 > $tempFile
-    sed -i "s|/devices>|/devices> <qemu:commandline> <qemu:arg value='-display'/> <qemu:arg value='gtk,gl=on,full-screen=on,zoom-to-fit=on,window-close=off,connectors.0=DP-3'/> <qemu:env name='DISPLAY' value=':0'/> <qemu:arg value='-device'/> <qemu:arg value='driver=virtio-vga,max_outputs=1,blob=true,bus=pcie.0,addr=0x3'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=2.3'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=2.4'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=7.1'/> </qemu:commandline>|" $tempFile
+    sed -i "s|/devices>|/devices> <qemu:commandline> <qemu:arg value='-display'/> <qemu:arg value='gtk,gl=on,full-screen=on,zoom-to-fit=on,window-close=off,input=off,connectors.0=DP-3'/> <qemu:env name='DISPLAY' value=':0'/> <qemu:arg value='-device'/> <qemu:arg value='driver=virtio-vga,max_outputs=1,blob=true,bus=pcie.0,addr=0x3'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=2.3'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=2.4'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=7.1'/> </qemu:commandline>|" $tempFile
     echo $tempFile > /tmp/t.xml
     cat $tempFile

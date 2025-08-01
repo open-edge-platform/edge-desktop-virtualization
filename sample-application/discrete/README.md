@@ -1,22 +1,24 @@
-# Deployment of Virtual Machines and sidecar using individual helm charts
+# Deployment of Virtual Machines and Sidecar(ConfigMap) using individual helm charts
 
 This directory contains mapped Sidecar and Virtual Machine Deployment charts.
 1. Sidecar scripts, patches Libvirt XML with QEMU Commandline parameters inside Virt-Launcher pod.
    - *deployment/discrete/sidecar/[connector].yaml*
-2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3).
+2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using CDI.
    - *deployment/discrete/helm-win11_[connector]*
+3. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using PVC.
+   - *deployment/discrete/pvc/helm-win11_[connector]*
 
 **Mapping of Sidecar script with VM deployment Helm chart**
 
 Each VM has been configured with 3 CPU, 12GB RAM, 60 GB Disk space.\
 Refer `deployment/discrete/helm-win11_[connector]/values.yaml` to edit
 
-| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port |
-| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: |
-| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     |
-| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     |
-| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     |
-| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     |
+| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for PVC based)              |
+| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: | :-------------------------------------------------: |
+| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     | /opt/user-apps/vm_imgs/vm1/disk.img                 |
+| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     | /opt/user-apps/vm_imgs/vm2/disk.img                 |
+| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     | /opt/user-apps/vm_imgs/vm3/disk.img                 |
+| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     | /opt/user-apps/vm_imgs/vm4/disk.img                 |
 
 **Verify Kubevirt, Device-plugin, SR-IOV GPU Passthrough and Hugepage before deploying VM**
 ```sh
@@ -83,8 +85,8 @@ Allocated resources:
 .
 .
 ```
-
-## 1. Upload VM bootimage to CDI
+## 2. Storing VM Images 
+### For CDI based deployment, upload VM bootimage to CDI
 Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 
 -   Get IP of CDI
@@ -109,8 +111,11 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
     vm3-win11-image   Succeeded   N/A                   16d
     vm4-win11-image   Succeeded   N/A                   15d
     ```
-  
-## 2. Edit Sidecar script to attach USB peripherals to Virtual Machine
+
+### For PVC based deployment
+Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm1/` as `disk.img`
+
+## 3. Edit Sidecar script to attach USB peripherals to Virtual Machine
 
 Get the list of USB devices connected to Host machine
 ```sh
@@ -161,7 +166,7 @@ Ex. in *deployment/discrete/sidecar/hdmi1.yaml* is mapped with
 <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=3.1'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=3.2'/>
 ```
 
-## 3. Deploy Sidecar
+## 4. Deploy Sidecar
 ```sh
 kubectl apply -f deployment/discrete/sidecar/hdmi1.yaml
 ```
@@ -182,11 +187,18 @@ sidecar-script-hdmi1   1      18d
 sidecar-script-hdmi2   1      16d
 ```
 
-## 4. Deploy Virtual Machine
+## 5. Deploy Virtual Machine
+### For CDI based deployment
 ```sh
 cd deployment/discrete/helm-win11_hdmi1
 helm install vm1 .
 ```
+### For PVC based deployment
+```sh
+cd deployment/discrete/pvc/helm-win11_hdmi1
+helm install vm1 .
+```
+
 Output
 ```sh
 NAME: vm1
@@ -238,7 +250,7 @@ Allocated resources:
 .
 ```
 
-## 5. GPU, DV Driver and Windows Cumulative Update Installation
+## 6. GPU, DV Driver and Windows Cumulative Update Installation
 1. Install Windows Cumulative Update.
    - For Windows 10, download [2023-05 Cumulative Update for Windows 10 Version 21H2 for x64-based Systems (KB5026361)](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2023/05/windows10.0-kb5026361-x64_961f439d6b20735f067af766e1813936bf76cb94.msu)
    - For Windows 11, download [2023-10 Cumulative Update Preview for Windows 11 Version 22H2 for x64-based Systems (KB5031455)](https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/e3472ba5-22b6-46d5-8de2-db78395b3209/public/windows11.0-kb5031455-x64_d1c3bafaa9abd8c65f0354e2ea89f35470b10b65.msu)
