@@ -1,7 +1,37 @@
-# Kubevirt installation using TAR files
+# Install Kubernetes
+K3s is a lightweight Kubernetes distribution suitable for Edge and IoT use cases. This step will setup a single node cluster where the host function as both the server/control plane and the worker node. This step is only required if you don't already have a Kubernetes cluster setup that you can use.
+```sh
+export K3S_VERSION="v1.32.6+k3s1"
+export KUBECONFIG_PATH="/etc/rancher/k3s/k3s.yaml"
+
+curl -sfL https://get.k3s.io | INSTALL_K3S_SELINUX_WARN=true INSTALL_K3S_VERSION=${K3S_VERSION}  sh -s - --disable=traefik --write-kubeconfig-mode=644
+
+found=$(grep -x "source <(kubectl completion bash)" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "source <(kubectl completion bash)" >> ~/.bashrc
+fi
+
+found=$(grep -x "alias k=kubectl" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "alias k=kubectl" >> ~/.bashrc
+fi
+
+found=$(grep -x "complete -F __start_kubectl k" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "complete -F __start_kubectl k" >> ~/.bashrc
+fi
+
+found=$(grep -x "export KUBECONFIG=${KUBECONFIG_PATH}" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "export KUBECONFIG=${KUBECONFIG_PATH}" >> ~/.bashrc
+fi
+```
+
+
+# Kubevirt and Intel Device-Plugin installation using TAR files
 This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node.
 
-Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-device-plugin-v0.1.tar.gz) to support enabling Display Virtualization on local display of edge node
+And the Intel Device-Plugin to support it.
 
 ## Steps
 1.  Ensure Kubernetes is installed and local cluster is running.
@@ -21,21 +51,6 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     zstd -d *.zst
     ```
 4.  Import the images into the container runtime
-    ```sh
-    cd ~/display-virtualization/intel-idv-kubevirt*
-    sudo ctr -n k8s.io images import sidecar-shim.tar
-    sudo ctr -n k8s.io images import virt-api.tar
-    sudo ctr -n k8s.io images import virt-controller.tar
-    sudo ctr -n k8s.io images import virt-handler.tar
-    sudo ctr -n k8s.io images import virt-launcher.tar
-    sudo ctr -n k8s.io images import virt-operator.tar
-
-    cd ~/display-virtualization/intel-idv-device-plugin*
-    sudo ctr -n k8s.io images import device-plugin.tar
-    sudo ctr -n k8s.io images import busybox.tar
-    ```
-
-    Alternatively 
     ```sh
     cd ~/display-virtualization/intel-idv-kubevirt*
     sudo k3s ctr i import virt-operator.tar
@@ -135,7 +150,7 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     > Please wait for all virt-handler pods to complete restarts\
     > The value of **Requests** and **Limits** will increase upon successful resource allocation to running pods/VMs
 
-9.  Install CDI
+9.  Install CDI - Not required in case of PVC based deployment
     ```sh
     kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-operator.yaml
     kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-cr.yaml

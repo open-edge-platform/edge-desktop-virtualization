@@ -1,19 +1,20 @@
-# Ubuntu Host system
+# Debian Host system
 
 Steps:
-1.  Enable Ubuntu Host system with Intel Graphics SR-IOV
+1.  Enable Debian Host system with Intel Graphics SR-IOV
 2.  Additional Settings to be done on host system to run Virtual Machine
 3.  Installing Kubernetes, Kubevirt(customized to enable local display for Intel Graphics SR-IOV), Intel Device Plugin
 4.  Creation of VM bootdisk image
 5.  Deployment of VMs
 
-## Enable Ubuntu Host system with Intel Graphics SR-IOV
+## Enabling Debian Host system with Intel Graphics SR-IOV
 
-Follow [Multi-OS with Graphics SR-IOV Virtualization on Ubuntu](https://www.intel.com/content/www/us/en/secure/content-details/762237/13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake-p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu-user-guide.html?wapkw=multi-os%20graphics%20SRIOV&DocID=762237) [User Guide PDF](https://cdrdv2.intel.com/v1/dl/getContent/762237?explicitVersion=true)
-1.  Section `2.0 Host OS Platform System Requirements and Setup`
-2.  Section `3.0 Ubuntu Kernel Setup`
-3.  Section `4.0 Getting Started with Ubuntu* with Kernel Overlay`
-4.  Section `5.1 Ubuntu Host Setup with SR-IOV`
+Follow [ThunderSoft-SRIOV Guide](https://github.com/ThunderSoft-SRIOV/sriov) to enable Debian OS based Host system with Graphics SR-IOV Virtualization 
+1.  Section [Prerequisites](https://github.com/ThunderSoft-SRIOV/sriov?tab=readme-ov-file#prerequisites)
+2.  Section [Preparation](https://github.com/ThunderSoft-SRIOV/sriov?tab=readme-ov-file#preparation)
+3.  Section [Host Setup](https://github.com/ThunderSoft-SRIOV/sriov?tab=readme-ov-file#host-setup)
+    1.  [Setup Host from PPA](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/setup_host_from_ppa.md) - Recommended
+    2.  Or [Rebuild PPA package](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/build_package.md)
 
 #### Ensure SR-IOV is enabled
 ```sh
@@ -39,6 +40,7 @@ sudo dmesg | grep -i i915
     i915 0000:00:02.0: [drm] fb0: i915drmfb frame buffer device
     i915 0000:00:02.0: 7 VFs could be associated with this PF
     ```
+
 
 ## Additional Settings
 These include creation of service to set Enabling Virtual Functions, Hugepage, USB permissions
