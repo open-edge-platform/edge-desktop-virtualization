@@ -27,7 +27,6 @@ if [[ $found -eq 0 ]]; then
 fi
 ```
 
-
 # Kubevirt and Intel Device-Plugin installation using TAR files
 This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node. And the Intel Device-Plugin to support it.
 
@@ -125,24 +124,37 @@ This version of Kubevirt is built on release tag v1.5.0 along with GTK library s
 
     Apply the YAML changes
     ```sh
-    kubectl apply -f manifests/kubevirt-cr.yaml
+    kubectl apply -f kubevirt-patch/kubevirt-cr.yaml
     ```
-
-    **Check for presence of `intel.com/sriov-gpudevices` resource**
-
+9.  Check for presence of resources needed in kubernetes
     ```sh
     kubectl describe nodes
     ```
     Output:
     ```sh
     Capacity:
-        intel.com/sriov-gpudevice:     7
+        intel.com/igpu:                 1k
+        intel.com/sriov-gpudevice:      7
+        intel.com/udma:                 1k
+        intel.com/usb:                  1k
+        intel.com/vfio:                 1k
+        intel.com/x11:                  1k
     Allocatable:
-        intel.com/sriov-gpudevice:     7
+        intel.com/igpu:                 1k
+        intel.com/sriov-gpudevice:      7
+        intel.com/udma:                 1k
+        intel.com/usb:                  1k
+        intel.com/vfio:                 1k
+        intel.com/x11:                  1k
     Allocated resources:
         Resource                       Requests     Limits
         --------                       --------     ------
-        intel.com/sriov-gpudevice      0            0
+        intel.com/igpu                 0                 0
+        intel.com/sriov-gpudevice      0                 0
+        intel.com/udma                 0                 0
+        intel.com/usb                  0                 0
+        intel.com/vfio                 0                 0
+        intel.com/x11                  0                 0
     ```
     > [!Note] 
     > Please wait for all virt-handler pods to complete restarts\
