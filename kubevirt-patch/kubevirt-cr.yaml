@@ -74,6 +74,9 @@ spec:
       - pciVendorSelector: "8086:a7a9"
         resourceName: "intel.com/sriov-gpudevice"
         externalResourceProvider: false
+      - pciVendorSelector: "8086:a720"
+        resourceName: "intel.com/sriov-gpudevice"
+        externalResourceProvider: false
       - pciVendorSelector: "8086:a721"
         resourceName: "intel.com/sriov-gpudevice"
         externalResourceProvider: false

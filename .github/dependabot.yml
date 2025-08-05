@@ -9,3 +9,18 @@ updates:
     directory: "/device-plugins-for-kubernetes/" 
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /device-plugins-for-kubernetes
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /device-plugins-for-kubernetes
+    schedule:
+      interval: daily

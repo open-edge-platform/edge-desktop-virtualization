@@ -20,14 +20,23 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: read
+
 jobs:
   device-plugins-for-kubernetes:
     permissions:
       contents: read
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0 # All history, not just latest commit
@@ -67,7 +76,8 @@ jobs:
           ls -hal
 
       - name: Upload device plugin release tarball
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: device-plugin artifacts
           path: |
@@ -86,7 +96,8 @@ jobs:
           trivy fs . --format template --template "@trivy-html.tpl" -o "trivy_code_scan_core.html"
 
       - name: Upload trivy reports
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: trivy-code-scan-results-core
           path: |
@@ -101,7 +112,8 @@ jobs:
               trivy image --quiet --format spdx-json --output device-plugins-for-kubernetes/trivy_image_scan_core-backend.spdx.json "localhost:5000/intel-idv-device-plugin:$EDV_VERSION"
 
       - name: Upload Trivy Image Report
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: Trivy image scan report-core
           path: |
@@ -130,7 +142,8 @@ jobs:
 
       - name: Upload Antivirus Report
         if: always()
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: antivirus-report-core
           path: device-plugins-for-kubernetes/clamav-scan-report.log

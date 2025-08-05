@@ -20,14 +20,23 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: read
+
 jobs:
   idv-services:
     permissions:
       contents: read
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0 # All history, not just latest commit
@@ -42,7 +51,7 @@ jobs:
           mkdir idv-services-artifacts
           cd idv-services-artifacts
           ls -hal
-          
+
           mkdir intel-idv-services-$EDV_VERSION
           mkdir -p intel-idv-services-$EDV_VERSION/init
           mkdir -p intel-idv-services-$EDV_VERSION/launcher
@@ -57,7 +66,8 @@ jobs:
           ls -hal
 
       - name: Upload idv-services release tarball
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: idv-services artifacts
           path: |

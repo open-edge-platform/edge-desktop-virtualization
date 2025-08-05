@@ -29,8 +29,14 @@ jobs:
         shell: bash -noprofile --norc -eo pipefail {0}
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0 # All history, not just latest commit
@@ -41,7 +47,10 @@ jobs:
 
       - name: Load coverity from cache
         id: cache-coverity
-        uses: actions/cache@v4
+        if: github.ref_type != 'tag'
+        # The cache is disabled for tags which zizmor can't accurately detect. This cache is not used at all for release artifacts.
+        # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # zizmor: ignore[cache-poisoning]
         env:
           cache-name: cache-coverity
         with:

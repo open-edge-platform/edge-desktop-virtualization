@@ -2,13 +2,16 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-name: "QEMU & Kubevirt: Build, Trivy & ClamAV Scan"
+name: "QEMU & Kubevirt"
 run-name: "Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
 
 # Only run at most 1 workflow concurrently per PR, unlimited for branches
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 on:
   pull_request:
@@ -27,15 +30,22 @@ on:
         default: "false"
 
 jobs:
-  qemu-build-and-scan:
+  qemu-build:
     permissions:
       contents: read
     runs-on: ubuntu-24.04
     outputs:
       qemu-artifact-id: ${{ steps.upload-qemu.outputs.artifact-id }}
+      qemu-scan-source-artifact-id: ${{ steps.upload-qemu-scan-source.outputs.artifact-id }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0 # All history, not just latest commit
@@ -45,18 +55,22 @@ jobs:
         uses: ./.github/actions/setup-tools
         with:
           go: "false"
+          trivy: "false"
 
       - name: Cache QEMU source & build directory
         id: cache-qemu
-        uses: actions/cache@v4
-        if: ${{ inputs.disable_cache != 'true' }}
+        # The cache is disabled for release builds which zizmor can't accurately detect
+        # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # zizmor: ignore[cache-poisoning]
+        # Always disable cache for tagged runs, runs on the main branch, or when disable_cache is explicitly set to true
+        if: ${{ ! (github.ref_type == 'tag' || github.ref == 'refs/heads/main' || inputs.disable_cache == 'true') }}
         env:
           cache-name: cache-qemu
         with:
           path: workspace/qemu-9.1.0
           # Use the hash of the document this workflow is based on to decide whether the build should be re-run or not
           # If the workflow was triggered as a result of pushing a tag, always do a clean cache-free build
-          key: "qemu-binary-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/README.md') }}"
+          key: "qemu-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/README.md') }}"
 
       - name: Build and patch QEMU
         if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
@@ -118,14 +132,58 @@ jobs:
 
       - name: Upload qemu-system-x86_64 artifact
         id: upload-qemu
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: qemu-artifact
           path: |
             workspace/qemu-9.1.0/build/qemu-system-x86_64
 
+      - name: Upload entire QEMU build directory as a temporary artifact for scanning
+        id: upload-qemu-scan-source
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          retention-days: 2 # This only needs to be retained long enough for the scanner to run on it
+          name: qemu-scan-source
+          path: |
+            workspace/qemu-9.1.0
+
+  qemu-scan:
+    needs: qemu-build
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # All history, not just latest commit
+          ref: ${{ github.event.pull_request.head.sha }} # Check out the actual commit, not a fake merge commit
+
+      - name: Setup Tools & Common Variables
+        uses: ./.github/actions/setup-tools
+        with:
+          go: "false"
+          trivy: "true"
+
+      - name: Download QEMU scan source artifact
+        # download-artifact@v4.3.0 released 2025 April 24. SHA pinned for enhanced security
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.qemu-build.outputs.qemu-scan-source-artifact-id }}
+          path: . # Will unpack into a folder with the name used in upload-artifact
+
+      - name: Restore unpacked artifact to correct directory
+        shell: bash
+        run: |
+          mkdir -p workspace
+          mv qemu-scan-source workspace/qemu-9.1.0
+
       - name: trivy qemu source scan
-        continue-on-error: true
         shell: bash
         run: |
           cd workspace/qemu-9.1.0
@@ -134,50 +192,123 @@ jobs:
           trivy image --download-db-only
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
 
-          # Use the downloaded template
-          trivy fs . --format template --template "@trivy-html.tpl" --exit-code 1 --severity MEDIUM,HIGH,CRITICAL -o "trivy_code_scan_qemu.html"
+          # Disable unneccessary warning for OSS project maintainers
+          export TRIVY_DISABLE_VEX_NOTICE=true
+
+          # Scan QEMU code, ignoring some python packages in components that are not copied to the release package
+          # Only scan QEMU for vulnerabilities (disable secrets)
+          trivy fs . \
+            --format json \
+            --scanners vuln \
+            -o trivy_raw_results.json \
+            --skip-files 'docs/requirements.txt' \
+            --skip-files 'roms/u-boot/test/py/requirements.txt'
+
+          # Implementation note: Using || to set the exit code in this way prevents this action component from exiting early when an expected error happens
+          TRIVY_STATUS=0
+          trivy convert \
+            --format template --template "@trivy-html.tpl" \
+            -o "trivy_code_scan_qemu.html" \
+            --exit-code 1 \
+            trivy_raw_results.json || TRIVY_STATUS=$?
+
+          # Generate SARIF output for GitHub Security tab
+          trivy convert \
+            --format sarif \
+            -o "trivy_code_scan_qemu.sarif" \
+            trivy_raw_results.json
+
+          # Summarize results on github for quick access
+          echo "# Trivy QEMU Scan Results" >> $GITHUB_STEP_SUMMARY
+
+          # Only fail this specific build step if the scan itself fails - need it to succeed so that artifacts are uploaded
+          if [[ $TRIVY_STATUS -eq 0 ]]; then
+            echo "Trivy scan completed with no vulnerabilities detected"
+            echo "TRIVY_QEMU_STATUS=No vulnerabilities detected" >> $GITHUB_ENV
+            echo "Trivy scan completed with no vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          elif [[ $TRIVY_STATUS -eq 1 ]]; then
+            echo "Trivy scan detected vulnerabilities"
+            echo "TRIVY_QEMU_STATUS=Trivy detected vulnerable dependencies. See report artifact for details." >> $GITHUB_ENV
+            echo "$(trivy convert --format table trivy_raw_results.json)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Trivy scan failed."
+            echo "Trivy scan failed" >> $GITHUB_STEP_SUMMARY
+            exit $TRIVY_STATUS
+          fi
 
       - name: Upload trivy reports
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: trivy-code-scan-results-core
+          name: trivy-qemu-results
           path: |
               workspace/qemu-9.1.0/trivy_code_scan_qemu.html
 
+      - name: Upload Trivy scan results to GitHub Security tab
+        # upload-sarif@v3.29.2 released 2025 June 30. SHA pinned for enhanced security
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: 'workspace/qemu-9.1.0/trivy_code_scan_qemu.sarif'
+
       - name: ClamAV QEMU Antivirus Scan
-        continue-on-error: true
         shell: bash
         run: |
           echo "Starting ClamAV scan on workspace/qemu-9.1.0/build/..."
 
+          CLAMAV_STATUS=0
           docker run --rm \
             --mount type=bind,source=./workspace/qemu-9.1.0/build/,target=/scandir \
             clamav/clamav:stable \
             clamscan --recursive --log=/scandir/clamav-scan-report.log \
-            /scandir
+            /scandir || CLAMAV_STATUS=$?
 
-          SCAN_EXIT_CODE=$?
           sudo chown $USER:$USER workspace/qemu-9.1.0/build/clamav-scan-report.log 2>/dev/null || true
 
-          if [ $SCAN_EXIT_CODE -ne 0 ]; then
-            echo "ClamAV scan failed or found issues"
+          if [ $CLAMAV_STATUS -ne 0 ]; then
+            echo "QEMU ClamAV scan failed or found issues"
+            echo "CLAMAV_QEMU_STATUS=Issues detected during antivirus scan" >> $GITHUB_ENV
+            echo "CLAMAV_QEMU_STATE=failure" >> $GITHUB_ENV
+          else
+            echo "QEMU ClamAV scan completed successfully with no issues detected"
+            echo "CLAMAV_QEMU_STATUS=No issues detected during antivirus scan" >> $GITHUB_ENV
+            echo "CLAMAV_QEMU_STATE=success" >> $GITHUB_ENV
+          fi
+
+          echo "# ClamAV QEMU Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat workspace/qemu-9.1.0/build/clamav-scan-report.log | grep -v 'Empty file$')" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload QEMU Antivirus Report
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: clamav-qemu-results
+          path: workspace/qemu-9.1.0/build/clamav-scan-report.log
+
+      - name: Evaluate Scan Results
+        shell: bash
+        run: |
+          echo "$TRIVY_QEMU_STATUS"
+          echo "$CLAMAV_QEMU_STATUS"
+          if [[ "$CLAMAV_QEMU_STATE" != "success" ]]; then
             exit 1
           fi
 
-      - name: Upload QEMU Antivirus Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: antivirus-qemu
-          path: workspace/qemu-9.1.0/build/clamav-scan-report.log
-
-  kubevirt-build-and-scan:
-    needs: qemu-build-and-scan
+  kubevirt-build:
+    needs: qemu-build
     permissions:
       contents: read
     runs-on: ubuntu-24.04
+    outputs:
+      kubevirt-artifact-id: ${{ steps.upload-kubevirt.outputs.artifact-id }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0 # All history, not just latest commit
@@ -190,8 +321,11 @@ jobs:
 
       - name: Cache Kubevirt output artifacts
         id: cache-kubevirt
-        uses: actions/cache@v4
-        if: ${{ inputs.disable_cache != 'true' }}
+        # The cache is disabled for release builds which zizmor can't accurately detect
+        # cache@v4.2.3 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # zizmor: ignore[cache-poisoning]
+        # Always disable cache for tagged runs, runs on the main branch, or when disable_cache is explicitly set to true
+        if: ${{ ! (github.ref_type == 'tag' || github.ref == 'refs/heads/main' || inputs.disable_cache == 'true') }}
         env:
           cache-name: cache-kubevirt
         with:
@@ -234,9 +368,10 @@ jobs:
 
       - name: Download QEMU artifact
         if: ${{ steps.cache-kubevirt.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
-        uses: actions/download-artifact@v4
+        # download-artifact@v4.3.0 released 2025 April 24. SHA pinned for enhanced security
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          artifact-ids: ${{ needs.qemu-build-and-scan.outputs.qemu-artifact-id }}
+          artifact-ids: ${{ needs.qemu-build.outputs.qemu-artifact-id }}
           path: . # Will unpack into a folder with the name used in upload-artifact, containing the binary
 
       - name: Build and patch kubevirt
@@ -373,48 +508,165 @@ jobs:
           ls -hal
 
       - name: Upload kubevirt artifacts
-        uses: actions/upload-artifact@v4
+        id: upload-kubevirt
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: kubevirt-artifacts
           path: |
             workspace/kubevirt-artifacts/intel-idv-kubevirt-${{ env.EDV_VERSION }}.tar.gz
 
+  kubevirt-scan:
+    needs: kubevirt-build
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        # checkout@v4.2.2 released 2024 October 23. SHA pinned for enhanced security
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # All history, not just latest commit
+          ref: ${{ github.event.pull_request.head.sha }} # Check out the actual commit, not a fake merge commit
+
+      - name: Setup Tools & Common Variables
+        uses: ./.github/actions/setup-tools
+        with:
+          go: "false"
+          trivy: "true"
+
+      - name: Download Kubevirt artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.kubevirt-build.outputs.kubevirt-artifact-id }}
+          path: workspace
+
+      - name: Unpack and Load Kubevirt Images
+        shell: bash
+        run: |
+          # Unpack the kubevirt artifacts
+          cd workspace/kubevirt-artifacts
+          tar -xvzf "intel-idv-kubevirt-${EDV_VERSION}.tar.gz"
+          cd "intel-idv-kubevirt-${EDV_VERSION}"
+
+          # Uncompress the zst files and load them into Docker
+          for file in *.zst; do
+            uncompressed_file="${file%.zst}"
+            zstd -d "$file" -o "$uncompressed_file"
+            docker load -i "$uncompressed_file"
+          done
+
       - name: Trivy Image Scan
-        continue-on-error: true
         shell: bash
         run: |
           mkdir -p workspace/kubevirt-trivy
           cd workspace/kubevirt-trivy
 
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
-          trivy image "localhost:5000/sidecar-shim:$EDV_VERSION"     --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_sidecar-shim.html
-          trivy image "localhost:5000/virt-api:$EDV_VERSION"         --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-api.html
-          trivy image "localhost:5000/virt-controller:$EDV_VERSION"  --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-controller.html
-          trivy image "localhost:5000/virt-handler:$EDV_VERSION"     --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-handler.html
-          trivy image "localhost:5000/virt-launcher:$EDV_VERSION"    --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-launcher.html
-          trivy image "localhost:5000/virt-operator:$EDV_VERSION"    --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_virt-operator.html
+          # Disable unneccessary warning for OSS project maintainers
+          export TRIVY_DISABLE_VEX_NOTICE=true
 
-          trivy image --quiet --format spdx-json --output trivy_sidecar-shim.spdx.json    "localhost:5000/sidecar-shim:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-api.spdx.json        "localhost:5000/virt-api:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-controller.spdx.json "localhost:5000/virt-controller:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-handler.spdx.json    "localhost:5000/virt-handler:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-launcher.spdx.json   "localhost:5000/virt-launcher:$EDV_VERSION"
-          trivy image --quiet --format spdx-json --output trivy_virt-operator.spdx.json   "localhost:5000/virt-operator:$EDV_VERSION"
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+
+          # Define a function to handle scanning, converting, and setting environment variables
+          scan_and_process_image() {
+            IMAGE_NAME="$1"
+            DOCKER_IMAGE="$2"
+
+            echo "Scanning $DOCKER_IMAGE..."
+            trivy image "$DOCKER_IMAGE" --format json -o "${IMAGE_NAME}_raw_results.json"
+
+            # Convert raw results to full HTML report
+            TRIVY_STATUS=0
+            trivy convert --format template --template "@trivy-html.tpl" \
+              -o "${IMAGE_NAME}.html" \
+              --exit-code 1 \
+              "${IMAGE_NAME}_raw_results.json" || TRIVY_STATUS=$?
+
+            # Generate SARIF output for GitHub Security tab
+            trivy convert \
+              --format sarif \
+              -o "${IMAGE_NAME}.sarif" \
+              "${IMAGE_NAME}_raw_results.json"
+
+            # Generate SPDX JSON file
+            trivy image --quiet --format spdx-json --output "${IMAGE_NAME}.spdx.json" "$DOCKER_IMAGE"
+
+            # Summarize results on GitHub for quick access
+            echo "# Trivy $IMAGE_NAME Scan Results" >> $GITHUB_STEP_SUMMARY
+
+            # Set environment variables based on scan results
+            if [[ $TRIVY_STATUS -eq 0 ]]; then
+              echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected"
+              echo "Trivy scan for $DOCKER_IMAGE completed with no vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+            elif [[ $TRIVY_STATUS -eq 1 ]]; then
+              echo "Trivy scan for $DOCKER_IMAGE detected vulnerabilities"
+              echo "$(trivy convert --format table "${IMAGE_NAME}_raw_results.json")" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "Trivy scan for $DOCKER_IMAGE failed."
+              echo "Trivy scan failed" >> $GITHUB_STEP_SUMMARY
+              exit $TRIVY_STATUS
+            fi
+          }
+
+          # Call the function for each image
+          scan_and_process_image "sidecar-shim" "localhost:5000/sidecar-shim:$EDV_VERSION"
+          scan_and_process_image "virt-api" "localhost:5000/virt-api:$EDV_VERSION"
+          scan_and_process_image "virt-controller" "localhost:5000/virt-controller:$EDV_VERSION"
+          scan_and_process_image "virt-handler" "localhost:5000/virt-handler:$EDV_VERSION"
+          scan_and_process_image "virt-launcher" "localhost:5000/virt-launcher:$EDV_VERSION"
+          scan_and_process_image "virt-operator" "localhost:5000/virt-operator:$EDV_VERSION"
 
       - name: Upload Trivy Image Report
-        uses: actions/upload-artifact@v4
+        # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: Trivy kubevirt image scan
           path: |
-            workspace/kubevirt-trivy/trivy_sidecar-shim.html
-            workspace/kubevirt-trivy/trivy_virt-api.html
-            workspace/kubevirt-trivy/trivy_virt-controller.html
-            workspace/kubevirt-trivy/trivy_virt-handler.html
-            workspace/kubevirt-trivy/trivy_virt-launcher.html
-            workspace/kubevirt-trivy/trivy_virt-operator.html
-            workspace/kubevirt-trivy/trivy_sidecar-shim.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-api.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-controller.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-handler.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-launcher.spdx.json
-            workspace/kubevirt-trivy/trivy_virt-operator.spdx.json
+            workspace/kubevirt-trivy/sidecar-shim.html
+            workspace/kubevirt-trivy/virt-api.html
+            workspace/kubevirt-trivy/virt-controller.html
+            workspace/kubevirt-trivy/virt-handler.html
+            workspace/kubevirt-trivy/virt-launcher.html
+            workspace/kubevirt-trivy/virt-operator.html
+            workspace/kubevirt-trivy/sidecar-shim.spdx.json
+            workspace/kubevirt-trivy/virt-api.spdx.json
+            workspace/kubevirt-trivy/virt-controller.spdx.json
+            workspace/kubevirt-trivy/virt-handler.spdx.json
+            workspace/kubevirt-trivy/virt-launcher.spdx.json
+            workspace/kubevirt-trivy/virt-operator.spdx.json
+
+      # Unfortunately, upload-sarif deprecated a feature that lets you upload all of these files together.
+      # Now they need to be done one-by-one with an explicitly different category
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - sidecar-shim
+        # upload-sarif@v3.29.2 released 2025 June 30. SHA pinned for enhanced security
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/sidecar-shim.sarif
+          category: kubevirt-sidecar-shim
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-api
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-api.sarif
+          category: kubevirt-virt-api
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-controller
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-controller.sarif
+          category: kubevirt-virt-controller
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-handler
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-handler.sarif
+          category: kubevirt-virt-handler
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-launcher
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-launcher.sarif
+          category: kubevirt-virt-launcher
+      - name: Upload Trivy SARIF Results to GitHub Security Tab - virt-operator
+        uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
+        with:
+          sarif_file: workspace/kubevirt-trivy/virt-operator.sarif
+          category: kubevirt-virt-operator
