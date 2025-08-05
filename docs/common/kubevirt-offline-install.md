@@ -29,11 +29,9 @@ fi
 
 
 # Kubevirt and Intel Device-Plugin installation using TAR files
-This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node.
+This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node. And the Intel Device-Plugin to support it.
 
-And the Intel Device-Plugin to support it.
-
-## Steps
+#### Steps
 1.  Ensure Kubernetes is installed and local cluster is running.
 2.  Download and copy the latest TAR files of Kubevirt and Device-Plugin from [release](https://github.com/open-edge-platform/edge-desktop-virtualization/releases) to the host system
 3.  Extract TAR files
@@ -150,8 +148,29 @@ And the Intel Device-Plugin to support it.
     > Please wait for all virt-handler pods to complete restarts\
     > The value of **Requests** and **Limits** will increase upon successful resource allocation to running pods/VMs
 
-9.  Install CDI - Not required in case of PVC based deployment
-    ```sh
-    kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-operator.yaml
-    kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-cr.yaml
-    ```
+
+# Install Virt-Plugin
+
+  Install Krew and then install Virt plugin to control Virtual Machine
+  ```sh
+  (
+    set -x; cd "$(mktemp -d)" &&
+    OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+    ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+    KREW="krew-${OS}_${ARCH}" &&
+    curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+    tar zxvf "${KREW}.tar.gz" &&
+    ./"${KREW}" install krew
+  )
+
+  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+  kubectl krew install virt
+  ```
+
+# Install CDI
+  Optional, if want to use VM image from CDI
+  ```sh
+  kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-operator.yaml
+  kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-cr.yaml
+  ```

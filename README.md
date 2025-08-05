@@ -11,13 +11,13 @@
     - [Key Features](#key-features)
     - [System requirements:](#system-requirements)
       - [Recommended Hardware Configuration](#recommended-hardware-configuration)
-    - [Host OS Options](#host-os-options)
-    - [Generate Virtual Machine qcow2 with required drivers for SR-IOV](#generate-virtual-machine-qcow2-with-required-drivers-for-sr-iov)
-  - [K3s/Kubevirt Solution stack for Edge Desktop Virtualization](#k3skubevirt-solution-stack-for-edge-desktop-virtualization)
-    - [IDV Services](#idv-services)
-    - [Device Plugins for Kubernetes](#device-plugins-for-kubernetes)
-    - [Kubevirt Patch](#kubevirt-patch)
-    - [Sample Application : VM deployment Helm charts](#sample-application--vm-deployment-helm-charts)
+  - [Enabling Desktop Virtualization with Graphics SR-IOV](#enabling-desktop-virtualization-with-graphics-sr-iov)
+    - [Enable Host system with Intel Graphics SR-IOV](#enable-host-system-with-intel-graphics-sr-iov)
+      - [Additional Settings](#additional-settings)
+    - [K3s/Kubevirt Solution stack for Edge Desktop Virtualization](#k3skubevirt-solution-stack-for-edge-desktop-virtualization)
+      - [Installing Kubernetes, Kubevirt and Intel Device Plugin](#installing-kubernetes-kubevirt-and-intel-device-plugin)
+    - [Creation of Virtual Machine Bootdisk Image](#creation-of-virtual-machine-bootdisk-image)
+    - [Deployment of Virtual Machines](#deployment-of-virtual-machines)
   - [References](#references)
   - [Getting Help](#getting-help)
   - [Contributions](#contributions)
@@ -65,25 +65,35 @@ One can check if your Intel graphics controller supports SR-IOV by executing bel
 | Storage      | 500 GB SSD or NVMe minimum               |
 | Networking   | 1GbE Ethernet                            |
 
-### Host OS Options
+## Enabling Desktop Virtualization with Graphics SR-IOV 
+Steps:
+1.  Enable Host system with Intel Graphics SR-IOV
+2.  Installing Kubernetes, Kubevirt(customized to enable local display for Intel Graphics SR-IOV), Intel Device Plugin
+3.  Creation of VM bootdisk image
+4.  Deployment of VMs
 
-Host OS has to be enabled with graphics SR-IOV ingredients.
+### Enable Host system with Intel Graphics SR-IOV
+
+Host OS has to be enabled with graphics SR-IOV ingredients.\
 Below are various options (but not limited to) :
 - #### EMT - Intel EMT with [desktop-virtualization Image config](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/70d364596e88ad332637d7073a7a0a445960ca39/toolkit/imageconfigs/edge-image-desktop-virtualization.json)
-- #### Debian - [ThunderSoft SR-IOV](https://github.com/ThunderSoft-SRIOV)
+- #### Debian 
+  - [ThunderSoft SR-IOV](docs/common/sriov-host.md#debian-host-system-with-intel-graphics-sr-iov)
 - #### Ubuntu
   - [kvm multi-os](https://github.com/intel/kvm-multios/blob/main/documentation/setup_sriov.md)
-  - [12th Gen](https://www.intel.com/content/www/us/en/secure/content-details/680834/12th-gen-intel-core-mobile-processors-code-named-alder-lake-p-12th-gen-intel-core-desktop-processors-code-named-alder-lake-s-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu-user-guide.html?wapkw=multi-os%20graphics%20SRIOV&DocID=680834)
-  - [13th Gen](https://www.intel.com/content/www/us/en/secure/content-details/762237/13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake-p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu-user-guide.html?wapkw=multi-os%20graphics%20SRIOV)
-  - [Core Ultra PS Series (Meteor Lake)](https://www.intel.com/content/www/us/en/secure/content-details/780205/reference-implementation-of-intel-core-ultra-processor-intel-core-ultra-processor-ps-series-formerly-known-as-meteor-lake-u-h-ps-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu-user-guide.html?wapkw=multi-os%20graphics%20SRIOV)
+  - [12th Gen](docs/common/sriov-host.md#12th-gen-intel-core-mobile-processors-code-named-alder-lake-p--12th-gen-intel-core-desktop-processors-code-named-alder-lake-s-multi-os-with-graphics-sriov-virtualization-on-ubuntu)
+  - [13th Gen](docs/common/sriov-host.md#13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake---p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
+  - [Core Ultra PS Series (Meteor Lake)](docs/common/sriov-host.md#reference-implementation-of-intel-core-ultra-processorintel-core-ultra-processor-ps-series-formerly-known-as-meteor-lake-uhps-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
 
+#### Additional Settings
+These include creation of service to set Enabling Virtual Functions, Hugepage, USB permissions
 
-### Generate Virtual Machine qcow2 with required drivers for SR-IOV
+1.  [Hugepage Service](docs/common/host-settings.md#setup-hugepages)
+2.  [USB Permissions](docs/common/host-settings.md#set-permissions-to-usb-devices)
+3.  [Display Settings](idv-services/README.md#manual-steps-to-run-idv-service)
+    - [Manual Steps](docs/common/host-settings.md#display-setup)
 
-- #### [Windows](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-windows-vm.md#microsoft-windows-11-vm)
-- #### [Ubuntu](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/docs/deploy-ubuntu-vm.md)
-
-## K3s/Kubevirt Solution stack for Edge Desktop Virtualization
+### K3s/Kubevirt Solution stack for Edge Desktop Virtualization
 
 Below are the ingredients to achieve Display and Graphics Virtualization pipeline using SR-IOV.
 
@@ -97,12 +107,24 @@ Below are the ingredients to achieve Display and Graphics Virtualization pipelin
 The components marked in red are in scope of this solution. 
 The display and graphics virtualization pipeline on k3s/kubevirt can be realized by following build and installation of below components.
 
-### [IDV Services](idv-services/README.md)
-### [Device Plugins for Kubernetes](device-plugins-for-kubernetes/README.md)
-### [Kubevirt Patch](kubevirt-patch/README.md)
-### Sample Application : VM deployment Helm charts
-   - #### [Discrete Helm charts](sample-application/discrete/README.md)
-   - #### [Single Helm deployment](sample-application/single/README.md)
+For detailed documentation refer [Kubevirt patching guide](kubevirt-patch/README.md), [Intel Device-Plugins for Kubernetes](device-plugins-for-kubernetes/README.md), 
+
+#### Installing Kubernetes, Kubevirt and Intel Device Plugin
+
+1. [Install K3S](docs/common/kubevirt-offline-install.md#install-kubernetes)
+2. [Install Kubevirt and Intel Device-Plugin](docs/common/kubevirt-offline-install.md#kubevirt-and-intel-device-plugin-installation-using-tar-files)
+3. [Install Virt plugin](docs/common/kubevirt-offline-install.md#install-virt-plugin)
+
+### Creation of Virtual Machine Bootdisk Image
+
+1. [Windows Guest VM image creation](../../sample-application/create-bootdisk/README.md#windows-guest-vm-creation)
+2. [Ubuntu Guest VM image creation](../../sample-application/create-bootdisk/README.md#ubuntu-guest-vm-creation)
+
+### Deployment of Virtual Machines
+
+1. Sample Application : VM deployment Helm charts
+   - [Discrete Helm charts](sample-application/discrete/README.md)
+   - [Single Helm deployment](sample-application/single/README.md)
 
 ## References
 - [Reference-1](https://cyberus-technology.de/en/articles/vbox-kvm-sriov)
