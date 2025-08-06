@@ -5,7 +5,7 @@ This directory contains mapped Sidecar and Virtual Machine Deployment charts.
    - *deployment/discrete/sidecar/[connector].yaml*
 2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using CDI.
    - *deployment/discrete/helm-win11_[connector]*
-3. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using PVC.
+3. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using HostPath PVC.
    - *deployment/discrete/pvc/helm-win11_[connector]*
 
 **Mapping of Sidecar script with VM deployment Helm chart**
@@ -13,7 +13,7 @@ This directory contains mapped Sidecar and Virtual Machine Deployment charts.
 Each VM has been configured with 3 CPU, 12GB RAM, 60 GB Disk space.\
 Refer `deployment/discrete/helm-win11_[connector]/values.yaml` to edit
 
-| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for PVC based)              |
+| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for HostPath PVC based)     |
 | :-----: | :------: | :--------: | :--------------: | :-------------: | :------: | :-------------------------------------------------: |
 | vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     | /opt/user-apps/vm_imgs/vm1/disk.img                 |
 | vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     | /opt/user-apps/vm_imgs/vm2/disk.img                 |
@@ -112,7 +112,7 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
     vm4-win11-image   Succeeded   N/A                   15d
     ```
 
-### For PVC based deployment
+### For HostPath PVC based deployment
 Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm1/` as `disk.img`
 
 ## 3. Edit Sidecar script to attach USB peripherals to Virtual Machine
@@ -306,7 +306,7 @@ sidecar-script-hdmi2   1      16d
 cd deployment/discrete/helm-win11_hdmi1
 helm install vm1 .
 ```
-### For PVC based deployment
+### For HostPath PVC based deployment
 ```sh
 cd deployment/discrete/pvc/helm-win11_hdmi1
 helm install vm1 .
@@ -367,10 +367,10 @@ Allocated resources:
 
 Once all the VMs are deployed and are running on their respective monitors, dedicated Keyboard, Mouse can be used.\
 Now install Chrome browser and open [WebGL Aquarium](https://webglsamples.org/aquarium/aquarium.html)\
-fps should be seen as 60fps on all 4 VMs, this will ensure the deployment of solution with Intel Graphics SR-IOV is working.
+60fps should be seen on all 4 VMs, this will ensure the deployment of solution with Intel Graphics SR-IOV is working.
 
 <p align="center">
-<img width=30% height=30% src="../../docs/images/webgl-aquarium.png">
+<img width=90% height=90% src="../../docs/images/webgl-aquarium.png">
 </p>
 <p align="center">
 <em>WebGl Aquarium at 60fps</em>
