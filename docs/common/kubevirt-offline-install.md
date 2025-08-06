@@ -1,5 +1,8 @@
 # Install Kubernetes
-K3s is a lightweight Kubernetes distribution suitable for Edge and IoT use cases. This step will setup a single node cluster where the host function as both the server/control plane and the worker node. This step is only required if you don't already have a Kubernetes cluster setup that you can use.
+K3s is a lightweight Kubernetes distribution suitable for Edge and IoT use cases. This step will setup a single node cluster where the host function as both the server/control plane and the worker node. This step is only required if you don't already have a Kubernetes cluster setup that you can use. 
+
+K3S Version is v1.32.6+k3s1
+
 ```sh
 export K3S_VERSION="v1.32.6+k3s1"
 export KUBECONFIG_PATH="/etc/rancher/k3s/k3s.yaml"
@@ -28,7 +31,8 @@ fi
 ```
 
 # Kubevirt and Intel Device-Plugin installation using TAR files
-This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node. And the Intel Device-Plugin to support it.
+Kubevirt used here is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node.\
+And the Intel Device-Plugin to support it.
 
 #### Steps
 1.  Ensure Kubernetes is installed and local cluster is running.
@@ -71,8 +75,8 @@ This version of Kubevirt is built on release tag v1.5.0 along with GTK library s
     localhost:5000/virt-handler                           v1.5.0_DV           a9bd1a37e2e0c       90.7MB
     localhost:5000/virt-launcher                          v1.5.0_DV           c69ddc6b90387       403MB
     localhost:5000/virt-operator                          v1.5.0_DV           99462ddb3a866       39.8MB
-    localhost:5000/device-plugin                          v1                  156ba1fcaf549       21.3MB
-    localhost:5000/busybox                                latest              ff7a7936e9306       2.21MB
+    localhost:5000/device-plugin                          v1.1                156ba1fcaf549       21.3MB
+    localhost:5000/busybox                                glibc               ff7a7936e9306       2.21MB
     ```
 6.  Deploy Kubevirt and Device Plugin
     ```sh
@@ -181,7 +185,8 @@ This version of Kubevirt is built on release tag v1.5.0 along with GTK library s
   ```
 
 # Install CDI
-  Optional, if want to use VM image from CDI
+  Optional, if want to use VM image from CDI.\
+  Version used is v1.60.3
   ```sh
   kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-operator.yaml
   kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-cr.yaml

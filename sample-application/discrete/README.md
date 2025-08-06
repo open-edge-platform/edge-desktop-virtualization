@@ -117,6 +117,119 @@ Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm
 
 ## 3. Edit Sidecar script to attach USB peripherals to Virtual Machine
 
+Sidecar script or configmap is used to update the Virt-Launcher Pod's libvirt domain XML `qemucommandline` section\
+`qemucommandline` section consist of DISPLAY variable, GTK enablement settings, Monitor info and USB Peripherals which are to be passthrough to the particular VM
+
+### Update DISPLAY variable
+Open a Terminal on Host system's physical display
+```sh
+echo $DISPLAY
+```
+- Output
+```
+DISPLAY=:0
+```
+Get the DISPLAY variable from the above output and update in sidecar script
+
+Ex. in *deployment/discrete/sidecar/hdmi1.yaml* `DISPLAY` is set to `:0`
+```xml
+<qemu:env name='DISPLAY' value=':0'/> 
+```
+
+### Monitor ID
+Check Monitor's resolution and names of `connected` displays
+Open a Terminal on Host system's physical display
+```sh
+xrandr
+```
+-   Output:
+    ```sh
+    Screen 0: minimum 320 x 200, current 7680 x 1080, maximum 16384 x 16384
+    HDMI-1 connected primary 1920x1080+0+0 (normal left inverted right x axis y axis) 521mm x 293mm
+    1920x1080     60.00*+  50.00    59.94
+    1600x1200     60.00
+    1680x1050     59.88
+    1400x1050     59.95
+    1600x900      60.00
+    1280x1024     75.02    60.02
+    1440x900      59.90
+    1280x960      60.00
+    1280x800      59.91
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1024x768      75.03    70.07    60.00
+    832x624       74.55
+    800x600       72.19    75.00    60.32    56.25
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    72.81    66.67    60.00    59.94
+    720x400       70.08
+    HDMI-2 connected 1920x1080+1920+0 (normal left inverted right x axis y axis) 527mm x 296mm
+    1920x1080     60.00*+  50.00    59.94
+    1680x1050     59.88
+    1600x900      60.00
+    1280x1024     75.02    60.02
+    1280x800      59.91
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1024x768      75.03    60.00
+    832x624       74.55
+    800x600       75.00    60.32
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    60.00    59.94
+    720x400       70.08
+    DP-1 connected 1920x1080+3840+0 (normal left inverted right x axis y axis) 521mm x 293mm
+    1920x1080     60.00*+  74.92    50.00    59.94
+    1600x1200     60.00
+    1680x1050     59.95
+    1400x1050     59.98
+    1280x1024     75.02    60.02
+    1440x900      59.89
+    1280x960      60.00
+    1280x800      59.81
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1440x576      50.00
+    1024x768      75.03    70.07    60.00
+    1440x480      60.00    59.94
+    832x624       74.55
+    800x600       72.19    75.00    60.32    56.25
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    72.81    66.67    60.00    59.94
+    720x400       70.08
+    DP-2 disconnected (normal left inverted right x axis y axis)
+    DP-3 connected 1920x1080+5760+0 (normal left inverted right x axis y axis) 521mm x 293mm
+    1920x1080     60.00*+  74.99    50.00    59.94
+    1600x1200     60.00
+    1680x1050     59.88
+    1400x1050     59.95
+    1280x1024     75.02    60.02
+    1440x900      59.90
+    1280x960      60.00
+    1280x800      59.91
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1440x576      50.00
+    1024x768      75.03    70.07    60.00
+    1440x480      60.00    59.94
+    832x624       74.55
+    800x600       72.19    75.00    60.32    56.25
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    72.81    66.67    60.00    59.94
+    720x400       70.08
+    DP-4 disconnected (normal left inverted right x axis y axis)
+    ```
+Get the connector names of monitors from the above output and update in sidecar script
+
+Ex. in *deployment/discrete/sidecar/hdmi1.yaml* `connectors.0` is mapped with
+```xml
+<qemu:arg value='gtk,gl=on,full-screen=on,zoom-to-fit=on,window-close=off,input=on,connectors.0=HDMI-1'/> 
+```
+
+### USB Info
 Get the list of USB devices connected to Host machine
 ```sh
 lsusb -t

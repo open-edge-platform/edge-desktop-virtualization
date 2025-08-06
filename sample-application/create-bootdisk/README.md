@@ -42,6 +42,50 @@ Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
 
 **Pre-requisites:**
   - Ubuntu 22.04/24.04 ISO
-  - SR-IOV scripts - Create ISO file with these scripts
 
-**WIP**
+1.  Convert the Ubuntu ISO file to RAW disk image
+    ```sh
+    qemu-img convert -f raw -O raw file.iso disk.img
+    ```
+2.  Place the RAW disk images derived from above ISO files in these locations
+    | Image                           | PersistantVolume Name  | Path to store RAW disk Image                        |
+    | :-----------------------------  | :--------------------: | :-------------------------------------------------  |
+    | Ubuntu ISO                      | cdisk-vm1-iso1-pv      | /opt/disk_imgs/iso/os-iso-disk/disk.img             |
+3.  Primary display considered in manifest is HDMI-1, hence deploy the Sidecar configmap of HDMI-1 and then apply manifest
+    ```sh
+    kubectl apply -f sample-application/discrete/sidecar/hdmi1.yaml
+    kubectl apply -f sample-application/create-bootdisk/manifest/vm1.yaml
+    ```
+4.  Now you should see prompt to install OS on HDMI-1, now continue installation
+5.  Once after OS is installed, ensure internet is available and set the proxy if required. 
+6.  Open a `Terminal` in the guest VM. Run the command shown below to upgrade Ubuntu software to the latest in the guest VM.
+    ```sh
+    # Upgrade Ubuntu software
+    sudo apt -y update
+    sudo apt -y upgrade
+    sudo apt -y install openssh-server
+    ```
+7.  Copy [setup_bsp.sh](https://github.com/ThunderSoft-SRIOV/sriov/blob/main/scripts/setup_guest/ubuntu/setup_bsp.sh) to home directory of Ubuntu Guest
+8.  Run `./setup_bsp.sh` in Ubuntu guest VM. Please be patient, it will take a few hours
+    ```shell
+    # in the guest
+    cd ~
+    sudo chmod +x setup_bsp.sh
+    sudo ./setup_bsp.sh -kp 6.6-intel
+    ```
+9.  Do reboot, after rebooting, check if the kernel is the installed version.
+    ```sh
+    uname -r
+    ```
+    Output
+    ```sh
+    6.6-intel
+    ```
+10. Verify SR-IOV is enabled
+    ```sh
+    sudo dmesg | grep SR-IOV
+    ```
+    Output
+    ```sh
+    [6.026008] i915 0000:00:02.0: Running in SR-IOV PF mode
+    ```

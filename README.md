@@ -117,8 +117,8 @@ For detailed documentation refer [Kubevirt patching guide](kubevirt-patch/README
 
 ### Creation of Virtual Machine Bootdisk Image
 
-1. [Windows Guest VM image creation](../../sample-application/create-bootdisk/README.md#windows-guest-vm-creation)
-2. [Ubuntu Guest VM image creation](../../sample-application/create-bootdisk/README.md#ubuntu-guest-vm-creation)
+1. [Windows Guest VM image creation](sample-application/create-bootdisk/README.md#windows-guest-vm-creation)
+2. [Ubuntu Guest VM image creation](sample-application/create-bootdisk/README.md#ubuntu-guest-vm-creation)
 
 ### Deployment of Virtual Machines
 
@@ -131,8 +131,8 @@ For detailed documentation refer [Kubevirt patching guide](kubevirt-patch/README
 - [Reference-2](https://www.dfi.com/Uploads/DownloadCenter/5631e304-28b2-4256-975a-5689750b5636/Intel%20iGPU%20(Integrated%20Graphics)%20SR-IOV%20-%20The%20Catalyst%20for%20IoT%20Virtualization%20in%20Factory%20Automation.pdf?timestamp=1676441838.9072)
 - [Reference-3](https://www.intel.com/content/www/us/en/secure/content-details/782115/intelligent-desktop-virtualization-idv.html?wapkw=intelligent%20desktop%20virtualization&DocID=782115)
 - [Reference-4](https://www.intel.com/content/www/us/en/secure/content-details/657261/sr-iov-based-graphics-virtualization.html?wapkw=intelligent%20desktop%20virtualization&DocID=657261)
-- [References-5](https://github.com/intel/kubevirt-gfx-sriov)
-- [References-6](https://dgpu-docs.intel.com/devices/hardware-table.html)
+- [Reference-5](https://github.com/intel/kubevirt-gfx-sriov)
+- [Reference-6](https://dgpu-docs.intel.com/devices/hardware-table.html)
 
 ## Getting Help
 
