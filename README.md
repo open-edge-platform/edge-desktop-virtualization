@@ -67,30 +67,30 @@ One can check if your Intel graphics controller supports SR-IOV by executing bel
 
 ## Enabling Desktop Virtualization with Graphics SR-IOV 
 Steps:
-1.  Enable Host system with Intel Graphics SR-IOV
-2.  Installing Kubernetes, Kubevirt(customized to enable local display for Intel Graphics SR-IOV), Intel Device Plugin
-3.  Creation of VM bootdisk image
-4.  Deployment of VMs
+1.  [Enable Host system with Intel Graphics SR-IOV](#enable-host-system-with-intel-graphics-sr-iov)
+2.  [Installing Kubernetes, Kubevirt(customized to enable local display for Intel Graphics SR-IOV), Intel Device Plugin](#installing-kubernetes-kubevirt-and-intel-device-plugin)
+3.  [Creation of VM bootdisk image](#creation-of-virtual-machine-bootdisk-image)
+4.  [Deployment of VMs](#deployment-of-virtual-machines)
 
 ### Enable Host system with Intel Graphics SR-IOV
 
 Host OS has to be enabled with graphics SR-IOV ingredients.\
 Below are various options (but not limited to) :
-- #### EMT - Intel EMT with [desktop-virtualization Image config](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/70d364596e88ad332637d7073a7a0a445960ca39/toolkit/imageconfigs/edge-image-desktop-virtualization.json)
+- #### EMT - Intel EMT with [desktop-virtualization Image config](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/70d364596e88ad332637d7073a7a0a445960ca39/toolkit/imageconfigs/edge-image-desktop-virtualization.json) - BKM to be linked
 - #### Debian 
   - [ThunderSoft SR-IOV](docs/common/sriov-host.md#debian-host-system-with-intel-graphics-sr-iov)
 - #### Ubuntu
-  - [kvm multi-os](https://github.com/intel/kvm-multios/blob/main/documentation/setup_sriov.md)
-  - [12th Gen](docs/common/sriov-host.md#12th-gen-intel-core-mobile-processors-code-named-alder-lake-p--12th-gen-intel-core-desktop-processors-code-named-alder-lake-s-multi-os-with-graphics-sriov-virtualization-on-ubuntu)
-  - [13th Gen](docs/common/sriov-host.md#13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake---p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
-  - [Core Ultra PS Series (Meteor Lake)](docs/common/sriov-host.md#reference-implementation-of-intel-core-ultra-processorintel-core-ultra-processor-ps-series-formerly-known-as-meteor-lake-uhps-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
+  - [KVM Multi-OS Guide](https://github.com/intel/kvm-multios/blob/main/documentation/setup_sriov.md)
+  - [12th Gen Intel® Core™ Processors](docs/common/sriov-host.md#12th-gen-intel-core-mobile-processors-code-named-alder-lake-p--12th-gen-intel-core-desktop-processors-code-named-alder-lake-s-multi-os-with-graphics-sriov-virtualization-on-ubuntu)
+  - [13th Gen Intel® Core™ Processors](docs/common/sriov-host.md#13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake---p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
+  - [Core Ultra PS Series (Meteor Lake) Intel® Core™ Ultra Processors](docs/common/sriov-host.md#reference-implementation-of-intel-core-ultra-processorintel-core-ultra-processor-ps-series-formerly-known-as-meteor-lake-uhps-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
 
 #### Additional Settings
 These include creation of service to set Enabling Virtual Functions, Hugepage, USB permissions
 
 1.  [Hugepage Service](docs/common/host-settings.md#setup-hugepages)
 2.  [USB Permissions](docs/common/host-settings.md#set-permissions-to-usb-devices)
-3.  [Display Settings](idv-services/README.md#manual-steps-to-run-idv-service)
+3.  [Display Settings and GFX Virtual Functions](idv-services/README.md#manual-steps-to-run-idv-service)
     - [Manual Steps](docs/common/host-settings.md#display-setup)
 
 ### K3s/Kubevirt Solution stack for Edge Desktop Virtualization
@@ -125,6 +125,7 @@ For detailed documentation refer [Kubevirt patching guide](kubevirt-patch/README
 1. Sample Application : VM deployment Helm charts
    - [Discrete Helm charts](sample-application/discrete/README.md)
    - [Single Helm deployment](sample-application/single/README.md)
+2. [Verifying deployment](sample-application/discrete/README.md#6-running-webgl-aquarium-test)
 
 ## References
 - [Reference-1](https://cyberus-technology.de/en/articles/vbox-kvm-sriov)

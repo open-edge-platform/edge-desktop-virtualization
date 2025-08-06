@@ -153,3 +153,4 @@ sudo systemctl start x.service
 
 # Troubleshooting
 
+## USB hotplug - WIP

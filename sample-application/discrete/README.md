@@ -363,41 +363,15 @@ Allocated resources:
 .
 ```
 
-## 6. GPU, DV Driver and Windows Cumulative Update Installation
-1. Install Windows Cumulative Update.
-   - For Windows 10, download [2023-05 Cumulative Update for Windows 10 Version 21H2 for x64-based Systems (KB5026361)](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2023/05/windows10.0-kb5026361-x64_961f439d6b20735f067af766e1813936bf76cb94.msu)
-   - For Windows 11, download [2023-10 Cumulative Update Preview for Windows 11 Version 22H2 for x64-based Systems (KB5031455)](https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/e3472ba5-22b6-46d5-8de2-db78395b3209/public/windows11.0-kb5031455-x64_d1c3bafaa9abd8c65f0354e2ea89f35470b10b65.msu)
-   - Double-click the msu file to install
+## 6. Running WebGL Aquarium test
 
-2. Download Intel® Graphics Driver Production Driver Version. 
-   [GFX-prod-hini-releases_23ww44-ci-master-15089-revenue-pr1015081-ms-attestation-sign-519-RPL-Rx64.zip](https://www.intel.com/content/www/us/en/secure/design/confidential/software-kits/kit-details.html?kitId=816432)
-   - Extract the zip file
-   - Navigate into the install folder and double click on installer.exe to launch the installer
-   - Click the “Begin installation button”
-   - After the installation has completed, click the “Reboot Required” button to reboot
-   - To check the installation, launch the Device manager, expand the Display adapters item in the device list
-   - Right click on the graphics device and select “Properties”. Check that the Intel® Graphics version is 31.0.101.5081
-    > [!Note]
-    > Note: If you see the yellow triangle with exclamation, then please install the driver manually by selecting the 31.0.101.5081 version. 
-    > (Right click to update the driver and select the option to point to the main installation directory)
+Once all the VMs are deployed and are running on their respective monitors, dedicated Keyboard, Mouse can be used.\
+Now install Chrome browser and open [WebGL Aquarium](https://webglsamples.org/aquarium/aquarium.html)\
+fps should be seen as 60fps on all 4 VMs, this will ensure the deployment of solution with Intel Graphics SR-IOV is working.
 
-3. Download Windows Zero Copy Drivers Release 1447 - DVServer, DVServerKMD.
-   [ZCBuild_1447_MSFT_Signed.zip](https://www.intel.com/content/www/us/en/download/816539/nex-displayvirtualization-drivers-for-alder-lake-s-p-n-and-raptor-lake-s-p-sr-p-core-psamston-lake.html?cache=1708585927)
-   - Extract the zip file
-   - Search for ‘Windows PowerShell’ and run it as an administrator
-   - Enter the following command and when prompted, enter “Y/Yes” to continue
-     ```sh
-     C:\> Set-ExecutionPolicy -ExecutionPolicy AllSigned -Scope CurrentUser
-     ```
-   - Run the command below to install the DVServerKMD and DVServerUMD device drivers. When prompted, enter “[R] Run once” to continue.
-     ```sh
-     C:\> .\DVInstaller.ps1
-     ```
-   - Once the driver installation completes, the Windows Guest VM will reboot automatically
-   - To check the installation, launch the Device manager, expand the Display adapters item in the device list
-   - Right click on the DVServerUMD device and select “Properties”. Check that the DVServerUMD Device Driver version is 4.0.0.1447
-   - In Device Manager, expand the System devices item in the device list
-   - Right click on the DVServerKMD device and select “Properties”. Check that the DVServerKMD Device Driver version is 4.0.0.1447
-    > [!Note]
-    > If you encounter DVInstaller.ps1 failure to run due to blocked script, please follow the [link](https://docs.microsoft.com/enus/powershell/module/microsoft.powershell.utility/unblock-file?view=powershell7.2#:~:text=The%20Unblock%2Dfile%20cmdlet%20lets,the%20computer%20from%20untrusted%20files) to unblock
-
+<p align="center">
+<img width=30% height=30% src="../../docs/images/webgl-aquarium.png">
+</p>
+<p align="center">
+<em>WebGl Aquarium at 60fps</em>
+</p>

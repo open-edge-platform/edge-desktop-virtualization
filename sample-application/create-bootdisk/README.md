@@ -3,14 +3,12 @@ This step is to create VM Disk image using Kubevirt, this is a one time activity
 
 Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
 
-[Multi-OS with Graphics SR-IOV Virtualization on Ubuntu](https://www.intel.com/content/www/us/en/secure/content-details/762237/13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake-p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu-user-guide.html?wapkw=multi-os%20graphics%20SRIOV&DocID=762237) [User Guide](https://cdrdv2.intel.com/v1/dl/getContent/762237?explicitVersion=true)
-
 ## Windows Guest VM creation
 
 **Pre-requisites:**
   - Windows 10/11 ISO
   - [Virtio ISO](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archivevirtio/virtio-win-0.1.240-1/virtio-win.iso) for drivers
-  - Latest [Intel GPU](https://www.intel.com/content/www/us/en/secure/design/confidential/software-kits/kit-details.html?kitId=861222) & [Zero Copy](https://github.com/intel/Display-Virtualization-for-Windows-OS/releases/tag/zerocopy-version-1918) drivers - Create ISO file with the drivers / Download directly on VM when Ethernet driver is installed and VM is able to connect to internet
+  - Latest [Intel GPU](https://www.intel.com/content/www/us/en/secure/design/confidential/software-kits/kit-details.html?kitId=861222) & [Zero Copy](https://www.intel.com/content/www/us/en/download/856334/display-virtualization-drivers-for-raptor-lake-ps.html?wapkw=sriov) drivers - Create ISO file with the drivers / Download directly on VM when Ethernet driver is installed and VM is able to connect to internet
 
 1.  Convert the ISO files to RAW disk image
     ```sh
@@ -28,9 +26,10 @@ Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
     kubectl apply -f sample-application/create-bootdisk/manifest/vm1.yaml
     ```
 4.  Now you should see prompt to install OS on HDMI-1, now continue installation
-5.  Refer Multi-OS with Graphics SR-IOV Virtualization on Ubuntu User Guide PDF Section `5.2.1 Windows* Guest VM Manual Setup`
+5.  Refer [Multi-OS with Graphics SR-IOV Virtualization on Ubuntu User Guide PDF](https://www.intel.com/content/www/us/en/secure/content-details/762237/13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake-p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu-user-guide.html?wapkw=multi-os%20graphics%20SRIOV&DocID=762237) Section `5.2.1 Windows* Guest VM Manual Setup`
+    -  **Note: Use the latest Intel GPU and Zero drivers from link mentioned in Pre-requisites section**
     -  Continue from Section `5.2.1.2 Create Windows Guest VM Image from ISO` > `Step 2 Follow the Windows installation steps until you see the Windows Setup screen`.
-    -  And complete installtion till `Section 5.2.1.12 Resume Windows Update` 
+    -  And complete installtion till `Section 5.2.1.12 Resume Windows Update`
 6.  Once after OS installation is complete, shutdown the VM, remove the manifest
     ```sh
     kubectl delete -f sample-application/create-bootdisk/manifest/vm1.yaml
@@ -89,3 +88,9 @@ Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
     ```sh
     [6.026008] i915 0000:00:02.0: Running in SR-IOV PF mode
     ```
+11.  Once after OS installation is complete, shutdown the VM, remove the manifest
+    ```sh
+    kubectl delete -f sample-application/create-bootdisk/manifest/vm1.yaml
+    kubectl delete -f sample-application/discrete/sidecar/hdmi1.yaml
+    ```
+12.  Copy the `disk.img` from `/opt/disk_imgs/create-vm-bootdisk` to desired location to deploy
