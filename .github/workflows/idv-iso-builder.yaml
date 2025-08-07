@@ -11,7 +11,7 @@ permissions:
 on:
   push:
     branches:
-      - emt-dv-iso-update-build-tag
+      - emt-idv-iso-update-build-tag
       - main
   workflow_dispatch:
     # Inputs the workflow accepts.
