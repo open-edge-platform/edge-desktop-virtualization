@@ -11,7 +11,7 @@ permissions:
 on:
   push:
     branches:
-      - emt-dv-iso
+      - emt-dv-iso-update-build-tag
       - main
   workflow_dispatch:
     # Inputs the workflow accepts.
@@ -20,7 +20,7 @@ on:
         # description to be shown in the UI
         description: 'release tag to be build'
         # Default value if no value is explicitly provided
-        default: '3.0.20250718'
+        default: '3.0.20250806'
         # Input has to be provided for the workflow to run
         required: true
         # The data type of the input
