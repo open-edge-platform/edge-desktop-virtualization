@@ -78,9 +78,9 @@ Host OS has to be enabled with graphics SR-IOV ingredients.\
 Below are various options (but not limited to) :
 - #### [Edge Microvisor Toolkit](https://github.com/open-edge-platform/edge-microvisor-toolkit/tree/3.0)
   - [Creating Intel EMT ISO with Graphics SR-IOV enabled Kernel](https://github.com/open-edge-platform/edge-desktop-virtualization/blob/emt-dv-iso/emt-dv-iso/README.md)
-- #### Debian 
+- #### [Debian](https://www.debian.org/distrib/) 
   - [ThunderSoft SR-IOV](docs/common/sriov-host.md#debian-host-system-with-intel-graphics-sr-iov)
-- #### Ubuntu
+- #### [Ubuntu](https://ubuntu.com/download/desktop)
   - [KVM Multi-OS Guide](https://github.com/intel/kvm-multios/blob/main/documentation/setup_sriov.md)
   - [12th Gen Intel® Core™ Processors](docs/common/sriov-host.md#12th-gen-intel-core-mobile-processors-code-named-alder-lake-p--12th-gen-intel-core-desktop-processors-code-named-alder-lake-s-multi-os-with-graphics-sriov-virtualization-on-ubuntu)
   - [13th Gen Intel® Core™ Processors](docs/common/sriov-host.md#13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake---p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
