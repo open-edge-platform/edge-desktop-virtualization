@@ -26,7 +26,7 @@ runs:
 
     - name: Set EDV_VERSION to the current git version for this actions run
       shell: bash
-      run: |
+      run: | # zizmor: ignore[github-env]
         # Print the most recent commit
         echo "Most recent commit:"
         git log -1
@@ -43,9 +43,24 @@ runs:
         EDV_VERSION="$(git describe --tags --always)"
 
         echo "EDV_VERSION=$EDV_VERSION"
+
+        # Check that the version is a legitimate git version identifier (commit id or tag)
+        # This will be injected into the github environment so need to be certain there's no code injection possible here
+        if [[ ! "$EDV_VERSION" =~ ^[a-zA-Z0-9\._-]+$ ]]; then
+          echo "EDV_VERSION contains invalid characters."
+          exit 1
+        fi
+
         echo "EDV_VERSION=$EDV_VERSION" >> $GITHUB_ENV
 
     - name: Set EDV_HOME to the checked-out edge-desktop-virtualization source code
       shell: bash
-      run: |
-        echo "EDV_HOME=$(pwd)" >> $GITHUB_ENV
+      run: | # zizmor: ignore[github-env]
+        # This variable is very useful in simplifying all dependent steps that use this actions workflow
+        # However, to protect against potential environment variable injection, it is hardcoded and then verified instead of being set dynamically
+        EDV_HOME="/home/runner/work/edge-desktop-virtualization/edge-desktop-virtualization"
+        echo "EDV_HOME=$EDV_HOME" >> $GITHUB_ENV
+        if [[ "$(pwd)" != "$EDV_HOME" ]]; then
+          echo "Current directory '$(pwd)' does not match expected home directory '$EDV_HOME'. Subsequent steps are likely to fail."
+          exit 1
+        fi
