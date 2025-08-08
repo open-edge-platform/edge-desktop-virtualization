@@ -76,14 +76,15 @@ Steps:
 
 Host OS has to be enabled with graphics SR-IOV ingredients.\
 Below are various options (but not limited to) :
-- #### EMT - Intel EMT with [desktop-virtualization Image config](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/70d364596e88ad332637d7073a7a0a445960ca39/toolkit/imageconfigs/edge-image-desktop-virtualization.json) - BKM to be linked
+- #### [Edge Microvisor Toolkit](https://github.com/open-edge-platform/edge-microvisor-toolkit/tree/3.0)
+  - [Creating Intel EMT ISO with Graphics SR-IOV enabled Kernel](https://github.com/open-edge-platform/edge-desktop-virtualization/blob/emt-dv-iso/emt-dv-iso/README.md)
 - #### Debian 
   - [ThunderSoft SR-IOV](docs/common/sriov-host.md#debian-host-system-with-intel-graphics-sr-iov)
 - #### Ubuntu
   - [KVM Multi-OS Guide](https://github.com/intel/kvm-multios/blob/main/documentation/setup_sriov.md)
   - [12th Gen Intel® Core™ Processors](docs/common/sriov-host.md#12th-gen-intel-core-mobile-processors-code-named-alder-lake-p--12th-gen-intel-core-desktop-processors-code-named-alder-lake-s-multi-os-with-graphics-sriov-virtualization-on-ubuntu)
   - [13th Gen Intel® Core™ Processors](docs/common/sriov-host.md#13th-gen-intel-core-mobile-processors-for-iot-edge-code-named-raptor-lake---p-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
-  - [Core Ultra PS Series (Meteor Lake) Intel® Core™ Ultra Processors](docs/common/sriov-host.md#reference-implementation-of-intel-core-ultra-processorintel-core-ultra-processor-ps-series-formerly-known-as-meteor-lake-uhps-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
+  - [Core Ultra PS Series Intel® Core™ Ultra Processors](docs/common/sriov-host.md#reference-implementation-of-intel-core-ultra-processorintel-core-ultra-processor-ps-series-formerly-known-as-meteor-lake-uhps-multi-os-with-graphics-sr-iov-virtualization-on-ubuntu)
 
 #### Additional Settings
 These include creation of service to set Enabling Virtual Functions, Hugepage, USB permissions
