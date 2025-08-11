@@ -1,22 +1,24 @@
-# Deployment of Virtual Machines and sidecar using individual helm charts
+# Deployment of Virtual Machines and Sidecar(ConfigMap) using individual helm charts
 
 This directory contains mapped Sidecar and Virtual Machine Deployment charts.
 1. Sidecar scripts, patches Libvirt XML with QEMU Commandline parameters inside Virt-Launcher pod.
    - *deployment/discrete/sidecar/[connector].yaml*
-2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3).
+2. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using CDI.
    - *deployment/discrete/helm-win11_[connector]*
+3. Virtual Machine deployment Helm charts to run VM on respecitive monitors (HDMI-1, HDMI-2, DP-1 and DP-3) using HostPath PVC.
+   - *deployment/discrete/pvc/helm-win11_[connector]*
 
 **Mapping of Sidecar script with VM deployment Helm chart**
 
 Each VM has been configured with 3 CPU, 12GB RAM, 60 GB Disk space.\
 Refer `deployment/discrete/helm-win11_[connector]/values.yaml` to edit
 
-| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port |
-| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: |
-| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     |
-| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     |
-| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     |
-| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     |
+| VM Name | Monitor  | Sidecar    | VM Helm Chart    | CDI Image Name  | RDP Port | Path to store VM Image (for HostPath PVC based)     |
+| :-----: | :------: | :--------: | :--------------: | :-------------: | :------: | :-------------------------------------------------: |
+| vm1     | HDMI-1   | hdmi1.yaml | helm-win11_hdmi1 | vm1-win11-image | 3390     | /opt/user-apps/vm_imgs/vm1/disk.img                 |
+| vm2     | HDMI-2   | hdmi2.yaml | helm-win11_hdmi2 | vm2-win11-image | 3391     | /opt/user-apps/vm_imgs/vm2/disk.img                 |
+| vm3     | DP-1     | dp1.yaml   | helm-win11_dp1   | vm3-win11-image | 3392     | /opt/user-apps/vm_imgs/vm3/disk.img                 |
+| vm4     | DP-3     | dp3.yaml   | helm-win11_dp3   | vm4-win11-image | 3393     | /opt/user-apps/vm_imgs/vm4/disk.img                 |
 
 **Verify Kubevirt, Device-plugin, SR-IOV GPU Passthrough and Hugepage before deploying VM**
 ```sh
@@ -83,8 +85,8 @@ Allocated resources:
 .
 .
 ```
-
-## 1. Upload VM bootimage to CDI
+## 2. Storing VM Images 
+### For CDI based deployment, upload VM bootimage to CDI
 Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 
 -   Get IP of CDI
@@ -109,9 +111,125 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
     vm3-win11-image   Succeeded   N/A                   16d
     vm4-win11-image   Succeeded   N/A                   15d
     ```
-  
-## 2. Edit Sidecar script to attach USB peripherals to Virtual Machine
 
+### For HostPath PVC based deployment
+Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm1/` as `disk.img`
+
+## 3. Sidecar script or Configmap to Virtual Machine
+
+Sidecar script or configmap is used to update the Virt-Launcher Pod's libvirt domain XML `qemucommandline` section\
+`qemucommandline` section consist of DISPLAY variable, GTK enablement settings, Monitor info and USB Peripherals which are to be passthrough to the particular VM
+
+### Update DISPLAY variable
+Open a Terminal on Host system's physical display
+```sh
+echo $DISPLAY
+```
+- Output
+```
+DISPLAY=:0
+```
+Get the DISPLAY variable from the above output and update in sidecar script
+
+Ex. in *deployment/discrete/sidecar/hdmi1.yaml* `DISPLAY` is set to `:0`
+```xml
+<qemu:env name='DISPLAY' value=':0'/> 
+```
+
+### Monitor ID
+Check Monitor's resolution and names of `connected` displays.\
+Open a Terminal on Host system's physical display
+```sh
+xrandr
+```
+-   Output:
+    ```sh
+    Screen 0: minimum 320 x 200, current 7680 x 1080, maximum 16384 x 16384
+    HDMI-1 connected primary 1920x1080+0+0 (normal left inverted right x axis y axis) 521mm x 293mm
+    1920x1080     60.00*+  50.00    59.94
+    1600x1200     60.00
+    1680x1050     59.88
+    1400x1050     59.95
+    1600x900      60.00
+    1280x1024     75.02    60.02
+    1440x900      59.90
+    1280x960      60.00
+    1280x800      59.91
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1024x768      75.03    70.07    60.00
+    832x624       74.55
+    800x600       72.19    75.00    60.32    56.25
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    72.81    66.67    60.00    59.94
+    720x400       70.08
+    HDMI-2 connected 1920x1080+1920+0 (normal left inverted right x axis y axis) 527mm x 296mm
+    1920x1080     60.00*+  50.00    59.94
+    1680x1050     59.88
+    1600x900      60.00
+    1280x1024     75.02    60.02
+    1280x800      59.91
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1024x768      75.03    60.00
+    832x624       74.55
+    800x600       75.00    60.32
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    60.00    59.94
+    720x400       70.08
+    DP-1 connected 1920x1080+3840+0 (normal left inverted right x axis y axis) 521mm x 293mm
+    1920x1080     60.00*+  74.92    50.00    59.94
+    1600x1200     60.00
+    1680x1050     59.95
+    1400x1050     59.98
+    1280x1024     75.02    60.02
+    1440x900      59.89
+    1280x960      60.00
+    1280x800      59.81
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1440x576      50.00
+    1024x768      75.03    70.07    60.00
+    1440x480      60.00    59.94
+    832x624       74.55
+    800x600       72.19    75.00    60.32    56.25
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    72.81    66.67    60.00    59.94
+    720x400       70.08
+    DP-2 disconnected (normal left inverted right x axis y axis)
+    DP-3 connected 1920x1080+5760+0 (normal left inverted right x axis y axis) 521mm x 293mm
+    1920x1080     60.00*+  74.99    50.00    59.94
+    1600x1200     60.00
+    1680x1050     59.88
+    1400x1050     59.95
+    1280x1024     75.02    60.02
+    1440x900      59.90
+    1280x960      60.00
+    1280x800      59.91
+    1152x864      75.00
+    1280x720      60.00    50.00    59.94
+    1440x576      50.00
+    1024x768      75.03    70.07    60.00
+    1440x480      60.00    59.94
+    832x624       74.55
+    800x600       72.19    75.00    60.32    56.25
+    720x576       50.00
+    720x480       60.00    59.94
+    640x480       75.00    72.81    66.67    60.00    59.94
+    720x400       70.08
+    DP-4 disconnected (normal left inverted right x axis y axis)
+    ```
+Get the connector names of monitors from the above output and update in sidecar script
+
+Ex. in *deployment/discrete/sidecar/hdmi1.yaml* `connectors.0` is mapped with
+```xml
+<qemu:arg value='gtk,gl=on,full-screen=on,zoom-to-fit=on,window-close=off,input=on,connectors.0=HDMI-1'/> 
+```
+
+### USB Device Passthrough
 Get the list of USB devices connected to Host machine
 ```sh
 lsusb -t
@@ -161,7 +279,7 @@ Ex. in *deployment/discrete/sidecar/hdmi1.yaml* is mapped with
 <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=3.1'/> <qemu:arg value='-usb'/> <qemu:arg value='-device'/> <qemu:arg value='usb-host,hostbus=3,hostport=3.2'/>
 ```
 
-## 3. Deploy Sidecar
+## 4. Deploy Sidecar
 ```sh
 kubectl apply -f deployment/discrete/sidecar/hdmi1.yaml
 ```
@@ -182,11 +300,18 @@ sidecar-script-hdmi1   1      18d
 sidecar-script-hdmi2   1      16d
 ```
 
-## 4. Deploy Virtual Machine
+## 5. Deploy Virtual Machine
+### For CDI based deployment
 ```sh
 cd deployment/discrete/helm-win11_hdmi1
 helm install vm1 .
 ```
+### For HostPath PVC based deployment
+```sh
+cd deployment/discrete/pvc/helm-win11_hdmi1
+helm install vm1 .
+```
+
 Output
 ```sh
 NAME: vm1
@@ -238,41 +363,15 @@ Allocated resources:
 .
 ```
 
-## 5. GPU, DV Driver and Windows Cumulative Update Installation
-1. Install Windows Cumulative Update.
-   - For Windows 10, download [2023-05 Cumulative Update for Windows 10 Version 21H2 for x64-based Systems (KB5026361)](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2023/05/windows10.0-kb5026361-x64_961f439d6b20735f067af766e1813936bf76cb94.msu)
-   - For Windows 11, download [2023-10 Cumulative Update Preview for Windows 11 Version 22H2 for x64-based Systems (KB5031455)](https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/e3472ba5-22b6-46d5-8de2-db78395b3209/public/windows11.0-kb5031455-x64_d1c3bafaa9abd8c65f0354e2ea89f35470b10b65.msu)
-   - Double-click the msu file to install
+## 6. Running WebGL Aquarium test
 
-2. Download Intel® Graphics Driver Production Driver Version. 
-   [GFX-prod-hini-releases_23ww44-ci-master-15089-revenue-pr1015081-ms-attestation-sign-519-RPL-Rx64.zip](https://www.intel.com/content/www/us/en/secure/design/confidential/software-kits/kit-details.html?kitId=816432)
-   - Extract the zip file
-   - Navigate into the install folder and double click on installer.exe to launch the installer
-   - Click the “Begin installation button”
-   - After the installation has completed, click the “Reboot Required” button to reboot
-   - To check the installation, launch the Device manager, expand the Display adapters item in the device list
-   - Right click on the graphics device and select “Properties”. Check that the Intel® Graphics version is 31.0.101.5081
-    > [!Note]
-    > Note: If you see the yellow triangle with exclamation, then please install the driver manually by selecting the 31.0.101.5081 version. 
-    > (Right click to update the driver and select the option to point to the main installation directory)
+Once all the VMs are deployed and are running on their respective monitors, dedicated Keyboard, Mouse can be used.\
+Now install Chrome browser and open [WebGL Aquarium](https://webglsamples.org/aquarium/aquarium.html)\
+60fps should be seen on all 4 VMs, this will ensure the deployment of solution with Intel Graphics SR-IOV is working.
 
-3. Download Windows Zero Copy Drivers Release 1447 - DVServer, DVServerKMD.
-   [ZCBuild_1447_MSFT_Signed.zip](https://www.intel.com/content/www/us/en/download/816539/nex-displayvirtualization-drivers-for-alder-lake-s-p-n-and-raptor-lake-s-p-sr-p-core-psamston-lake.html?cache=1708585927)
-   - Extract the zip file
-   - Search for ‘Windows PowerShell’ and run it as an administrator
-   - Enter the following command and when prompted, enter “Y/Yes” to continue
-     ```sh
-     C:\> Set-ExecutionPolicy -ExecutionPolicy AllSigned -Scope CurrentUser
-     ```
-   - Run the command below to install the DVServerKMD and DVServerUMD device drivers. When prompted, enter “[R] Run once” to continue.
-     ```sh
-     C:\> .\DVInstaller.ps1
-     ```
-   - Once the driver installation completes, the Windows Guest VM will reboot automatically
-   - To check the installation, launch the Device manager, expand the Display adapters item in the device list
-   - Right click on the DVServerUMD device and select “Properties”. Check that the DVServerUMD Device Driver version is 4.0.0.1447
-   - In Device Manager, expand the System devices item in the device list
-   - Right click on the DVServerKMD device and select “Properties”. Check that the DVServerKMD Device Driver version is 4.0.0.1447
-    > [!Note]
-    > If you encounter DVInstaller.ps1 failure to run due to blocked script, please follow the [link](https://docs.microsoft.com/enus/powershell/module/microsoft.powershell.utility/unblock-file?view=powershell7.2#:~:text=The%20Unblock%2Dfile%20cmdlet%20lets,the%20computer%20from%20untrusted%20files) to unblock
-
+<p align="center">
+<img width=90% height=90% src="../../docs/images/webgl-aquarium.png">
+</p>
+<p align="center">
+<em>WebGl Aquarium at 60fps</em>
+</p>
