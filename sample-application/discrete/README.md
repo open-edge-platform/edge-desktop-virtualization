@@ -115,7 +115,7 @@ Ex. for `vm1` the image name in CDI is `vm1-win11-image`
 ### For HostPath PVC based deployment
 Ex. for `vm1` the image path to keep VM disk image is `/opt/user-apps/vm_imgs/vm1/` as `disk.img`
 
-## 3. Edit Sidecar script to attach USB peripherals to Virtual Machine
+## 3. Sidecar script or Configmap to Virtual Machine
 
 Sidecar script or configmap is used to update the Virt-Launcher Pod's libvirt domain XML `qemucommandline` section\
 `qemucommandline` section consist of DISPLAY variable, GTK enablement settings, Monitor info and USB Peripherals which are to be passthrough to the particular VM
@@ -137,7 +137,7 @@ Ex. in *deployment/discrete/sidecar/hdmi1.yaml* `DISPLAY` is set to `:0`
 ```
 
 ### Monitor ID
-Check Monitor's resolution and names of `connected` displays
+Check Monitor's resolution and names of `connected` displays.\
 Open a Terminal on Host system's physical display
 ```sh
 xrandr
@@ -229,7 +229,7 @@ Ex. in *deployment/discrete/sidecar/hdmi1.yaml* `connectors.0` is mapped with
 <qemu:arg value='gtk,gl=on,full-screen=on,zoom-to-fit=on,window-close=off,input=on,connectors.0=HDMI-1'/> 
 ```
 
-### USB Info
+### USB Device Passthrough
 Get the list of USB devices connected to Host machine
 ```sh
 lsusb -t
