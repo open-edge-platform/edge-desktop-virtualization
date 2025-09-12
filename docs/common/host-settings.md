@@ -153,4 +153,17 @@ sudo systemctl start x.service
 
 # Troubleshooting
 
-## USB hotplug - WIP
+#### Convert bootdisk between QCOW2 and RAW Image
+-   Convert from QCOW2 to RAW Image
+    ```sh
+    qemu-img convert -f qcow2 -O raw input.qcow2 output.img
+    ```
+-   Convert from RAW Image to QCOW2
+    ```sh
+    qemu-img convert -f raw -O qcow2 input.img output.qcow2
+    ```
+
+#### USB hotplug
+USB Bus-PortID which is mentioned in sidecar script is passthroughd to VM. QEMU Commandline parameters in the Sidecar script are used to patch the libvirt XML inside Virt-Launcher pod, when QEMU command launches inside Virt-Launcher pod gets these USB peripherals passthrough.
+
+To enable USB passthrough, Intel Device Plugin mounts USB bus to each instance of Virt-Launcher and is considered as static resource, so the USB peripheral (Keyboard, mouse, headset..) needs to passthrough to the VM should be the connected respective USB ports of Host system before starting VM. Hence hot-plugging, disconnect/connect requires pod to be restarted which will restart VM.

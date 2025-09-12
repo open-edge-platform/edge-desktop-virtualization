@@ -86,7 +86,7 @@ Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
     ```
     Output
     ```sh
-    [6.026008] i915 0000:00:02.0: Running in SR-IOV PF mode
+    [6.026008] i915 0000:00:02.0: Running in SR-IOV VF mode
     ```
 11.  Once after OS installation is complete, shutdown the VM, remove the manifest
     ```sh
