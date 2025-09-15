@@ -57,7 +57,7 @@ IDV service is collection of 2 services:
   ```
   DISPLAY=:0
   ```
-  Get the DISPLAY variable from the above output and update in `idv-services/etc/systemd/user/idv-init.service` and `idv-services/etc/systemd/user/idv-launcher.service`
+  In the above example, DISPLAY variable obtained from host system is `:0`, update the same in `Environment=DISPLAY=:0` of `idv-services/etc/systemd/user/idv-init.service` and `idv-services/etc/systemd/user/idv-launcher.service` files
 
 
   ### Step 1: Run scripts to copy necessary files and set sudo permissions
