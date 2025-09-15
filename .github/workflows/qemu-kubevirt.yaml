@@ -81,8 +81,8 @@ jobs:
 
           git clone https://github.com/intel/Intel-distribution-of-QEMU.git
           cd Intel-distribution-of-QEMU
-          git checkout 0e33000c917458cd1c6d884377d6442d50b14a58
-          git format-patch -50
+          git checkout 29ed545c07364a99a931b31712ae68fdf74f6992
+          git format-patch -54
           ls -hal
 
           if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/9.1.0-gfx-sriov)" ]; then
