@@ -1,11 +1,12 @@
-From 610083ca7acf52ab05640460d8a778bcdbe1b97b Mon Sep 17 00:00:00 2001
+From 89bdbb6d6db2a0528b082d7a9698f188f3be5376 Mon Sep 17 00:00:00 2001
 From: Intel <intel.com>
 Date: Wed, 18 Jun 2025 04:00:38 +0000
 Subject: [PATCH] Bump dependency versions for kubevirt v1.5.0
 
-Two changes:
+Changes:
 - make bump-images
 - Update go_version in WORKSPACE from 1.23.4 -> 1.23.10
+- Update pinned libvirt/qemu versions in hack/rpm-deps.sh
 
 This patch was created and verified on Kubevirt release v1.5.0
 ---
@@ -14,7 +15,7 @@ This patch was created and verified on Kubevirt release v1.5.0
  2 files changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/WORKSPACE b/WORKSPACE
-index cf3cdbd89e..5003587cdc 100644
+index cf3cdbd89e..ca79740b22 100644
 --- a/WORKSPACE
 +++ b/WORKSPACE
 @@ -171,7 +171,7 @@ load("@bazeldnf//:deps.bzl", "bazeldnf_dependencies", "rpm")
@@ -31,7 +32,7 @@ index cf3cdbd89e..5003587cdc 100644
  container_pull(
      name = "go_image_base",
 -    digest = "sha256:a7af3ef5d69f6534ba0492cc7d6b8fbcffddcb02511b45becc2fac752f907584",
-+    digest = "sha256:0d0479220a36ba3e9665b5c08b635ed5421bec501ed38365e48eb716986b20eb",
++    digest = "sha256:b14f0d621bdfd1c967bca28f28ae7c1191e216ce0f34977c9f1e1f5081aae047",
      registry = "gcr.io",
      repository = "distroless/base-debian12",
  )
@@ -39,7 +40,7 @@ index cf3cdbd89e..5003587cdc 100644
  container_pull(
      name = "go_image_base_aarch64",
 -    digest = "sha256:198302a46cd40ab2e24ee54d39ba0919a431e59289fd7b87f798b62e2076c62a",
-+    digest = "sha256:5515eef798481300d4f7c16b0e7e72fa8b8221954cf8b6adb9d76bbfa66dec32",
++    digest = "sha256:4b66c135f2d73c969783fcb918e3b224ea66dac43ce8d2bdd166f362d5dd248c",
      registry = "gcr.io",
      repository = "distroless/base-debian12",
  )
@@ -47,12 +48,12 @@ index cf3cdbd89e..5003587cdc 100644
  container_pull(
      name = "go_image_base_s390x",
 -    digest = "sha256:642791d0afe3d071e365923e65203074f30bad4ca621309d2eab52bf2d32077e",
-+    digest = "sha256:e7ea68353aa46a09eb3f5b11587f62548f175e23378e329cba3450f80ce5e34f",
++    digest = "sha256:fa81a9ab9966083922a8465506accd01cad4ebb787f7e11309d464e19b94d097",
      registry = "gcr.io",
      repository = "distroless/base-debian12",
  )
 diff --git a/hack/rpm-deps.sh b/hack/rpm-deps.sh
-index c3da8cfda5..f6d54ae7ab 100755
+index c3da8cfda5..16784861e6 100755
 --- a/hack/rpm-deps.sh
 +++ b/hack/rpm-deps.sh
 @@ -6,11 +6,11 @@ source hack/common.sh
@@ -61,12 +62,12 @@ index c3da8cfda5..f6d54ae7ab 100755
  
 -LIBVIRT_VERSION=${LIBVIRT_VERSION:-0:10.10.0-4.el9}
 -QEMU_VERSION=${QEMU_VERSION:-17:9.1.0-12.el9}
-+LIBVIRT_VERSION=${LIBVIRT_VERSION:-0:10.10.0-12.el9}
-+QEMU_VERSION=${QEMU_VERSION:-17:9.1.0-19.el9}
++LIBVIRT_VERSION=${LIBVIRT_VERSION:-0:10.10.0-15.el9}
++QEMU_VERSION=${QEMU_VERSION:-17:9.1.0-27.el9}
  SEABIOS_VERSION=${SEABIOS_VERSION:-0:1.16.3-4.el9}
  EDK2_VERSION=${EDK2_VERSION:-0:20241117-2.el9}
 -LIBGUESTFS_VERSION=${LIBGUESTFS_VERSION:-1:1.54.0-3.el9}
-+LIBGUESTFS_VERSION=${LIBGUESTFS_VERSION:-1:1.54.0-7.el9}
++LIBGUESTFS_VERSION=${LIBGUESTFS_VERSION:-1:1.54.0-11.el9}
  GUESTFSTOOLS_VERSION=${GUESTFSTOOLS_VERSION:-0:1.52.2-2.el9}
  PASST_VERSION=${PASST_VERSION:-0:0^20250121.g4f2c8e7-3.el9}
  VIRTIOFSD_VERSION=${VIRTIOFSD_VERSION:-0:1.13.0-1.el9}
