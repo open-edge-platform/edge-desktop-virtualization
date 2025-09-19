@@ -20,6 +20,7 @@ Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
     | Windows ISO                     | cdisk-vm1-iso1-pv      | /opt/disk_imgs/iso/os-iso-disk/disk.img             |
     | Virtio ISO                      | cdisk-vm1-iso2-pv      | /opt/disk_imgs/iso/virtio-iso-disk/disk.img         |
     | Drivers ISO (If ISO is created) | cdisk-vm1-folder-pv    | /opt/disk_imgs/iso/drivers/disk.img                 |
+    **Note: size of VM image is set to 60GB by default, edit `storage` parameter in `vm1.yaml` under `cdisk-vm1-bootdisk` to change it**
 3.  Primary display considered in manifest is HDMI-1, hence deploy the Sidecar configmap of HDMI-1 and then apply manifest
     ```sh
     kubectl apply -f sample-application/discrete/sidecar/hdmi1.yaml
