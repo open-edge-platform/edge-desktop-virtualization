@@ -1,0 +1,13 @@
+virtualMachines:
+  - name: win11-vm4
+    namespace: default
+    storage: 150Gi
+    hostPath: /opt/user-apps/vm_imgs/vm4/
+    storageClassName: local-path
+    cpuCores: 3
+    memory: 12288Mi
+    gpuDeviceName: intel.com/sriov-gpudevice
+    secureBoot: false
+    usePVC: false
+    rdpPort: 3393
+    cdiDv: vm4-win11-image

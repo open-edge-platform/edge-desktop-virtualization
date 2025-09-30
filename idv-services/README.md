@@ -8,6 +8,7 @@ IDV service is collection of 2 services:
   - [Modify VM configuration](#modify-vm-configuration)
   - [Run IDV services via an RPM package](#run-idv-services-via-an-rpm-package)
   - [Manual steps to run IDV service](#manual-steps-to-run-idv-service)
+    - [Update DISPLAY variable](#update-display-variable)
     - [Step 1: Run scripts to copy necessary files and set sudo permissions](#step-1-run-scripts-to-copy-necessary-files-and-set-sudo-permissions)
     - [Step 2: Enable and start `idv-init` service](#step-2-enable-and-start-idv-init-service)
     - [Step 3: Enable and start `idv-launcher` service](#step-3-enable-and-start-idv-launcher-service)
@@ -46,6 +47,18 @@ IDV service is collection of 2 services:
 ## Manual steps to run IDV service
 
 - If you prefer not to use the RPM package, follow these steps:
+
+###   Update DISPLAY variable
+  Open a Terminal on Host system's physical display
+  ```sh
+  echo $DISPLAY
+  ```
+  Output
+  ```
+  DISPLAY=:0
+  ```
+  In the above example, DISPLAY variable obtained from host system is `:0`, update the same in `Environment=DISPLAY=:0` of `idv-services/etc/systemd/user/idv-init.service` and `idv-services/etc/systemd/user/idv-launcher.service` files
+
 
   ### Step 1: Run scripts to copy necessary files and set sudo permissions
 

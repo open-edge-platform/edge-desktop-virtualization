@@ -1,0 +1,237 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cdisk-vm1-bootdisk-pv
+spec:
+  capacity:
+    storage: 60Gi # Adjust VM disk size as needed
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /opt/disk_imgs/create-vm-bootdisk/  # Path to your specific boot image
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app/name: cdisk-vm1
+  name: cdisk-vm1-bootdisk
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 60Gi # Adjust VM disk size as needed
+  storageClassName: ""
+  volumeName: cdisk-vm1-bootdisk-pv
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cdisk-vm1-iso1-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: /opt/disk_imgs/iso/os-iso-disk  # Path to your Windows/Ubuntu ISO disk image
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app/name: cdisk-vm1
+  name: cdisk-vm1-iso1
+  namespace: default
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: cdisk-vm1-iso1-pv
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cdisk-vm1-iso2-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: /opt/disk_imgs/iso/virtio-iso-disk  # Path to your second ISO image, Virtio ISO disk image
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app/name: cdisk-vm1
+  name: cdisk-vm1-iso2
+  namespace: default
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: cdisk-vm1-iso2-pv
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cdisk-vm1-folder-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /opt/disk_imgs/iso/drivers  # Path to your folder disk image ISO
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app/name: cdisk-vm1
+  name: cdisk-vm1-folder
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: cdisk-vm1-folder-pv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: cdisk-vm1
+  name: cdisk-vm1-rdp
+  namespace: default
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: rdp
+    port: 3390
+    protocol: TCP
+    targetPort: 3389
+  selector:
+    app/name: cdisk-vm1
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: cdisk-vm1
+  name: cdisk-vm1-ssh
+  namespace: default
+spec:
+  ports:
+  - name: ssh
+    port: 22
+    protocol: TCP
+    targetPort: 22
+  selector:
+    app/name: cdisk-vm1
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    app/name: cdisk-vm1
+  name: cdisk-vm1-vm
+  namespace: default
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      annotations:
+        hooks.kubevirt.io/hookSidecars: '[{"args": ["--version", "v1alpha2"], "configMap": {"name": "sidecar-script-hdmi1", "key": "my_script.sh", "hookPath": "/usr/bin/onDefineDomain"}}]'
+      labels:
+        app/name: cdisk-vm1
+    spec:
+      domain:
+        cpu:
+          cores: 3
+          model: host-passthrough
+        devices:
+          autoattachGraphicsDevice: false
+          autoattachPodInterface: true
+          gpus:
+            - deviceName: intel.com/sriov-gpudevice
+              name: gpu1
+          disks:
+            - bootOrder: 1
+              disk:
+                bus: virtio
+              name: bootdisk
+            - cdrom:
+                bus: sata
+              name: iso1
+            - cdrom:
+                bus: sata
+              name: iso2
+            - disk:
+                bus: virtio
+              name: folder
+          tpm: {}
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: false
+        machine:
+          type: q35
+        features:
+          acpi:
+            enabled: true
+          apic:
+            enabled: true
+          smm:
+            enabled: true
+        memory:
+          guest: 12288Mi
+          hugepages:
+            pageSize: "2Mi"
+        resources:
+          requests:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: 12288Mi
+            ephemeral-storage: "1Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+          limits:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: 12288Mi
+            ephemeral-storage: "2Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: bootdisk
+        persistentVolumeClaim:
+          claimName: cdisk-vm1-bootdisk
+      - name: iso1
+        persistentVolumeClaim:
+          claimName: cdisk-vm1-iso1
+      - name: iso2
+        persistentVolumeClaim:
+          claimName: cdisk-vm1-iso2
+      - name: folder
+        persistentVolumeClaim:
+          claimName: cdisk-vm1-folder

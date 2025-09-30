@@ -1,9 +1,40 @@
-# Kubevirt installation using TAR files
-This version of Kubevirt is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node.
+# Install Kubernetes
+K3s is a lightweight Kubernetes distribution suitable for Edge and IoT use cases. This step will setup a single node cluster where the host function as both the server/control plane and the worker node. This step is only required if you don't already have a Kubernetes cluster setup that you can use. 
 
-Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/pre-release-v0.1/intel-idv-device-plugin-v0.1.tar.gz) to support enabling Display Virtualization on local display of edge node
+K3S Version is v1.32.6+k3s1
 
-## Steps
+```sh
+export K3S_VERSION="v1.32.6+k3s1"
+export KUBECONFIG_PATH="/etc/rancher/k3s/k3s.yaml"
+
+curl -sfL https://get.k3s.io | INSTALL_K3S_SELINUX_WARN=true INSTALL_K3S_VERSION=${K3S_VERSION}  sh -s - --disable=traefik --write-kubeconfig-mode=644
+
+found=$(grep -x "source <(kubectl completion bash)" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "source <(kubectl completion bash)" >> ~/.bashrc
+fi
+
+found=$(grep -x "alias k=kubectl" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "alias k=kubectl" >> ~/.bashrc
+fi
+
+found=$(grep -x "complete -F __start_kubectl k" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "complete -F __start_kubectl k" >> ~/.bashrc
+fi
+
+found=$(grep -x "export KUBECONFIG=${KUBECONFIG_PATH}" ~/.bashrc 2> /dev/null | wc -l)
+if [[ $found -eq 0 ]]; then
+    echo "export KUBECONFIG=${KUBECONFIG_PATH}" >> ~/.bashrc
+fi
+```
+
+# Kubevirt and Intel Device-Plugin installation using TAR files
+Kubevirt used here is built on release tag v1.5.0 along with GTK library support for enabling Display Virtualization and Intel Graphics SR-IOV patched QEMU version 9.1.0 that supports local display of edge node.\
+And the Intel Device-Plugin to support it.
+
+#### Steps
 1.  Ensure Kubernetes is installed and local cluster is running.
 2.  Download and copy the latest TAR files of Kubevirt and Device-Plugin from [release](https://github.com/open-edge-platform/edge-desktop-virtualization/releases) to the host system
 3.  Extract TAR files
@@ -21,21 +52,6 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     zstd -d *.zst
     ```
 4.  Import the images into the container runtime
-    ```sh
-    cd ~/display-virtualization/intel-idv-kubevirt*
-    sudo ctr -n k8s.io images import sidecar-shim.tar
-    sudo ctr -n k8s.io images import virt-api.tar
-    sudo ctr -n k8s.io images import virt-controller.tar
-    sudo ctr -n k8s.io images import virt-handler.tar
-    sudo ctr -n k8s.io images import virt-launcher.tar
-    sudo ctr -n k8s.io images import virt-operator.tar
-
-    cd ~/display-virtualization/intel-idv-device-plugin*
-    sudo ctr -n k8s.io images import device-plugin.tar
-    sudo ctr -n k8s.io images import busybox.tar
-    ```
-
-    Alternatively 
     ```sh
     cd ~/display-virtualization/intel-idv-kubevirt*
     sudo k3s ctr i import virt-operator.tar
@@ -59,8 +75,8 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
     localhost:5000/virt-handler                           v1.5.0_DV           a9bd1a37e2e0c       90.7MB
     localhost:5000/virt-launcher                          v1.5.0_DV           c69ddc6b90387       403MB
     localhost:5000/virt-operator                          v1.5.0_DV           99462ddb3a866       39.8MB
-    localhost:5000/device-plugin                          v1                  156ba1fcaf549       21.3MB
-    localhost:5000/busybox                                latest              ff7a7936e9306       2.21MB
+    localhost:5000/device-plugin                          v1.1                156ba1fcaf549       21.3MB
+    localhost:5000/busybox                                glibc               ff7a7936e9306       2.21MB
     ```
 6.  Deploy Kubevirt and Device Plugin
     ```sh
@@ -112,31 +128,66 @@ Also the Device-Plugin has been shared as a [Device-Plugin TAR](https://github.c
 
     Apply the YAML changes
     ```sh
-    kubectl apply -f manifests/kubevirt-cr.yaml
+    kubectl apply -f kubevirt-patch/kubevirt-cr.yaml
     ```
-
-    **Check for presence of `intel.com/sriov-gpudevices` resource**
-
+9.  Check for presence of resources needed in kubernetes
     ```sh
     kubectl describe nodes
     ```
     Output:
     ```sh
     Capacity:
-        intel.com/sriov-gpudevice:     7
+        intel.com/igpu:                 1k
+        intel.com/sriov-gpudevice:      7
+        intel.com/udma:                 1k
+        intel.com/usb:                  1k
+        intel.com/vfio:                 1k
+        intel.com/x11:                  1k
     Allocatable:
-        intel.com/sriov-gpudevice:     7
+        intel.com/igpu:                 1k
+        intel.com/sriov-gpudevice:      7
+        intel.com/udma:                 1k
+        intel.com/usb:                  1k
+        intel.com/vfio:                 1k
+        intel.com/x11:                  1k
     Allocated resources:
         Resource                       Requests     Limits
         --------                       --------     ------
-        intel.com/sriov-gpudevice      0            0
+        intel.com/igpu                 0                 0
+        intel.com/sriov-gpudevice      0                 0
+        intel.com/udma                 0                 0
+        intel.com/usb                  0                 0
+        intel.com/vfio                 0                 0
+        intel.com/x11                  0                 0
     ```
     > [!Note] 
     > Please wait for all virt-handler pods to complete restarts\
     > The value of **Requests** and **Limits** will increase upon successful resource allocation to running pods/VMs
 
-9.  Install CDI
-    ```sh
-    kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-operator.yaml
-    kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-cr.yaml
-    ```
+
+# Install Virt-Plugin
+
+  Install Krew and then install Virt plugin to control Virtual Machine
+  ```sh
+  (
+    set -x; cd "$(mktemp -d)" &&
+    OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+    ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+    KREW="krew-${OS}_${ARCH}" &&
+    curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+    tar zxvf "${KREW}.tar.gz" &&
+    ./"${KREW}" install krew
+  )
+
+  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+  kubectl krew install virt
+  ```
+
+# Install CDI
+  Optional, if want to use VM image from CDI.\
+  Version used is v1.60.3
+  ```sh
+  kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-operator.yaml
+  kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.60.3/cdi-cr.yaml
+  ```
