@@ -72,8 +72,7 @@ function launch_build() {
     # the above 2 steps can alternatively be done using the following command if preferred:
     # sudo ./toolkit/docs/building/prerequisites-ubuntu.sh --no-install-prereqs --fix-go-links --configure-docker
     
-    ----------------------
-    
+   
     # For automated environments (CI/CD pipelines) or complete setup
     # Installs prerequisites AND configures Docker and Go links
     sudo make -C toolkit install-prereqs-and-configure
