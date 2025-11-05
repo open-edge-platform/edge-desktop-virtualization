@@ -55,13 +55,28 @@ function launch_build() {
     git checkout $TAG
 
     # pre-requisites
-    echo -e "${BLUE}Installing all the pre-requisites${ENDCOLOR}"
-    sudo ./toolkit/docs/building/prerequisites-ubuntu.sh
-    sudo ln -vsf /usr/lib/go-1.21/bin/go /usr/bin/go
-    sudo ln -vsf /usr/lib/go-1.21/bin/gofmt /usr/bin/gofmt
+    # For interactive development environments (local machines)
+    # Installs prerequisites but doesn't modify system configuration
+    sudo make -C toolkit install-prereqs
+    
+    # Manually create Go symlinks for proper PATH integration
+    sudo ln -sf /usr/lib/go-1.23/bin/go /usr/bin/go
+    sudo ln -sf /usr/lib/go-1.23/bin/gofmt /usr/bin/gofmt
+    
+    # Manually configure Docker if needed
     curl -fsSL https://get.docker.com -o get-docker.sh
     sudo sh get-docker.sh
     sudo usermod -aG docker $USER
+    # Note: You will need to log out and log back in for user changes to take effect
+    
+    # the above 2 steps can alternatively be done using the following command if preferred:
+    # sudo ./toolkit/docs/building/prerequisites-ubuntu.sh --no-install-prereqs --fix-go-links --configure-docker
+    
+    ----------------------
+    
+    # For automated environments (CI/CD pipelines) or complete setup
+    # Installs prerequisites AND configures Docker and Go links
+    sudo make -C toolkit install-prereqs-and-configure
 
     # build the toolkit
     cd toolkit
