@@ -14,7 +14,7 @@ ENDCOLOR='\e[0m' # Reset to default color
 # ------------------- Default Values ------------------------------
 
 # Default tag. This will be the latest EMT release tag.
-DEFAULT_TAG=3.0.20250806
+DEFAULT_TAG=3.0.20251106
 
 # Default image config .json file. If this is NULL, default will be fetched from the repo.
 DEFAULT_IDV_JSON_PATH=""
