@@ -57,8 +57,11 @@ function launch_build() {
     # pre-requisites
     echo -e "${BLUE}Installing all the pre-requisites${ENDCOLOR}"
     sudo ./toolkit/docs/building/prerequisites-ubuntu.sh
-    sudo ln -vsf /usr/lib/go-1.21/bin/go /usr/bin/go
-    sudo ln -vsf /usr/lib/go-1.21/bin/gofmt /usr/bin/gofmt
+    #sudo ln -vsf /usr/lib/go-1.21/bin/go /usr/bin/go
+    #sudo ln -vsf /usr/lib/go-1.21/bin/gofmt /usr/bin/gofmt
+    # Manually create Go symlinks for proper PATH integration
+    sudo ln -sf /usr/lib/go-1.23/bin/go /usr/bin/go
+    sudo ln -sf /usr/lib/go-1.23/bin/gofmt /usr/bin/gofmt
     curl -fsSL https://get.docker.com -o get-docker.sh
     sudo sh get-docker.sh
     sudo usermod -aG docker $USER
