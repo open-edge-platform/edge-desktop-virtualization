@@ -14,7 +14,7 @@ ENDCOLOR='\e[0m' # Reset to default color
 # ------------------- Default Values ------------------------------
 
 # Default tag. This will be the latest EMT release tag.
-DEFAULT_TAG=3.0.20251113
+DEFAULT_TAG=3.0.20251106
 
 # Default image config .json file. If this is NULL, default will be fetched from the repo.
 DEFAULT_IDV_JSON_PATH=""
@@ -54,6 +54,10 @@ function launch_build() {
     echo -e "${BLUE}Checkout tag : ${GREEN}${TAG}${ENDCOLOR}"
     git checkout $TAG
 
+    git remote add yang-fix https://github.com/yangliang-intel/edge-microvisor-toolkit
+    git fetch yang-fix
+    git cherry-pick 8a0cc735523787e2502137c21319304bd6f17691
+
     # pre-requisites
     echo -e "${BLUE}Installing all the pre-requisites${ENDCOLOR}"
     sudo ./toolkit/docs/building/prerequisites-ubuntu.sh
@@ -77,6 +81,11 @@ function launch_build() {
         cp $IDV_JSON_PATH ./imageconfigs/idv.json
     fi
     sudo make -j$(nproc) toolchain REBUILD_TOOLS=y VALIDATE_TOOLCHAIN_GPG=n
+
+    sudo make -j8 build-packages \
+                      REBUILD_TOOLS=y CONFIG_FILE= \
+                      SRPM_PACK_LIST="qemu" CONCURRENT_PACKAGE_BUILDS=8 \
+                      VALIDATE_TOOLCHAIN_GPG=n
 
     # build the iso image
     sudo make iso -j$(nproc) REBUILD_TOOLS=y VALIDATE_TOOLCHAIN_GPG=n REBUILD_PACKAGES=n CONFIG_FILE=./imageconfigs/idv.json
