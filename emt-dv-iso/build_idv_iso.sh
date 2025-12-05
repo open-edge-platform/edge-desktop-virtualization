@@ -54,9 +54,9 @@ function launch_build() {
     echo -e "${BLUE}Checkout tag : ${GREEN}${TAG}${ENDCOLOR}"
     git checkout $TAG
 
-    git remote add yang-fix https://github.com/yangliang-intel/edge-microvisor-toolkit
-    git fetch yang-fix
-    git cherry-pick 8a0cc735523787e2502137c21319304bd6f17691
+    #git remote add yang-fix https://github.com/yangliang-intel/edge-microvisor-toolkit
+    #git fetch yang-fix
+    #git cherry-pick 8a0cc735523787e2502137c21319304bd6f17691
 
     # pre-requisites
     echo -e "${BLUE}Installing all the pre-requisites${ENDCOLOR}"
