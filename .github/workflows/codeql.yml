@@ -12,6 +12,13 @@
 name: "CodeQL Advanced"
 
 on:
+  # Allow this to also be manually scheduled against a specific branch
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run on'
+        required: true
+        default: 'main'
   push:
     branches: [ "main" ]
   pull_request:
