@@ -11,6 +11,13 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 on:
+  # Allow this to also be manually scheduled against a specific branch
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run on'
+        required: true
+        default: 'main'
   pull_request:
     branches:
       - main
