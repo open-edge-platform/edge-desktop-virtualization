@@ -16,9 +16,61 @@ DOORBELL_SPARE_PF=32
 # set the default value for VF scheduling parameters
 VFSCHED_EXECQ=25
 VFSCHED_TIMEOUT=500000
-NUMVFS=$(cat /sys/class/drm/card0/device/sriov_totalvfs)
-VENDOR=$(cat /sys/bus/pci/devices/0000:00:02.0/vendor)
-DEVICE=$(cat /sys/bus/pci/devices/0000:00:02.0/device)
+
+# Function to check if GPU is ready before attempting VF enumeration
+check_gpu_ready() {    
+    # Check 1: Verify PCI device exists
+    if [ ! -d "/sys/bus/pci/devices/0000:00:02.0" ]; then
+        echo "PCI device 0000:00:02.0 not found"
+        return 1
+    fi
+
+    # Check 2: Verify a kernel driver is loaded (i915 or xe)
+    local drm_driver
+    drm_driver=$(lspci -D -k -s 00:02.0 2>/dev/null | grep "Kernel driver in use" | awk -F ':' '{print $2}' | xargs)
+    if [ -z "$drm_driver" ]; then
+        echo "No kernel driver loaded yet"
+        return 1
+    fi
+    
+    # Verify it's one of the expected drivers
+    if [[ "$drm_driver" != "i915" && "$drm_driver" != "xe" ]]; then
+        echo "Unexpected driver: $drm_driver (expected i915 or xe)"
+        return 1
+    fi
+
+    # Check 3: Verify DRM card0 exists
+    if [ ! -d "/sys/class/drm/card0" ]; then
+        echo "DRM card0 not found"
+        return 1
+    fi
+
+    # Check 4: Verify sriov_totalvfs file exists and is readable
+    if [ ! -f "/sys/class/drm/card0/device/sriov_totalvfs" ]; then
+        echo "SR-IOV totalvfs file not found"
+        return 1
+    fi
+
+    # Check 5: Verify we can read the total VFs
+    local total_vfs
+    total_vfs=$(cat /sys/class/drm/card0/device/sriov_totalvfs 2>/dev/null)
+    if [ -z "$total_vfs" ]; then
+        echo "Cannot read sriov_totalvfs"
+        return 1
+    fi
+
+    # Check 6: For xe driver, verify debugfs paths exist
+    if [[ "$drm_driver" == "xe" ]]; then
+        if [ ! -d "/sys/kernel/debug/dri/0" ]; then
+            echo "XE driver debugfs not ready"
+            return 1
+        fi
+    fi
+
+    # All checks passed
+    echo "GPU is ready (driver: $drm_driver, total VFs: $total_vfs)"
+    return 0
+}
 
 function remove_sriov_vf() {
   echo -e "Remove provisioning dev-id: $DEVICE\n"
@@ -28,7 +80,7 @@ function remove_sriov_vf() {
 }
 
 function validate_sriov_vf(){
-  TotalVFs=`lspci | grep -i vga | cut -b 1-7 | cut -d "." -f2 | tail -n 1`
+  TotalVFs=`lspci | grep -i vga | tail -n 1 | awk '{print $1}' | awk -F'.' '{print $2}'`
   if [[ $TotalVFs != $NUMVFS ]]; then
     echo -e "SRIOV enumeration failed."
     # Remove SRIOV VFs
@@ -129,4 +181,17 @@ function setup_sriov_vf() {
   fi
 }
 
+# Check if GPU is ready
+if ! check_gpu_ready; then
+    echo "ERROR: GPU not ready"
+    exit 1
+fi
+
+# Initialize device variables after GPU is confirmed ready
+NUMVFS=$(cat /sys/class/drm/card0/device/sriov_totalvfs)
+VENDOR=$(cat /sys/bus/pci/devices/0000:00:02.0/vendor)
+DEVICE=$(cat /sys/bus/pci/devices/0000:00:02.0/device)
+
+# Proceed with VF setup
 setup_sriov_vf
+
