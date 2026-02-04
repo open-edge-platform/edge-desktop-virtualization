@@ -80,7 +80,7 @@ function remove_sriov_vf() {
 }
 
 function validate_sriov_vf(){
-  TotalVFs=`lspci | grep -i vga | tail -n 1 | awk '{print $1}' | awk -F'.' '{print $2}'`
+  TotalVFs=`lspci | grep -i "vga compatible" | tail -n 1 | awk '{print $1}' | awk -F'.' '{print $2}'`
   if [[ $TotalVFs != $NUMVFS ]]; then
     echo -e "SRIOV enumeration failed."
     # Remove SRIOV VFs
