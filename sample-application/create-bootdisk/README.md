@@ -7,7 +7,7 @@ Manifest is provided in `sample-application/create-bootdisk/manifest/vm1.yaml`
 
 **Pre-requisites:**
   - Windows 10/11 ISO
-  - [Virtio ISO](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archivevirtio/virtio-win-0.1.240-1/virtio-win.iso) for drivers
+  - [Virtio ISO](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.271-1/virtio-win-0.1.271.iso) for drivers
   - Latest [Intel GPU](https://www.intel.com/content/www/us/en/secure/design/confidential/software-kits/kit-details.html?kitId=861222) & [Zero Copy](https://www.intel.com/content/www/us/en/download/856334/display-virtualization-drivers-for-raptor-lake-ps.html?wapkw=sriov) drivers - Create ISO file with the drivers / Download directly on VM when Ethernet driver is installed and VM is able to connect to internet
 
 1.  Convert the ISO files to RAW disk image
