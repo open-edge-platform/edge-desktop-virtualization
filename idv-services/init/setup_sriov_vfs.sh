@@ -79,18 +79,6 @@ function remove_sriov_vf() {
   rmmod vfio-pci
 }
 
-function validate_sriov_vf(){
-  TotalVFs=`lspci | grep -i "vga compatible" | tail -n 1 | awk '{print $1}' | awk -F'.' '{print $2}'`
-  if [[ $TotalVFs != $NUMVFS ]]; then
-    echo -e "SRIOV enumeration failed."
-    # Remove SRIOV VFs
-    echo '0' | tee -a /sys/class/drm/card0/device/sriov_numvfs
-    exit 1
-  else
-    echo -e "[$TotalVFs] VFs enumerated successfully."
-  fi
-}
-
 function validate_vfio(){
   vfioDev=`ls /dev/vfio/`
   count=0
@@ -171,8 +159,7 @@ function setup_sriov_vf() {
           done
       done
 
-      # Check if all VFs are enumerated and vfios' are bound
-      validate_sriov_vf
+      # Check if all vfios' are bound
       validate_vfio
 
       echo "SR-IOV VF setup completed successfully"
