@@ -1,0 +1,143 @@
+{{- range .Values.virtualMachines }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .name }}-bootdisk-pv
+spec:
+  capacity:
+    storage: {{ .storage }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .hostPath }}  # Path to your specific boot image
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-bootdisk
+  namespace: {{ .namespace }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .storage }}
+  storageClassName: ""
+  volumeName: {{ .name }}-bootdisk-pv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-rdp
+  namespace: {{ .namespace }}
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: rdp
+    port: {{ .rdpPort }}
+    protocol: TCP
+    targetPort: 3389
+  selector:
+    app/name: {{ .name }}
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-ssh
+  namespace: {{ .namespace }}
+spec:
+  ports:
+  - name: ssh
+    port: 22
+    protocol: TCP
+    targetPort: 22
+  selector:
+    app/name: {{ .name }}
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-vm
+  namespace: {{ .namespace }}
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      annotations:
+        hooks.kubevirt.io/hookSidecars: '[{"args": ["--version", "v1alpha2"], "configMap": {"name": "sidecar-script-hdmi1", "key": "my_script.sh", "hookPath": "/usr/bin/onDefineDomain"}}]'
+      labels:
+        app/name: {{ .name }}
+    spec:
+      domain:
+        cpu:
+          cores: {{ .cpuCores }}
+          model: host-passthrough
+        devices:
+          autoattachGraphicsDevice: false
+          autoattachPodInterface: true
+          gpus:
+            - deviceName: intel.com/sriov-gpudevice
+              name: gpu1
+          disks:
+            - bootOrder: 1
+              disk:
+                bus: virtio
+              name: bootdisk
+          tpm: {}
+          interfaces:
+            - masquerade: {}
+              name: default
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: {{ .secureBoot }}
+        machine:
+          type: q35
+        features:
+          acpi:
+            enabled: true
+          apic:
+            enabled: true
+          smm:
+            enabled: true
+        memory:
+          guest: {{ .memory }}
+          hugepages:
+            pageSize: "2Mi"
+        resources:
+          requests:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: {{ .memory }}
+            ephemeral-storage: "1Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+          limits:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: {{ .memory }}
+            ephemeral-storage: "2Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+      networks:
+        - name: default
+          pod: {}
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: bootdisk
+        persistentVolumeClaim:
+          claimName: {{ .name }}-bootdisk
+{{- end }}
