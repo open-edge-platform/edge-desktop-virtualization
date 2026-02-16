@@ -385,9 +385,9 @@ jobs:
 
           git checkout v1.7.0
 
-          git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
+          # git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
 
-          git apply $EDV_HOME/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
+          # git apply $EDV_HOME/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
 
           mkdir build
           cp $EDV_HOME/qemu-artifact/qemu-system-x86_64 build/qemu-system-x86_64
