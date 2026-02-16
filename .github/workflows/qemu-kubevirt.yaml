@@ -383,7 +383,7 @@ jobs:
           git clone https://github.com/kubevirt/kubevirt.git
           cd kubevirt
 
-          git checkout v1.5.0
+          git checkout v1.7.0
 
           git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
 
