@@ -393,7 +393,7 @@ jobs:
 
           cp $EDV_HOME/kubevirt-patch/rpm-BUILD.bazel ./rpm/BUILD.bazel
 
-          cp $EDV_HOME/kubevirt-patch/cmd-virtlauncher.bazel ./cmd/virt-launcher/BUILD.bazel 
+          cp $EDV_HOME/kubevirt-patch/cmd-virtlauncher-BUILD.bazel ./cmd/virt-launcher/BUILD.bazel 
 
           mkdir build
           cp $EDV_HOME/qemu-artifact/qemu-system-x86_64 build/qemu-system-x86_64
