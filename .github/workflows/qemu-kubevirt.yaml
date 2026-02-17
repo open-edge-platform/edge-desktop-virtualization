@@ -405,7 +405,7 @@ jobs:
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
 
-          make rpm-deps
+          # make rpm-deps
           make all
           make bazel-build-images
 
