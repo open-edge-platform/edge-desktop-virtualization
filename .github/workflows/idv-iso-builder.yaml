@@ -1,0 +1,55 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# This is a workflow that is triggered to build EMT desktop virtualization (IDV) ISO
+name: EMT IDV ISO Builder
+permissions:
+  contents: read
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  push:
+    branches:
+      - emt-dv-iso
+      - main
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      tag:
+        # description to be shown in the UI
+        description: 'release tag to be build'
+        # Default value if no value is explicitly provided
+        default: '3.0.20250806'
+        # Input has to be provided for the workflow to run
+        required: true
+        # The data type of the input
+        type: string
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  build-idv-iso:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-24.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Runs a single command using the runners shell
+    - name: Build EMT IDV ISO
+      run: |
+        wget https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/emt-dv-iso/emt-dv-iso/build_idv_iso.sh
+        chmod a+x build_idv_iso.sh
+        if [[ -z "${{ inputs.myInput }}" ]]; then
+          ./build_idv_iso.sh
+        else
+          ./build_idv_iso.sh -t "${{ inputs.myInput }}"
+        fi
+        ls -lrt
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        # Artifact name
+        name: emt-idv-iso
+        # A file, directory or wildcard pattern that describes what to upload
+        path: idv*.iso
