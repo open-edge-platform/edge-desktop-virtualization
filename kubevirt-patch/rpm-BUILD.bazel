@@ -1679,6 +1679,7 @@ rpmtree(
         "@jbigkit-libs-0__2.1-23.el9.x86_64//rpm",
         "@langpacks-core-font-en-0__3.0-16.el9.x86_64//rpm",
         "@lcms2-0__2.12-3.el9.x86_64//rpm",
+        "@libblkio-0__1.5.0-1.el9.x86_64//rpm",
         "@libX11-0__1.7.0-11.el9.x86_64//rpm",
         "@libX11-common-0__1.7.0-11.el9.x86_64//rpm",
         "@libX11-devel-0__1.7.0-11.el9.x86_64//rpm",
