@@ -1651,6 +1651,7 @@ rpmtree(
         "@cryptsetup-libs-0__2.7.2-4.el9.x86_64//rpm",
         "@cups-libs-1__2.3.3op2-33.el9.x86_64//rpm",
         "@dbus-devel-1__1.12.20-8.el9.x86_64//rpm",
+        "@dbus-libs-1__1.12.20-8.el9.x86_64//rpm",
         "@dejavu-sans-fonts-0__2.37-18.el9.x86_64//rpm",
         "@elfutils-libelf-devel-0__0.193-1.el9.x86_64//rpm",
         "@fdk-aac-free-0__2.0.0-8.el9.x86_64//rpm",
