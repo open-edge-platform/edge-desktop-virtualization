@@ -9660,6 +9660,14 @@ rpm(
 )
 
 rpm(
+    name = "usbutils-0__017-1.el9.x86_64",
+    sha256 = "723291f990fd4c93233e4f4d52995ecb57a7e976074384ec2da3b64c6060bb58",
+    urls = [
+        "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/usbutils-017-1.el9.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "vte-profile-0__0.64.2-2.el9.x86_64",
     sha256 = "20c7cc4d012677a19ef11a5bf7c89d13bd0462b63a4e570a151384c0d4850f7b",
     urls = [
