@@ -9372,18 +9372,18 @@ rpm(
 )
 
 rpm(
-    name = "llvm-filesystem-0__20.1.8-3.el9.x86_64",
-    sha256 = "f202993b0c11cc64cad0d2f8e4c6da50aeda05e8ee64eacde9944a41de4dd784",
+    name = "llvm-filesystem-0__20.1.8-1.el9.x86_64",
+    sha256 = "b1882b91d71db936aa4fdd8a709cca21d3d14b6129912e1160834ec6c430e4d3",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-filesystem-20.1.8-3.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-filesystem-20.1.8-1.el9.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "llvm-libs-0__20.1.8-3.el9.x86_64",
-    sha256 = "e46752cae898bc92d8b7cd3984f294f1b958e950a0afd63a37f444b223927533",
+    name = "llvm-libs-0__20.1.8-1.el9.x86_64",
+    sha256 = "30601498486e725eb19433bfdbb8b4effb8cceaf1c48e296f6d580551d3bf532",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-libs-20.1.8-3.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-libs-20.1.8-1.el9.x86_64.rpm",
     ],
 )
 
