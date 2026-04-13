@@ -18,6 +18,15 @@ diff --git a/WORKSPACE b/WORKSPACE
 index cf3cdbd89e..ca79740b22 100644
 --- a/WORKSPACE
 +++ b/WORKSPACE
+@@ -171,7 +171,7 @@ load("@bazeldnf//:deps.bzl", "bazeldnf_dependencies", "rpm")
+ go_rules_dependencies()
+ 
+ go_register_toolchains(
+-    go_version = "1.23.4",
++    go_version = "1.23.10",
+     nogo = "@//:nogo_vet",
+ )
+ 
 @@ -306,21 +306,21 @@ container_deps()
  # Pull go_image_base
  container_pull(
@@ -66,4 +75,3 @@ index c3da8cfda5..16784861e6 100755
  VIRTIOFSD_VERSION=${VIRTIOFSD_VERSION:-0:1.13.0-1.el9}
 -- 
 2.43.0
-
