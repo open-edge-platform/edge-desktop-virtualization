@@ -1674,6 +1674,7 @@ rpmtree(
         "@flac-libs-0__1.3.3-12.el9.x86_64//rpm",
         "@fontconfig-0__2.14.0-2.el9.x86_64//rpm",
         "@fontconfig-devel-0__2.14.0-2.el9.x86_64//rpm",
+        "@fonts-filesystem-1__2.0.5-7.el9.1.x86_64//rpm"
         "@freetype-0__2.10.4-11.el9.x86_64//rpm",
         "@freetype-devel-0__2.10.4-11.el9.x86_64//rpm",
         "@fribidi-0__1.0.10-6.el9.2.x86_64//rpm",
