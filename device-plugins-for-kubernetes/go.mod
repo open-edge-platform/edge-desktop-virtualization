@@ -1,14 +1,13 @@
 module device-plugin
 
-go 1.24.4
+go 1.25.0
 
 require (
 	google.golang.org/grpc v1.79.3
-	k8s.io/kubelet v0.33.2
+	k8s.io/kubelet v0.35.3
 )
 
 require (
-	github.com/gogo/protobuf v1.3.2 // indirect
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
