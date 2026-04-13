@@ -1477,7 +1477,7 @@ rpmtree(
         "@grep-0__3.6-5.el9.x86_64//rpm",
         "@gsettings-desktop-schemas-0__40.0-6.el9.x86_64//rpm",
         "@gzip-0__1.12-1.el9.x86_64//rpm",
-        "@hwdata-0__0.348-9.19.el9.x86_64//rpm",
+        "@hwdata-0__0.348-9.20.el9.x86_64//rpm",
         "@iproute-0__6.14.0-2.el9.x86_64//rpm",
         "@iproute-tc-0__6.14.0-2.el9.x86_64//rpm",
         "@iptables-libs-0__1.8.10-11.el9.x86_64//rpm",
