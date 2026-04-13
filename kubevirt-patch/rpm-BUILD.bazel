@@ -1485,7 +1485,7 @@ rpmtree(
         "@jansson-0__2.14-1.el9.x86_64//rpm",
         "@json-c-0__0.14-11.el9.x86_64//rpm",
         "@json-glib-0__1.6.6-1.el9.x86_64//rpm",
-        "@kernel-headers-0__5.14.0-598.el9.x86_64//rpm",
+        "@kernel-headers-0__5.14.0-611.el9.x86_64//rpm",
         "@keyutils-libs-0__1.6.3-1.el9.x86_64//rpm",
         "@kmod-libs-0__28-11.el9.x86_64//rpm",
         "@krb5-libs-0__1.21.1-8.el9.x86_64//rpm",
