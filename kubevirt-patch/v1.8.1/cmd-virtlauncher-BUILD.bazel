@@ -256,7 +256,7 @@ oci_image(
             ":libvirt-hook-client-tar",
             ":qemu-kvm-modules-dir-tar",
             ":var-run-symlink-tar",
-	    ":custom-qemu-build", # EDV dependency
+            ":custom-qemu-build", # EDV dependency
         ],
     }),
 )

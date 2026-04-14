@@ -17,7 +17,7 @@ The following will be captured in this document:
   - Build and Deploy Kubevirt
 
 > [!Note]
-> This has been verified on `Kubevirt Version v1.5.0`
+> This has been verified on `Kubevirt Version v1.5.0`, `v1.7.0`, `v1.8.1 CentOS-9-Stream`
 > OS and QEMU version provided in default Kubevirt virt-launcher image is
 
 ```shell
@@ -184,54 +184,41 @@ The original idea to build within the Centos container comes from this [link](ht
     cd kubevirt
     ```
 
-1. Check out the specific kubevirt version you want to build with.
-    ```
-    git checkout v1.5.0
-    ```
-    For v1.7.0 or v1.8.1
+1. Check out the specific kubevirt version you want to build with. $KV_VER should be set to either `v1.5.0`, `v1.7.0` or `v1.8.1`.
+
     ```
     KV_VER=v1.8.1
     git checkout $KV_VER
     ```
 
-1. Apply a patch to kubevirt to update dependencies which resolve potential security issues since the original v1.5.0 kubevirt was released. $EDV_HOME should be set to the path to the top level of this repository (e.g. edge-desktop-virtualization).
-    ```sh
-    git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
-    ```
-    For v1.7.0 or v1.8.1
+2. Apply a patched to kubevirt files to update dependencies. $EDV_HOME should be set to the path to the top level of this repository (e.g. edge-desktop-virtualization).
+
     ```
     cp $EDV_HOME/kubevirt-patch/$KV_VER/WORKSPACE ./WORKSPACE
     cp $EDV_HOME/kubevirt-patch/$KV_VER/rpm-BUILD.bazel ./rpm/BUILD.bazel
     cp $EDV_HOME/kubevirt-patch/$KV_VER/cmd-virtlauncher-BUILD.bazel ./cmd/virt-launcher/BUILD.bazel 
     ```
 
-1. [OPTIONAL for v1.5.0 only] Update kubevirt dependency images using the `make bump-images` command. Note that you may also have to update `go_version` in `WORKSPACE` if applicable.
-
-1. Apply the kubevirt patch from this repo to expand kubevirt virt-launcher image with additional dependencies to support GTK for v1.5.0 only
-    ```sh
-    git apply $EDV_HOME/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
-    ```
-
-1. Create a directory to place the custom QEMU binary and copy it from the QEMU build
+3. Create a directory to place the custom QEMU binary and copy it from the QEMU build
 
     ```sh
     mkdir build
     cp ../qemu-9.1.0/build/qemu-system-x86_64 build/qemu-system-x86_64
     ```
 
-1. Obtain the `SHA` hash number of the QEMU binary
+4. Obtain the `SHA` hash number of the QEMU binary
 
     ```sh
     QEMU_SHA256="$(sha256sum ./build/qemu-system-x86_64 | cut -d ' ' -f 1)"
     echo "QEMU_SHA256=$QEMU_SHA256"
     ```
 
-1. Patch the top level `WORKSPACE` file in top level `kubevirt` directory. Replace `<SHA256SUM_OF_PATCHED_QEMU>` with your sha256sum from the previous step
+5. Patch the top level `WORKSPACE` file in top level `kubevirt` directory. Replace `<SHA256SUM_OF_PATCHED_QEMU>` with your sha256sum from the previous step
     ```sh
     perl -p -i -e "s|<SHA256SUM_OF_PATCHED_QEMU>|$QEMU_SHA256|g" WORKSPACE
     ```
 
-1. Export the location of the docker registry and build tag (local docker registry in this case)
+6. Export the location of the docker registry and build tag (local docker registry in this case)
 
     ```sh
     export DOCKER_PREFIX=localhost:5000
@@ -244,14 +231,13 @@ The original idea to build within the Centos container comes from this [link](ht
     export HTTP_PROXY="http://proxy-dmz.intel.com:912"
     ```
 
-1. Build Kubevirt & dependencies.
+7. Build Kubevirt & dependencies.
     ```sh
-    make rpm-deps #this step is for v1.5.0 only
     make all
     make bazel-build-images
     ```
 
-1. Push the images to the local Docker registry
+8. Push the images to the local Docker registry
 
     ```sh
     make push
@@ -260,19 +246,19 @@ The original idea to build within the Centos container comes from this [link](ht
     BUILD_ARCH= DOCKER_PREFIX=localhost:5000 DOCKER_TAG=mybuild hack/push-container-manifest.sh
     ```
 
-1. Build manifests referencing the image locations
+9.  Build manifests referencing the image locations
 
     ```sh
     make manifests
     ```
 
-1. To install Kubevirt
+10. To install Kubevirt
     ```sh
     kubectl apply -f _out/manifests/release/kubevirt-operator.yaml
     kubectl apply -f _out/manifests/release/kubevirt-cr.yaml
     ```
 
-1.  Verify Deployment
+11. Verify Deployment
     ```sh
     kubectl get all -n kubevirt
 
