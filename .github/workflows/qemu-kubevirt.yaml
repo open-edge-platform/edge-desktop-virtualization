@@ -383,13 +383,9 @@ jobs:
           git clone https://github.com/kubevirt/kubevirt.git
           cd kubevirt
 
-          KV_VER=v1.7.0
+          KV_VER=v1.8.1
 
           git checkout $KV_VER
-
-          # git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
-
-          # git apply $EDV_HOME/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
 
           cp $EDV_HOME/kubevirt-patch/$KV_VER/WORKSPACE ./WORKSPACE
 
@@ -407,7 +403,6 @@ jobs:
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
 
-          # make rpm-deps
           make all
           make bazel-build-images
 
