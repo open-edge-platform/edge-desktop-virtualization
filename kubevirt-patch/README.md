@@ -188,20 +188,21 @@ The original idea to build within the Centos container comes from this [link](ht
     ```
     git checkout v1.5.0
     ```
-    or
+    For v1.7.0 or v1.8.1
     ```
-    git checkout v1.7.0
+    KV_VER=v1.8.1
+    git checkout $KV_VER
     ```
 
 1. Apply a patch to kubevirt to update dependencies which resolve potential security issues since the original v1.5.0 kubevirt was released. $EDV_HOME should be set to the path to the top level of this repository (e.g. edge-desktop-virtualization).
     ```sh
     git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
     ```
-    for v1.7.0
+    For v1.7.0 or v1.8.1
     ```
-    cp $EDV_HOME/kubevirt-patch/v1.7.0/WORKSPACE ./WORKSPACE
-    cp $EDV_HOME/kubevirt-patch/v1.7.0/rpm-BUILD.bazel ./rpm/BUILD.bazel
-    cp $EDV_HOME/kubevirt-patch/v1.7.0/cmd-virtlauncher-BUILD.bazel ./cmd/virt-launcher/BUILD.bazel 
+    cp $EDV_HOME/kubevirt-patch/$KV_VER/WORKSPACE ./WORKSPACE
+    cp $EDV_HOME/kubevirt-patch/$KV_VER/rpm-BUILD.bazel ./rpm/BUILD.bazel
+    cp $EDV_HOME/kubevirt-patch/$KV_VER/cmd-virtlauncher-BUILD.bazel ./cmd/virt-launcher/BUILD.bazel 
     ```
 
 1. [OPTIONAL for v1.5.0 only] Update kubevirt dependency images using the `make bump-images` command. Note that you may also have to update `go_version` in `WORKSPACE` if applicable.
