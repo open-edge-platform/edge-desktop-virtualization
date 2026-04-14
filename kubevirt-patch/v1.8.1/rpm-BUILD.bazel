@@ -2841,7 +2841,7 @@ rpmtree(
         "@harfbuzz-devel-0__2.7.4-10.el9.x86_64//rpm",
         "@harfbuzz-icu-0__2.7.4-10.el9.x86_64//rpm",
         "@hicolor-icon-theme-0__0.17-13.el9.x86_64//rpm",
-        "@hwdata-0__0.348-9.20.el9.x86_64//rpm",
+        "@hwdata-0__0.348-9.22.el9.x86_64//rpm",
         "@jbigkit-libs-0__2.1-23.el9.x86_64//rpm",
         "@kernel-headers-0__5.14.0-686.el9.x86_64//rpm",
         "@langpacks-core-font-en-0__3.0-16.el9.x86_64//rpm",

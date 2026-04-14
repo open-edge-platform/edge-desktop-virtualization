@@ -17,7 +17,7 @@ The following will be captured in this document:
   - Build and Deploy Kubevirt
 
 > [!Note]
-> This has been verified on `Kubevirt Version v1.5.0`, `v1.7.0`, `v1.8.1 CentOS-9-Stream`
+> This has been verified on `Kubevirt Version v1.5.0`, `v1.7.0`, `v1.8.1 CentOS-9-Stream`.
 > OS and QEMU version provided in default Kubevirt virt-launcher image is
 
 ```shell
