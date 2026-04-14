@@ -8218,6 +8218,7 @@ rpm(
     ],
 )
 
+# Edge Desktop Virtualization dependency - START
 http_file(
     name = "custom-qemu",
     downloaded_file_path = "qemu-kvm",
@@ -9778,3 +9779,4 @@ rpm(
         "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/zlib-devel-1.2.11-41.el9.x86_64.rpm",
     ],
 )
+# Edge Desktop Virtualization dependency - END

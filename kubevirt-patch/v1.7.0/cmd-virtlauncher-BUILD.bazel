@@ -177,6 +177,7 @@ pkg_tar(
     package_dir = "/",
 )
 
+# Edge Desktop Virtualization dependency - START
 pkg_tar(
     name = "custom-qemu-build",
     srcs = ["@custom-qemu//file"],
@@ -185,6 +186,7 @@ pkg_tar(
     package_dir = "/usr/libexec",
     visibility = ["//visibility:public"],
 )
+# Edge Desktop Virtualization dependency - END
 
 oci_image(
     name = "version-container",
@@ -218,7 +220,7 @@ oci_image(
             ":nsswitch-tar",
             ":qemu-hook-tar",
             ":qemu-kvm-modules-dir-tar",
-            ":custom-qemu-build",
+            ":custom-qemu-build", # Edge Desktop Virtualization dependency
         ],
     }),
 )
