@@ -188,15 +188,25 @@ The original idea to build within the Centos container comes from this [link](ht
     ```
     git checkout v1.5.0
     ```
+    or
+    ```
+    git checkout v1.7.0
+    ```
 
 1. Apply a patch to kubevirt to update dependencies which resolve potential security issues since the original v1.5.0 kubevirt was released. $EDV_HOME should be set to the path to the top level of this repository (e.g. edge-desktop-virtualization).
     ```sh
     git apply $EDV_HOME/kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch
     ```
+    for v1.7.0
+    ```
+    cp $EDV_HOME/kubevirt-patch/v1.7.0/WORKSPACE ./WORKSPACE
+    cp $EDV_HOME/kubevirt-patch/v1.7.0/rpm-BUILD.bazel ./rpm/BUILD.bazel
+    cp $EDV_HOME/kubevirt-patch/v1.7.0/cmd-virtlauncher-BUILD.bazel ./cmd/virt-launcher/BUILD.bazel 
+    ```
 
-1. [OPTIONAL] Update kubevirt dependency images using the `make bump-images` command. Note that you may also have to update `go_version` in `WORKSPACE` if applicable.
+1. [OPTIONAL for v1.5.0 only] Update kubevirt dependency images using the `make bump-images` command. Note that you may also have to update `go_version` in `WORKSPACE` if applicable.
 
-1. Apply the kubevirt patch from this repo to expand kubevirt virt-launcher image with additional dependencies to support GTK
+1. Apply the kubevirt patch from this repo to expand kubevirt virt-launcher image with additional dependencies to support GTK for v1.5.0 only
     ```sh
     git apply $EDV_HOME/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
     ```
@@ -235,7 +245,7 @@ The original idea to build within the Centos container comes from this [link](ht
 
 1. Build Kubevirt & dependencies.
     ```sh
-    make rpm-deps
+    make rpm-deps #this step is for v1.5.0 only
     make all
     make bazel-build-images
     ```

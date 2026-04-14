@@ -391,7 +391,7 @@ jobs:
 
           # git apply $EDV_HOME/kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch
 
-          cp $EDV_HOME/kubevirt-patch/$KV_VER/WORKSPACE ./
+          cp $EDV_HOME/kubevirt-patch/$KV_VER/WORKSPACE ./WORKSPACE
 
           cp $EDV_HOME/kubevirt-patch/$KV_VER/rpm-BUILD.bazel ./rpm/BUILD.bazel
 
