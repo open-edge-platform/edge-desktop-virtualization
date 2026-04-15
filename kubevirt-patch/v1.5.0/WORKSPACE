@@ -100,6 +100,19 @@ http_archive(
 )
 
 http_archive(
+    name = "rules_pkg",
+    sha256 = "d20c951960ed77cb7b341c2a59488534e494d5ad1d30c4818c736d57772a9fef",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/...",
+        "https://github.com/bazelbuild/rules_pkg/...",
+        "https://storage.googleapis.com/builddeps/...",
+    ],
+)
+
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+rules_pkg_dependencies()
+
+http_archive(
     name = "io_bazel_rules_docker",
     sha256 = "95d39fd84ff4474babaf190450ee034d958202043e366b9fc38f438c9e6c3334",
     strip_prefix = "rules_docker-0.16.0",
