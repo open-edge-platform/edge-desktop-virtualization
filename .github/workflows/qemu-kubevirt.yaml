@@ -383,7 +383,7 @@ jobs:
           git clone https://github.com/kubevirt/kubevirt.git
           cd kubevirt
 
-          KV_VER=v1.5.0
+          KV_VER=v1.8.1
 
           git checkout $KV_VER
 
