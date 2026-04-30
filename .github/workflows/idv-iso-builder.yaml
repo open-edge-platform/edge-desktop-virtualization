@@ -13,6 +13,7 @@ on:
     branches:
       - emt-dv-iso
       - main
+      - emt-idv-tag-update
   workflow_dispatch:
     # Inputs the workflow accepts.
     inputs:
@@ -20,7 +21,7 @@ on:
         # description to be shown in the UI
         description: 'release tag to be build'
         # Default value if no value is explicitly provided
-        default: '3.0.20250806'
+        default: '25.06.02'
         # Input has to be provided for the workflow to run
         required: true
         # The data type of the input
