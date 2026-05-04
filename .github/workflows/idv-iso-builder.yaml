@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - emt-dv-iso
+      - emt-dv-iso-latest
       - main
   workflow_dispatch:
     # Inputs the workflow accepts.
