@@ -96,7 +96,7 @@ function launch_build() {
     if [[ -z "$IDV_JSON_PATH" ]]; then
         echo -e "${BLUE}JSON input not provided. Hence download the default one.${ENDCOLOR}"
         wget $DEFAULT_IDV_JSON_GIT_FETCH
-        cp edge-image-desktop-virtualization.json ./imageconfigs
+        cp idv.json ./imageconfigs
     else
         echo -e "${BLUE}JSON input provided is : ${GREEN}$IDV_JSON_PATH${ENDCOLOR}"
         cp $IDV_JSON_PATH ./imageconfigs/idv.json
