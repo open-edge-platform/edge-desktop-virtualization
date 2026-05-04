@@ -19,7 +19,8 @@ DEFAULT_TAG=25.06.02
 # Default image config .json file. If this is NULL, default will be fetched from the repo.
 DEFAULT_IDV_JSON_PATH=""
 # This will be used only if above is NULL
-DEFAULT_IDV_JSON_GIT_FETCH="https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/emt-dv-iso/emt-dv-iso/idv.json"
+#DEFAULT_IDV_JSON_GIT_FETCH="https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/emt-dv-iso/emt-dv-iso/idv.json"
+DEFAULT_IDV_JSON_GIT_FETCH = https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0/toolkit/imageconfigs/edge-image-desktop-virtualization.json
 
 # ------------------- Global Variables ----------------------------
 
