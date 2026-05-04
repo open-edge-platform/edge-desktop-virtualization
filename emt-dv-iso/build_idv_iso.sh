@@ -20,7 +20,7 @@ DEFAULT_TAG=25.06.02
 DEFAULT_IDV_JSON_PATH=""
 # This will be used only if above is NULL
 #DEFAULT_IDV_JSON_GIT_FETCH="https://raw.githubusercontent.com/open-edge-platform/edge-desktop-virtualization/refs/heads/emt-dv-iso/emt-dv-iso/idv.json"
-DEFAULT_IDV_JSON_GIT_FETCH = "https://raw.githubusercontent.com/open-edge-platform/edge-microvisor-toolkit/refs/heads/3.0/toolkit/imageconfigs/edge-image-desktop-virtualization.json"
+DEFAULT_IDV_JSON_GIT_FETCH="https://raw.githubusercontent.com/open-edge-platform/edge-microvisor-toolkit/refs/heads/3.0/toolkit/imageconfigs/edge-image-desktop-virtualization.json"
 
 # ------------------- Global Variables ----------------------------
 
