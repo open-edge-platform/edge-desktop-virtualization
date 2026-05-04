@@ -106,7 +106,7 @@ function launch_build() {
     sudo make -j8 build-packages \
                       REBUILD_TOOLS=y CONFIG_FILE= \
                       SRPM_PACK_LIST="qemu" CONCURRENT_PACKAGE_BUILDS=8 \
-                      VALIDATE_TOOLCHAIN_GPG=n --nogpgcheck
+                      VALIDATE_TOOLCHAIN_GPG=n
 
     # build the iso image
     sudo make iso -j$(nproc) REBUILD_TOOLS=y VALIDATE_TOOLCHAIN_GPG=n REBUILD_PACKAGES=n --nogpgcheck CONFIG_FILE=./imageconfigs/idv.json
