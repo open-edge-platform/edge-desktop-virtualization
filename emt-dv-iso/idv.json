@@ -15,7 +15,7 @@
                 "packagelists/drtm.json",
                 "packagelists/virt-guest-packages.json",
                 "packagelists/intel-wireless.json",
-				"packagelists/qemu-guest-packages.json",
+				"packagelists/qemu-guest-packages.json"
             ],
             "Packages": [
                 "lsb-release",
