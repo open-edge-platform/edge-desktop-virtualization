@@ -109,7 +109,7 @@ function launch_build() {
                       VALIDATE_TOOLCHAIN_GPG=n
 
     # build the iso image
-    sudo make iso -j$(nproc) REBUILD_TOOLS=y VALIDATE_TOOLCHAIN_GPG=n REBUILD_PACKAGES=n --nogpgcheck CONFIG_FILE=./imageconfigs/idv.json
+    sudo make iso -j$(nproc) REBUILD_TOOLS=y VALIDATE_TOOLCHAIN_GPG=n REBUILD_PACKAGES=n CONFIG_FILE=./imageconfigs/idv.json
 
     # copy the generated iso to same parent folder
     cp ../out/images/idv/*.iso ../../.
