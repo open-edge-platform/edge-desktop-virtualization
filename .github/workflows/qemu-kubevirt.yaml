@@ -400,6 +400,53 @@ jobs:
           echo "QEMU_SHA256=$QEMU_SHA256"
           perl -p -i -e "s|<SHA256SUM_OF_PATCHED_QEMU>|$QEMU_SHA256|g" WORKSPACE
 
+          # Dynamically resolve webkit2gtk3-jsc to the current version on the CentOS
+          # AppStream mirror.  mirror.stream.centos.org only keeps the latest version of
+          # every package, so any hardcoded version will eventually produce a 404.  We
+          # detect the current version at build time, download the RPM once to compute
+          # its SHA-256, then patch WORKSPACE and rpm/BUILD.bazel before Bazel runs.
+          CENTOS_APPSTREAM="http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/"
+          echo "Querying CentOS AppStream mirror for current webkit2gtk3-jsc..."
+          WEBKIT_RPM=$(curl -sfL "${CENTOS_APPSTREAM}" | \
+            grep -oP 'webkit2gtk3-jsc-[0-9][0-9.]*-[0-9]+\.el9\.x86_64\.rpm' | \
+            sort -V | tail -1)
+          if [ -z "${WEBKIT_RPM}" ]; then
+            echo "ERROR: Could not determine current webkit2gtk3-jsc version from mirror" >&2
+            exit 1
+          fi
+          echo "Found: ${WEBKIT_RPM}"
+          echo "Downloading RPM to compute SHA-256..."
+          curl -fL "${CENTOS_APPSTREAM}${WEBKIT_RPM}" -o /tmp/webkit2gtk3-jsc.rpm
+          WEBKIT_SHA256=$(sha256sum /tmp/webkit2gtk3-jsc.rpm | cut -d ' ' -f 1)
+          echo "SHA-256: ${WEBKIT_SHA256}"
+          WEBKIT_VER_REL="${WEBKIT_RPM%.x86_64.rpm}"
+          WEBKIT_VER_REL="${WEBKIT_VER_REL#webkit2gtk3-jsc-}"
+          WEBKIT_BAZEL_NAME="webkit2gtk3-jsc-0__${WEBKIT_VER_REL}.x86_64"
+          echo "Patching WORKSPACE and rpm/BUILD.bazel with ${WEBKIT_BAZEL_NAME}..."
+          python3 - "${WEBKIT_BAZEL_NAME}" "${WEBKIT_SHA256}" "${CENTOS_APPSTREAM}${WEBKIT_RPM}" <<'PYEOF'
+import re, sys
+new_name, new_sha256, new_url = sys.argv[1], sys.argv[2], sys.argv[3]
+new_entry = (
+    f'rpm(\n    name = "{new_name}",\n    sha256 = "{new_sha256}",\n'
+    f'    urls = [\n        "{new_url}",\n    ],\n)'
+)
+with open('WORKSPACE') as f:
+    content = f.read()
+content = re.sub(
+    r'rpm\(\n    name = "webkit2gtk3-jsc-0__[^"]+",\n    sha256 = "[^"]+",\n'
+    r'    urls = \[\n        "[^"]+",\n    \],\n\)',
+    new_entry, content)
+with open('WORKSPACE', 'w') as f:
+    f.write(content)
+print(f'Updated WORKSPACE with {new_name}')
+with open('rpm/BUILD.bazel') as f:
+    content = f.read()
+content = re.sub(r'@webkit2gtk3-jsc-0__[^/]+//', f'@{new_name}//', content)
+with open('rpm/BUILD.bazel', 'w') as f:
+    f.write(content)
+print(f'Updated rpm/BUILD.bazel with @{new_name}//')
+PYEOF
+
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
           export BUILD_ARCH=amd64
