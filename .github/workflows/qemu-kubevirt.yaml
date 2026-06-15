@@ -408,7 +408,7 @@ jobs:
           CENTOS_APPSTREAM="http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/"
           echo "Querying CentOS AppStream mirror for current webkit2gtk3-jsc..."
           WEBKIT_RPM=$(curl -sfL "${CENTOS_APPSTREAM}" | \
-            grep -oP 'webkit2gtk3-jsc-[0-9][0-9.]*-[0-9]+\.el9\.x86_64\.rpm' | \
+            grep -oP 'webkit2gtk3-jsc-[0-9]+(?:\.[0-9]+)*-[0-9]+\.el9\.x86_64\.rpm' | \
             sort -V | tail -1)
           if [ -z "${WEBKIT_RPM}" ]; then
             echo "ERROR: Could not determine current webkit2gtk3-jsc version from mirror" >&2
@@ -430,21 +430,41 @@ new_entry = (
     f'rpm(\n    name = "{new_name}",\n    sha256 = "{new_sha256}",\n'
     f'    urls = [\n        "{new_url}",\n    ],\n)'
 )
-with open('WORKSPACE') as f:
-    content = f.read()
-content = re.sub(
+
+workspace_path = 'WORKSPACE'
+try:
+    with open(workspace_path) as f:
+        content = f.read()
+except OSError as e:
+    sys.exit(f'ERROR: Could not read {workspace_path}: {e}')
+new_content, n = re.subn(
     r'rpm\(\n    name = "webkit2gtk3-jsc-0__[^"]+",\n    sha256 = "[^"]+",\n'
     r'    urls = \[\n        "[^"]+",\n    \],\n\)',
     new_entry, content)
-with open('WORKSPACE', 'w') as f:
-    f.write(content)
-print(f'Updated WORKSPACE with {new_name}')
-with open('rpm/BUILD.bazel') as f:
-    content = f.read()
-content = re.sub(r'@webkit2gtk3-jsc-0__[^/]+//', f'@{new_name}//', content)
-with open('rpm/BUILD.bazel', 'w') as f:
-    f.write(content)
-print(f'Updated rpm/BUILD.bazel with @{new_name}//')
+if n == 0:
+    sys.exit('ERROR: webkit2gtk3-jsc entry not found in WORKSPACE; patch failed')
+try:
+    with open(workspace_path, 'w') as f:
+        f.write(new_content)
+except OSError as e:
+    sys.exit(f'ERROR: Could not write {workspace_path}: {e}')
+print(f'Updated WORKSPACE with {new_name} ({n} substitution(s))')
+
+build_path = 'rpm/BUILD.bazel'
+try:
+    with open(build_path) as f:
+        content = f.read()
+except OSError as e:
+    sys.exit(f'ERROR: Could not read {build_path}: {e}')
+new_content, n = re.subn(r'@webkit2gtk3-jsc-0__[^/]+//', f'@{new_name}//', content)
+if n == 0:
+    sys.exit('ERROR: webkit2gtk3-jsc reference not found in rpm/BUILD.bazel; patch failed')
+try:
+    with open(build_path, 'w') as f:
+        f.write(new_content)
+except OSError as e:
+    sys.exit(f'ERROR: Could not write {build_path}: {e}')
+print(f'Updated rpm/BUILD.bazel with @{new_name}// ({n} substitution(s))')
 PYEOF
 
           export DOCKER_PREFIX=localhost:5000
