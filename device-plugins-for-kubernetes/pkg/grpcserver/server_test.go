@@ -122,7 +122,7 @@ func TestAllocate(t *testing.T) {
 
 	req := &pluginapi.AllocateRequest{
 		ContainerRequests: []*pluginapi.ContainerAllocateRequest{
-			{DevicesIDs: []string{"usb-0"}},
+			{DevicesIds: []string{"usb-0"}},
 		},
 	}
 	resp, err := client.Allocate(context.Background(), req)
