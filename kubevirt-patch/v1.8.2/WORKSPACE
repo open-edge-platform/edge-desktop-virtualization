@@ -16309,7 +16309,7 @@ rpm(
 
 rpm(
     name = "libpng-devel-2__1.6.37-17.el9.x86_64",
-    sha256 = "2b40cfc1167db99a7703b2e17548b826b72808dff829ec93b57211660b33fb26",
+    sha256 = "74d797143d1fb53ef6de826d55867e8571189b21181dfb9b492332cb8ef7b8f7",
     urls = [
         "https://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/libpng-devel-1.6.37-17.el9.x86_64.rpm",
     ],
