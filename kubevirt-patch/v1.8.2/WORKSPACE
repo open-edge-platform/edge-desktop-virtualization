@@ -16876,10 +16876,10 @@ rpm(
 )
 
 rpm(
-    name = "webkit2gtk3-jsc-0__2.48.5-1.el9.x86_64",
-    sha256 = "c3404d87fc1856171f6895aac5637ef093bb3d3811db04cdac511462ae32f267",
+    name = "webkit2gtk3-jsc-0__2.52.4-1.el9.x86_64",
+    sha256 = "01c9c8f3c7a6d152cfcf3581075aebafb096e9f97e26e5a80b95bff0cf372382",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/webkit2gtk3-jsc-2.48.5-1.el9.x86_64.rpm",
+        " https://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/webkit2gtk3-jsc-2.52.4-1.el9.x86_64.rpm",
     ],
 )
 
