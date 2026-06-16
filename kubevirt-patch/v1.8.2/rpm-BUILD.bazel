@@ -2906,7 +2906,7 @@ rpmtree(
         "@libogg-2__1.3.4-6.el9.x86_64//rpm",
         "@libpciaccess-0__0.16-7.el9.x86_64//rpm",
         "@libpkgconf-0__1.7.3-10.el9.x86_64//rpm",
-        "@libpng-devel-2__1.6.37-12.el9.x86_64//rpm",
+        "@libpng-devel-2__1.6.37-17.el9.x86_64//rpm",
         "@libproxy-webkitgtk4-0__0.4.15-35.el9.x86_64//rpm",
         "@libproxy-0__0.4.15-35.el9.x86_64//rpm",
         "@libpsl-0__0.21.1-5.el9.x86_64//rpm",
