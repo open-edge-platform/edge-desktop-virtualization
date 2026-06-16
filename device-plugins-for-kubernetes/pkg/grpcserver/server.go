@@ -73,7 +73,7 @@ func (s *DevicePluginServer) ListAndWatch(req *pluginapi.Empty, stream pluginapi
 // Allocate handles resource allocation requests from Kubernetes
 func (s *DevicePluginServer) Allocate(ctx context.Context, req *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {
 	var responses []*pluginapi.ContainerAllocateResponse
-	res := s.resource.Allocate(req.ContainerRequests[0].DevicesIDs)
+	res := s.resource.Allocate(req.ContainerRequests[0].DevicesIds)
 	responses = append(responses, res...)
 
 	return &pluginapi.AllocateResponse{ContainerResponses: responses}, nil
