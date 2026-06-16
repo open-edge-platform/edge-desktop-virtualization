@@ -467,6 +467,73 @@ except OSError as e:
 print(f'Updated rpm/BUILD.bazel with @{new_name}// ({n} substitution(s))')
 PYEOF
 
+          # Dynamically resolve libpng-devel to the current version on the CentOS
+          # AppStream mirror.  mirror.stream.centos.org only keeps the latest version
+          # of every package, so any hardcoded version will eventually produce a 404.
+          # This entry has no fallback GCS URL, so we must detect the current version,
+          # download it to compute its SHA-256, then patch WORKSPACE and
+          # rpm/BUILD.bazel before Bazel runs.
+          echo "Querying CentOS AppStream mirror for current libpng-devel..."
+          LIBPNG_DEVEL_RPM=$(curl -sfL "${CENTOS_APPSTREAM}" | \
+            grep -oP 'libpng-devel-[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.el9\.x86_64\.rpm' | \
+            sort -V | tail -1)
+          if [ -z "${LIBPNG_DEVEL_RPM}" ]; then
+            echo "ERROR: Could not determine current libpng-devel version from mirror" >&2
+            exit 1
+          fi
+          echo "Found: ${LIBPNG_DEVEL_RPM}"
+          echo "Downloading RPM to compute SHA-256..."
+          curl -fL "${CENTOS_APPSTREAM}${LIBPNG_DEVEL_RPM}" -o /tmp/libpng-devel.rpm
+          LIBPNG_DEVEL_SHA256=$(sha256sum /tmp/libpng-devel.rpm | cut -d ' ' -f 1)
+          echo "SHA-256: ${LIBPNG_DEVEL_SHA256}"
+          LIBPNG_DEVEL_VER_REL="${LIBPNG_DEVEL_RPM%.x86_64.rpm}"
+          LIBPNG_DEVEL_VER_REL="${LIBPNG_DEVEL_VER_REL#libpng-devel-}"
+          LIBPNG_DEVEL_BAZEL_NAME="libpng-devel-2__${LIBPNG_DEVEL_VER_REL}.x86_64"
+          echo "Patching WORKSPACE and rpm/BUILD.bazel with ${LIBPNG_DEVEL_BAZEL_NAME}..."
+          python3 - "${LIBPNG_DEVEL_BAZEL_NAME}" "${LIBPNG_DEVEL_SHA256}" "${CENTOS_APPSTREAM}${LIBPNG_DEVEL_RPM}" <<'PYEOF'
+import re, sys
+new_name, new_sha256, new_url = sys.argv[1], sys.argv[2], sys.argv[3]
+new_entry = (
+    f'rpm(\n    name = "{new_name}",\n    sha256 = "{new_sha256}",\n'
+    f'    urls = [\n        "{new_url}",\n    ],\n)'
+)
+
+workspace_path = 'WORKSPACE'
+try:
+    with open(workspace_path) as f:
+        content = f.read()
+except OSError as e:
+    sys.exit(f'ERROR: Could not read {workspace_path}: {e}')
+new_content, n = re.subn(
+    r'rpm\(\n    name = "libpng-devel-2__[^"]+",\n    sha256 = "[^"]+",\n'
+    r'    urls = \[\n        "[^"]+",\n    \],\n\)',
+    new_entry, content)
+if n == 0:
+    sys.exit('ERROR: libpng-devel entry not found in WORKSPACE; patch failed')
+try:
+    with open(workspace_path, 'w') as f:
+        f.write(new_content)
+except OSError as e:
+    sys.exit(f'ERROR: Could not write {workspace_path}: {e}')
+print(f'Updated WORKSPACE with {new_name} ({n} substitution(s))')
+
+build_path = 'rpm/BUILD.bazel'
+try:
+    with open(build_path) as f:
+        content = f.read()
+except OSError as e:
+    sys.exit(f'ERROR: Could not read {build_path}: {e}')
+new_content, n = re.subn(r'@libpng-devel-2__[^/]+//', f'@{new_name}//', content)
+if n == 0:
+    sys.exit('ERROR: libpng-devel reference not found in rpm/BUILD.bazel; patch failed')
+try:
+    with open(build_path, 'w') as f:
+        f.write(new_content)
+except OSError as e:
+    sys.exit(f'ERROR: Could not write {build_path}: {e}')
+print(f'Updated rpm/BUILD.bazel with @{new_name}// ({n} substitution(s))')
+PYEOF
+
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
           export BUILD_ARCH=amd64
