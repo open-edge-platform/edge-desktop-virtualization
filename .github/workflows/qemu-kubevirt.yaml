@@ -475,7 +475,7 @@ PYEOF
           # rpm/BUILD.bazel before Bazel runs.
           echo "Querying CentOS AppStream mirror for current libpng-devel..."
           LIBPNG_DEVEL_RPM=$(curl -sfL "${CENTOS_APPSTREAM}" | \
-            grep -oP 'libpng-devel-[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.el9\.x86_64\.rpm' | \
+            grep -oP 'libpng-devel-[0-9]+(?:\.[0-9]+)*-[0-9]+\.el9\.x86_64\.rpm' | \
             sort -V | tail -1)
           if [ -z "${LIBPNG_DEVEL_RPM}" ]; then
             echo "ERROR: Could not determine current libpng-devel version from mirror" >&2
