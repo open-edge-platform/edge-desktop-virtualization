@@ -165,6 +165,10 @@ def find_mirror_url(urls: List[str]) -> Optional[str]:
     return None
 
 
+def is_mirror_url(url: str) -> bool:
+    return "/9-stream/BaseOS/x86_64/os/Packages/" in url or "/9-stream/AppStream/x86_64/os/Packages/" in url
+
+
 def pick_search_roots(mirror_url: Optional[str]) -> List[str]:
     if mirror_url and "/BaseOS/" in mirror_url:
         return [BASEOS_URL, APPSTREAM_URL]
@@ -241,20 +245,54 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
 
         pkg, epoch, _ = parsed
 
-        if any(is_url_alive(u) for u in block.urls):
-            continue
-
         fallback_builddeps = f"{BUILDDEPS_PREFIX}{block.sha256}"
-        if is_url_alive(fallback_builddeps):
-            new_text = replace_block_fields(
-                block.text,
-                new_name=block.name,
-                new_sha=block.sha256,
-                new_urls=[fallback_builddeps],
-            )
-            replacements.append((block.start, block.end, new_text))
-            messages.append(f"{workspace_path}: switched to builddeps fallback for {block.name}")
-            continue
+
+        existing_builddeps_urls = [u for u in block.urls if u.startswith(BUILDDEPS_PREFIX)]
+        existing_mirror_urls = [u for u in block.urls if is_mirror_url(u)]
+        has_single_mirror_only_url = len(block.urls) == 1 and len(existing_mirror_urls) == 1 and not existing_builddeps_urls
+        has_mirror_and_builddeps_urls = bool(existing_mirror_urls) and bool(existing_builddeps_urls)
+
+        url_status: Dict[str, bool] = {u: is_url_alive(u) for u in block.urls}
+        any_existing_alive = any(url_status.values())
+
+        # Case 1: one BaseOS/AppStream URL only. Try builddeps/<sha256>; if alive, keep version and append it.
+        if has_single_mirror_only_url:
+            if is_url_alive(fallback_builddeps):
+                new_urls = list(block.urls)
+                if fallback_builddeps not in new_urls:
+                    new_urls.append(fallback_builddeps)
+                new_text = replace_block_fields(
+                    block.text,
+                    new_name=block.name,
+                    new_sha=block.sha256,
+                    new_urls=new_urls,
+                )
+                replacements.append((block.start, block.end, new_text))
+                messages.append(f"{workspace_path}: added builddeps fallback for {block.name}")
+                continue
+
+            messages.append(f"{workspace_path}: builddeps fallback unavailable for {block.name}; checking latest RPM")
+
+        # Case 2: two URLs with mirror+builddeps. Only proceed when both links are dead.
+        elif has_mirror_and_builddeps_urls:
+            if any_existing_alive:
+                continue
+
+        # Existing/default behavior for other URL layouts.
+        else:
+            if any_existing_alive:
+                continue
+
+            if is_url_alive(fallback_builddeps):
+                new_text = replace_block_fields(
+                    block.text,
+                    new_name=block.name,
+                    new_sha=block.sha256,
+                    new_urls=[fallback_builddeps],
+                )
+                replacements.append((block.start, block.end, new_text))
+                messages.append(f"{workspace_path}: switched to builddeps fallback for {block.name}")
+                continue
 
         latest_url = find_latest_rpm_url(pkg, block.urls)
         if not latest_url:
