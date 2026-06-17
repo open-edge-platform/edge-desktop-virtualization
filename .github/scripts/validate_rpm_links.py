@@ -131,8 +131,18 @@ def parse_rpm_blocks(content: str) -> List[RpmBlock]:
 
 
 def replace_block_fields(block_text: str, new_name: str, new_sha: str, new_urls: List[str]) -> str:
-    updated = re.sub(r'(\bname\s*=\s*")([^"]+)("\s*,)', rf'\1{new_name}\3', block_text, count=1)
-    updated = re.sub(r'(\bsha256\s*=\s*")([0-9a-fA-F]{64})("\s*,)', rf'\1{new_sha}\3', updated, count=1)
+    updated = re.sub(
+        r'(\bname\s*=\s*")([^"]+)("\s*,)',
+        lambda m: f'{m.group(1)}{new_name}{m.group(3)}',
+        block_text,
+        count=1,
+    )
+    updated = re.sub(
+        r'(\bsha256\s*=\s*")([0-9a-fA-F]{64})("\s*,)',
+        lambda m: f'{m.group(1)}{new_sha}{m.group(3)}',
+        updated,
+        count=1,
+    )
 
     urls_indent = "    "
     url_lines = "\n".join(f'{urls_indent}    "{u}",' for u in new_urls)
