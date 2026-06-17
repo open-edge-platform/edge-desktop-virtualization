@@ -227,7 +227,11 @@ def find_latest_rpm_url(pkg: str, current_urls: List[str]) -> Optional[str]:
     return None
 
 
-def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> Tuple[bool, Dict[str, str], List[str]]:
+def update_workspace_file(
+    workspace_path: pathlib.Path,
+    apply_changes: bool,
+    live_logger: Optional[callable] = None,
+) -> Tuple[bool, Dict[str, str], List[str]]:
     content = workspace_path.read_text(encoding="utf-8")
     blocks = parse_rpm_blocks(content)
 
@@ -238,12 +242,17 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
     name_map: Dict[str, str] = {}
     messages: List[str] = []
 
+    def log(message: str) -> None:
+        messages.append(message)
+        if live_logger:
+            live_logger(message)
+
     kubevirt_version = workspace_path.parent.name
 
     for block in blocks:
         parsed = parse_name(block.name)
         if not parsed:
-            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> unsupported-name-format")
+            log(f"[{kubevirt_version}] {block.name} -> FAIL -> unsupported-name-format")
             continue
 
         pkg, epoch, _ = parsed
@@ -261,7 +270,7 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
         # Case 1: one BaseOS/AppStream URL only. Try builddeps/<sha256>; if alive, keep version and append it.
         if has_single_mirror_only_url:
             if any_existing_alive:
-                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
+                log(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
                 continue
 
             if is_url_alive(fallback_builddeps):
@@ -275,19 +284,19 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
                     new_urls=new_urls,
                 )
                 replacements.append((block.start, block.end, new_text))
-                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> builddeps-added")
+                log(f"[{kubevirt_version}] {block.name} -> PASS -> builddeps-added")
                 continue
 
         # Case 2: two URLs with mirror+builddeps. Only proceed when both links are dead.
         elif has_mirror_and_builddeps_urls:
             if any_existing_alive:
-                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
+                log(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
                 continue
 
         # Existing/default behavior for other URL layouts.
         else:
             if any_existing_alive:
-                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
+                log(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
                 continue
 
             if is_url_alive(fallback_builddeps):
@@ -298,26 +307,26 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
                     new_urls=[fallback_builddeps],
                 )
                 replacements.append((block.start, block.end, new_text))
-                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> builddeps-switched")
+                log(f"[{kubevirt_version}] {block.name} -> PASS -> builddeps-switched")
                 continue
 
         latest_url = find_latest_rpm_url(pkg, block.urls)
         if not latest_url:
-            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> no-replace")
+            log(f"[{kubevirt_version}] {block.name} -> FAIL -> no-replace")
             continue
 
         if not is_url_alive(latest_url):
-            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> latest-rpm-unreachable")
+            log(f"[{kubevirt_version}] {block.name} -> FAIL -> latest-rpm-unreachable")
             continue
 
         latest_file = urllib.parse.urlparse(latest_url).path.rsplit("/", 1)[-1]
         if not latest_file.endswith(".rpm"):
-            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> invalid-latest-filename")
+            log(f"[{kubevirt_version}] {block.name} -> FAIL -> invalid-latest-filename")
             continue
 
         expected_prefix = f"{pkg}-"
         if not latest_file.startswith(expected_prefix):
-            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> unexpected-latest-filename")
+            log(f"[{kubevirt_version}] {block.name} -> FAIL -> unexpected-latest-filename")
             continue
 
         new_ver = latest_file[len(expected_prefix) : -4]
@@ -325,8 +334,8 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
 
         try:
             new_sha = fetch_sha256(latest_url)
-        except Exception as exc:
-            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> sha256-fetch-failed")
+        except Exception:
+            log(f"[{kubevirt_version}] {block.name} -> FAIL -> sha256-fetch-failed")
             continue
 
         new_urls = [latest_url, f"{BUILDDEPS_PREFIX}{new_sha}"]
@@ -334,7 +343,7 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
         replacements.append((block.start, block.end, new_text))
         if new_name != block.name:
             name_map[block.name] = new_name
-        messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> updated={new_name}")
+        log(f"[{kubevirt_version}] {block.name} -> PASS -> updated={new_name}")
 
     if not replacements:
         return False, {}, messages
@@ -392,18 +401,19 @@ def main() -> int:
         return 2
 
     any_changes = False
-    all_messages: List[str] = []
-
     apply_changes = not args.check
 
     for workspace_path in workspace_paths:
         rpm_build_path = workspace_path.with_name("rpm-BUILD.bazel")
         if not rpm_build_path.exists():
-            all_messages.append(f"skip: missing {rpm_build_path}")
+            print(f"skip: missing {rpm_build_path}", flush=True)
             continue
 
-        changed_workspace, name_map, messages = update_workspace_file(workspace_path, apply_changes=apply_changes)
-        all_messages.extend(messages)
+        changed_workspace, name_map, _ = update_workspace_file(
+            workspace_path,
+            apply_changes=apply_changes,
+            live_logger=lambda msg: print(msg, flush=True),
+        )
 
         changed_rpm_build = False
         if changed_workspace:
@@ -411,9 +421,6 @@ def main() -> int:
 
         if changed_workspace or changed_rpm_build:
             any_changes = True
-
-    for msg in all_messages:
-        print(msg)
 
     if args.check:
         return 1 if any_changes else 0
