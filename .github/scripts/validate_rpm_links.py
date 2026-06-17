@@ -338,7 +338,10 @@ def update_workspace_file(
             log(f"FAIL\t[{kubevirt_version}]\t{block.name}\t-> sha256-fetch-failed")
             continue
 
-        new_urls = [latest_url, f"{BUILDDEPS_PREFIX}{new_sha}"]
+        new_builddeps = f"{BUILDDEPS_PREFIX}{new_sha}"
+        new_urls = [latest_url]
+        if is_url_alive(new_builddeps):
+            new_urls.append(new_builddeps)
         new_text = replace_block_fields(block.text, new_name=new_name, new_sha=new_sha, new_urls=new_urls)
         replacements.append((block.start, block.end, new_text))
         if new_name != block.name:
