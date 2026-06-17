@@ -238,9 +238,12 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
     name_map: Dict[str, str] = {}
     messages: List[str] = []
 
+    kubevirt_version = workspace_path.parent.name
+
     for block in blocks:
         parsed = parse_name(block.name)
         if not parsed:
+            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> unsupported-name-format")
             continue
 
         pkg, epoch, _ = parsed
@@ -257,6 +260,10 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
 
         # Case 1: one BaseOS/AppStream URL only. Try builddeps/<sha256>; if alive, keep version and append it.
         if has_single_mirror_only_url:
+            if any_existing_alive:
+                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
+                continue
+
             if is_url_alive(fallback_builddeps):
                 new_urls = list(block.urls)
                 if fallback_builddeps not in new_urls:
@@ -268,19 +275,19 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
                     new_urls=new_urls,
                 )
                 replacements.append((block.start, block.end, new_text))
-                messages.append(f"{workspace_path}: added builddeps fallback for {block.name}")
+                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> builddeps-added")
                 continue
-
-            messages.append(f"{workspace_path}: builddeps fallback unavailable for {block.name}; checking latest RPM")
 
         # Case 2: two URLs with mirror+builddeps. Only proceed when both links are dead.
         elif has_mirror_and_builddeps_urls:
             if any_existing_alive:
+                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
                 continue
 
         # Existing/default behavior for other URL layouts.
         else:
             if any_existing_alive:
+                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> no-change")
                 continue
 
             if is_url_alive(fallback_builddeps):
@@ -291,26 +298,26 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
                     new_urls=[fallback_builddeps],
                 )
                 replacements.append((block.start, block.end, new_text))
-                messages.append(f"{workspace_path}: switched to builddeps fallback for {block.name}")
+                messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> builddeps-switched")
                 continue
 
         latest_url = find_latest_rpm_url(pkg, block.urls)
         if not latest_url:
-            messages.append(f"{workspace_path}: no replacement found for {block.name}")
+            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> no-replace")
             continue
 
         if not is_url_alive(latest_url):
-            messages.append(f"{workspace_path}: replacement not reachable for {block.name}: {latest_url}")
+            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> latest-rpm-unreachable")
             continue
 
         latest_file = urllib.parse.urlparse(latest_url).path.rsplit("/", 1)[-1]
         if not latest_file.endswith(".rpm"):
-            messages.append(f"{workspace_path}: invalid replacement filename for {block.name}: {latest_file}")
+            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> invalid-latest-filename")
             continue
 
         expected_prefix = f"{pkg}-"
         if not latest_file.startswith(expected_prefix):
-            messages.append(f"{workspace_path}: unexpected replacement filename for {block.name}: {latest_file}")
+            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> unexpected-latest-filename")
             continue
 
         new_ver = latest_file[len(expected_prefix) : -4]
@@ -319,7 +326,7 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
         try:
             new_sha = fetch_sha256(latest_url)
         except Exception as exc:
-            messages.append(f"{workspace_path}: failed to compute sha256 for {latest_url}: {exc}")
+            messages.append(f"[{kubevirt_version}] {block.name} -> FAIL -> sha256-fetch-failed")
             continue
 
         new_urls = [latest_url, f"{BUILDDEPS_PREFIX}{new_sha}"]
@@ -327,7 +334,7 @@ def update_workspace_file(workspace_path: pathlib.Path, apply_changes: bool) -> 
         replacements.append((block.start, block.end, new_text))
         if new_name != block.name:
             name_map[block.name] = new_name
-        messages.append(f"{workspace_path}: updated {block.name} -> {new_name}")
+        messages.append(f"[{kubevirt_version}] {block.name} -> PASS -> updated={new_name}")
 
     if not replacements:
         return False, {}, messages
