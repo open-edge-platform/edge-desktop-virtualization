@@ -16308,10 +16308,10 @@ rpm(
 )
 
 rpm(
-    name = "libpng-devel-2__1.6.37-12.el9.x86_64",
-    sha256 = "2b40cfc1167db99a7703b2e17548b826b72808dff829ec93b57211660b33fb26",
+    name = "libpng-devel-2__1.6.37-17.el9.x86_64",
+    sha256 = "74d797143d1fb53ef6de826d55867e8571189b21181dfb9b492332cb8ef7b8f7",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/libpng-devel-1.6.37-12.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/libpng-devel-1.6.37-17.el9.x86_64.rpm",
     ],
 )
 
@@ -16876,10 +16876,10 @@ rpm(
 )
 
 rpm(
-    name = "webkit2gtk3-jsc-0__2.48.3-1.el9.x86_64",
-    sha256 = "7e2f0ac1bbc9b58b34cdda0caa169a39a304c43a4345823356c3c973f2b65e50",
+    name = "webkit2gtk3-jsc-0__2.52.4-1.el9.x86_64",
+    sha256 = "01c9c8f3c7a6d152cfcf3581075aebafb096e9f97e26e5a80b95bff0cf372382",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/webkit2gtk3-jsc-2.48.3-1.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/webkit2gtk3-jsc-2.52.4-1.el9.x86_64.rpm",
     ],
 )
 
