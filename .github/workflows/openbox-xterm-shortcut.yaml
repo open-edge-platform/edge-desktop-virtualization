@@ -1,0 +1,91 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: "Openbox xterm Shortcut: Build, Trivy Scan"
+run-name: "Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
+
+# Only run at most 1 workflow concurrently per PR, unlimited for branches
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+jobs:
+  openbox-xterm-shortcut:
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # All history, not just latest commit
+          ref: ${{ github.event.pull_request.head.sha }} # Check out the actual commit, not a fake merge commit
+
+      - name: Setup Tools & Common Variables
+        uses: ./.github/actions/setup-tools
+
+      - name: Build XTerm Docker Image
+        working-directory: openbox-xterm-shortcut
+        run: |
+          chmod +x ./build-xterm-docker.sh
+          # Note, this image is tagged with "latest" instead of "$EDV_VERSION"
+          ./build-xterm-docker.sh --name "localhost:5000/xterm-docker" --tag "latest"
+
+      - name: Build XTerm Docker release tarball
+        working-directory: openbox-xterm-shortcut
+        run: |
+          mkdir xterm-artifacts
+          cd xterm-artifacts
+
+          # Save the Docker image to a tarball
+          docker image save -o xterm-docker.tar "localhost:5000/xterm-docker:latest"
+
+          # Create a directory for the release and compress files
+          for file in *.tar; do
+            zstd --no-progress -T0 -16 -f --long=25 "$file" -o "${file}.zst"
+          done
+
+          mkdir xterm-docker-$EDV_VERSION
+          mv *.zst xterm-docker-$EDV_VERSION/
+
+          cp -a ../README.md xterm-docker-$EDV_VERSION/
+
+          # Create the final tarball
+          tar cvzf xterm-docker-$EDV_VERSION.tar.gz xterm-docker-$EDV_VERSION
+
+          ls -hal
+
+      - name: Upload xterm Docker release tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: xterm-docker-artifacts
+          path: |
+              openbox-xterm-shortcut/xterm-artifacts/xterm-docker-${{ env.EDV_VERSION }}.tar.gz
+
+      - name: Trivy Image Scan
+        continue-on-error: true
+        shell: bash
+        run: |
+              curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o trivy-html.tpl
+              trivy image "localhost:5000/xterm-docker:latest" --ignore-unfixed --format template --template "@trivy-html.tpl" -o openbox-xterm-shortcut/trivy_image_scan_xterm.html
+              trivy image --quiet --format spdx-json --output openbox-xterm-shortcut/trivy_image_scan_xterm.spdx.json "localhost:5000/xterm-docker:latest"
+
+      - name: Upload Trivy Image Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy image scan report-xterm
+          path: |
+                openbox-xterm-shortcut/trivy_image_scan_xterm.html
+                openbox-xterm-shortcut/trivy_image_scan_xterm.spdx.json
