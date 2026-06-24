@@ -1,0 +1,6 @@
+# Code owners for the edge-desktop-virtualization repository.
+# See https://docs.github.com/articles/about-code-owners/
+# Each line is a file pattern followed by one or more GitHub usernames.
+# The last matching pattern for a file takes precedence.
+
+* @dmkarthi @smitesh-sutaria @Dhanya122
