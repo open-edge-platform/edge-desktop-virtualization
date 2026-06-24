@@ -51,16 +51,14 @@ fi
 # Build the device plugin
 echo "Building the device plugin..."
 rm -f device-plugin
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 BUILD_VERSION=$VER go build -o device-plugin cmd/main.go
-if [[ $? -ne 0 ]]; then
+if ! CGO_ENABLED=0 GOOS=linux GOARCH=amd64 BUILD_VERSION=$VER go build -o device-plugin cmd/main.go; then
   echo "Error: Failed to build the device plugin"
   exit 1
 fi
 
 # Build the Docker image
 echo "Building the Docker image..."
-docker build --no-cache -t "$DOCKER_REPO/intel-idv-device-plugin:$VER" .
-if [[ $? -ne 0 ]]; then
+if ! docker build --no-cache -t "$DOCKER_REPO/intel-idv-device-plugin:$VER" .; then
   echo "Error: Failed to build the Docker image"
   exit 1
 fi
@@ -68,8 +66,7 @@ fi
 # Push the Docker image if --push is specified
 if [[ $PUSH == "true" ]]; then
   echo "Pushing the Docker image to the repository..."
-  ! docker push "$DOCKER_REPO/intel-idv-device-plugin:$VER"
-  if [[ $? -ne 0 ]]; then
+  if ! docker push "$DOCKER_REPO/intel-idv-device-plugin:$VER"; then
     echo "Error: Failed to push the Docker image"
     exit 1
   fi
