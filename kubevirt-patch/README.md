@@ -79,6 +79,90 @@ The SRIOV patches to QEMU are based on QEMU 9.1.0
     git apply ./sriov/*.patch
     ```
 
+### 2.0.1 Building and patching QEMU 10.2.1 (upgrade)
+
+The steps above target QEMU 9.1.0. To build against **QEMU 10.2.1**, use the
+`10.2.1-gfx-sriov` branch of the Intel distribution of QEMU. The procedure is the
+same as 9.1.0 with the deltas noted below.
+
+> [!Note]
+> **Key structural difference from 9.1.0.** The `10.2.1-gfx-sriov` branch is based
+> on the **Ubuntu/Debian packaged** QEMU (`1:10.2.1+ds-1ubuntu2`, commit
+> `ec78d33b5c`) rather than a clean upstream release tag. Consequently there is
+> **no `v10.2.1` tag** in the Intel repo, so the patches are extracted using the
+> base commit as the boundary instead of a fixed patch count. Because the base
+> commit is "patches unapplied", its source tree equals upstream 10.2.1, so the
+> extracted patches apply cleanly onto the stock `qemu-10.2.1.tar.xz`. This yields
+> **27 patches** (all display-only: `ui/gtk`, `ui/gtk-egl`, `virtio-gpu`, `hw/usb`).
+
+1. Download the SR-IOV Intel distribution of QEMU and check out the 10.2.1 branch.
+
+    ```sh
+    mkdir -p workspace
+    cd workspace
+
+    git clone https://github.com/intel/Intel-distribution-of-QEMU.git
+    cd Intel-distribution-of-QEMU
+    git checkout 10.2.1-gfx-sriov
+    ```
+
+1. Extract the patches. There is no `v10.2.1` tag, so extract every Intel commit
+   above the Ubuntu base commit `ec78d33b5c` (`1:10.2.1+ds-1ubuntu2 (patches
+   unapplied)`). This produces **27** patches.
+
+    ```sh
+    git format-patch ec78d33b5c..HEAD
+    ls 00*.patch | wc -l                 # → 27
+    ```
+
+    > [!Note]
+    > To confirm the base commit yourself, run `git log --oneline -60` and locate
+    > the commit whose subject is `1:10.2.1+ds-1ubuntu2 (patches unapplied)` —
+    > everything above it is Intel's additions, everything below is Ubuntu/Debian
+    > packaging + upstream source.
+
+1. Download the matching QEMU 10.2.1 source:
+
+    ```sh
+    cd ..
+    wget -N https://download.qemu.org/qemu-10.2.1.tar.xz
+    tar -xf qemu-10.2.1.tar.xz
+    cd qemu-10.2.1
+    ```
+
+1. Copy the patches exported above to a new `sriov` directory:
+
+    ```sh
+    mkdir sriov
+    cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
+    ```
+
+1. Apply patches. All 27 apply cleanly (0 rejects):
+
+    ```sh
+    git apply ./sriov/*.patch
+    ```
+
+    > [!Note]
+    > `git apply --check ./sriov/*.patch` may falsely report one failing hunk in
+    > `ui/gtk-egl.c`. This is because `--check` validates every patch against the
+    > *unmodified* tree, while a later `gtk-egl.c` patch depends on an earlier one.
+    > The real sequential `git apply` (above) succeeds with no rejects, so this can
+    > be ignored.
+
+From here, continue with the CentOS 9 build environment (Section 2.1) and QEMU
+build (Section 2.2), substituting the `qemu-10.2.1` directory for `qemu-9.1.0`
+throughout. Every `./configure` flag used for 9.1.0 remains valid in 10.2.1.
+
+> [!Note]
+> When adding corporate proxy `ENV` lines to `Dockerfile.centos-stream9`, insert
+> them **after** the `FROM` line — Docker requires `FROM` to be the first
+> instruction, so proxy lines placed at the top of the file cause a
+> `no FROM statement found` build error. For example:
+> ```sh
+> sed -i '/^FROM /a ENV HTTPS_PROXY "http://proxy-iind.intel.com:912"\nENV HTTP_PROXY "http://proxy-iind.intel.com:912"' Dockerfile.centos-stream9
+> ```
+
 ### 2.1 Creating CentOS 9 containerized environment
 
 QEMU is built in Centos 9 container environment to ensure compatible with the Centos 9 based container image for virt-launcher.
