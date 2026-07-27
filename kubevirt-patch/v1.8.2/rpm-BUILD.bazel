@@ -2935,7 +2935,7 @@ rpmtree(
         "@libxdp-devel-0__1.5.3-1.el9.x86_64//rpm",
         "@libxkbcommon-0__1.0.3-4.el9.x86_64//rpm",
         "@libxkbcommon-devel-0__1.0.3-4.el9.x86_64//rpm",
-        "@libxml2-devel-0__2.9.13-9.el9.x86_64//rpm",
+        "@libxml2-devel-0__2.9.13-16.el9.x86_64//rpm",
         "@libxshmfence-0__1.3-10.el9.x86_64//rpm",
         "@libzstd-devel-0__1.5.5-1.el9.x86_64//rpm",
         "@llvm-filesystem-0__20.1.8-3.el9.x86_64//rpm",
