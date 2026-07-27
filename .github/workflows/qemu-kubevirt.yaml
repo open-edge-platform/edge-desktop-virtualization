@@ -2,10 +2,9 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Standalone variant of qemu-kubevirt.yaml that builds QEMU DIRECTLY from the Intel
-# 'Intel-distribution-of-QEMU' git branch (10.2.1-gfx-sriov) instead of the
-# download.qemu.org release tarball + extracted patches. Manual-trigger only, so it
-# does not double every PR/push build alongside the main workflow.
+# Builds QEMU from the Intel 'Intel-distribution-of-QEMU' git branch (10.2.1-gfx-sriov),
+# bundles the patched binary into KubeVirt (virt-launcher), and scans the results.
+# Manual-trigger (workflow_dispatch) only.
 
 name: "QEMU (git build) & Kubevirt"
 run-name: "QEMU git-build Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
