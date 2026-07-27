@@ -75,147 +75,128 @@ jobs:
 
       - name: Build and patch QEMU
         if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
-        # The active build below compiles QEMU directly from the Intel
-        # 'Intel-distribution-of-QEMU' git branch (10.2.1-gfx-sriov).
-        # The previous tarball-based method (kubevirt-patch/README.md - 27 extracted patches
-        # applied on top of qemu-10.2.1.tar.xz) is retained, commented out, at the end.
+        # The active build below compiles QEMU from the upstream download.qemu.org
+        # release tarball (qemu-10.2.1.tar.xz) with the 27 SR-IOV/GTK patches extracted
+        # from the Intel 'Intel-distribution-of-QEMU' branch applied on top.
+        # An alternative that builds directly from the Intel git branch is retained,
+        # commented out, at the end.
+        # Each logical block here is copied exactly from a code block in kubevirt-patch/README.md
         run: |
           mkdir -p workspace
           cd workspace
 
-          # ---------------------------------------------------------------------------
-          # Build QEMU directly from the Intel 'Intel-distribution-of-QEMU' git branch
-          # (10.2.1-gfx-sriov) instead of applying the extracted patches onto the
-          # upstream download.qemu.org tarball. The branch already contains all 27
-          # SR-IOV/GTK commits, so the extract-patches / re-apply round-trip is not
-          # needed. The clone is placed in 'qemu-10.2.1' so every downstream step
-          # (artifact upload, trivy/clamav scan, kubevirt build) keeps working unchanged.
-          # ---------------------------------------------------------------------------
-          git clone https://github.com/intel/Intel-distribution-of-QEMU.git qemu-10.2.1
-          cd qemu-10.2.1
+          git clone https://github.com/intel/Intel-distribution-of-QEMU.git
+          cd Intel-distribution-of-QEMU
           git checkout faa368fe92642adf983b77fdc599466a42a73fef
+          git format-patch ec78d33b5c..HEAD
           ls -hal
 
           if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/10.2.1-gfx-sriov)" ]; then
             echo "::warning file=kubevirt-patch/README.md::The 10.2.1-gfx-sriov branch has new commits which are not included here. Consider updating the README and this workflow."
           fi
+
           cd ..
-
-          # ---------------------------------------------------------------------------
-          # The upstream 10.2.1 release tarball is still downloaded, but ONLY to supply
-          # two things the bare git checkout lacks (issues hit during the manual build):
-          #   1. Pre-built firmware blobs under pc-bios/ - the git tree does not ship
-          #      them, so 'meson setup' otherwise fails with e.g.
-          #      "File edk2-aarch64-code.fd.bz2 does not exist".
-          #   2. The bundled tests/lcitool submodule content used to generate the
-          #      CentOS Stream 9 build Dockerfile (submodules are not initialised in a
-          #      plain clone).
-          # QEMU itself is compiled from the Intel git branch, NOT from the tarball.
-          # The tarball is extracted into a throwaway 'qemu-tarball' directory so it
-          # does not collide with the 'qemu-10.2.1' git checkout above.
-          # ---------------------------------------------------------------------------
           wget -N https://download.qemu.org/qemu-10.2.1.tar.xz
-          mkdir -p qemu-tarball
-          tar -xf qemu-10.2.1.tar.xz -C qemu-tarball --strip-components=1
+          tar -xf qemu-10.2.1.tar.xz
+          cd qemu-10.2.1
+          git init
+          ls -hal
 
-          # Copy the pre-built firmware blobs into the git checkout so 'meson setup'
-          # passes. Only x86_64-softmmu is targeted, so the ARM/aarch64 blobs are never
-          # used at runtime; this only satisfies meson's install-list check.
-          cp -r qemu-tarball/pc-bios/* qemu-10.2.1/pc-bios/
+          mkdir sriov
+          cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
+          ls -hal sriov/
 
-          # Generate & build the CentOS Stream 9 build image from the tarball tree
-          # (which has the lcitool submodule content bundled).
-          cd qemu-tarball
+          git apply sriov/*.patch
+
           ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
           perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
-          docker build -t qemu_build:centos-stream9 -f Dockerfile.centos-stream9 .
-          cd ..
 
-          # Build QEMU from the Intel git branch inside the CentOS container.
-          # NOTE: the build script must live inside the directory that is bind-mounted
-          # as /src (qemu-10.2.1), because the container runs it as /src/buildscript.sh.
-          cat <<EOF > qemu-10.2.1/buildscript.sh
+          docker build -t qemu_build:centos-stream9 -f Dockerfile.centos-stream9 .
+          cat <<EOF > buildscript.sh
           #!/bin/bash
           set -x
           set -e
           cd /src
           rm -rf build
-          # The container's bundled mkvenv runs offline and will not fetch meson/pycotap
-          # from PyPI, so install them system-wide first - otherwise ./configure fails
-          # with "Could not find meson" / missing "pycotap".
-          pip3 install --upgrade meson pycotap
           ./configure --prefix=/usr --enable-kvm --disable-xen --enable-libusb --enable-debug-info --enable-debug  --enable-sdl --enable-vhost-net --enable-spice --disable-debug-tcg  --enable-opengl  --enable-gtk  --enable-virtfs --target-list=x86_64-softmmu --audio-drv-list=pa --firmwarepath=/usr/share/qemu-firmware:/usr/share/ipxe/qemu:/usr/share/seavgabios:/usr/share/seabios:/usr/share/qemu-kvm/ --disable-spice --disable-smartcard --disable-libnfs -Ddocs=disabled --disable-docs
           mkdir -p build
           cd build
-          ninja qemu-system-x86_64
+          ninja
+          ninja install
           EOF
-          chmod +x qemu-10.2.1/buildscript.sh
+          chmod +x buildscript.sh
 
           docker run \
-              -v $(pwd)/qemu-10.2.1:/src:Z \
+              -v $(pwd):/src:Z \
               -w /src  \
               --entrypoint=/src/buildscript.sh \
               --security-opt label=disable \
               qemu_build:centos-stream9
 
-          ls -la qemu-10.2.1/build/qemu-system-x86_64
-          sha256sum qemu-10.2.1/build/qemu-system-x86_64
+          ls -la build/qemu-system-x86_64
+          sha256sum build/qemu-system-x86_64
 
           # ===========================================================================
-          # PREVIOUS METHOD (commented out) - build from the download.qemu.org release
-          # tarball with the 27 extracted SR-IOV/GTK patches applied on top. Retained
-          # for reference; superseded by the git-branch build above.
+          # ALTERNATIVE METHOD (commented out) - build QEMU directly from the Intel
+          # 'Intel-distribution-of-QEMU' git branch (10.2.1-gfx-sriov). The branch already
+          # contains all 27 SR-IOV/GTK commits, so no patch extraction/apply is needed.
+          # The tarball is still fetched, but ONLY to supply the pre-built pc-bios firmware
+          # blobs and the lcitool submodule content that a bare git checkout lacks.
+          # To use this method, comment out the tarball build above and uncomment this block.
           # ===========================================================================
-          # git clone https://github.com/intel/Intel-distribution-of-QEMU.git
-          # cd Intel-distribution-of-QEMU
+          # mkdir -p workspace
+          # cd workspace
+          #
+          # git clone https://github.com/intel/Intel-distribution-of-QEMU.git qemu-10.2.1
+          # cd qemu-10.2.1
           # git checkout faa368fe92642adf983b77fdc599466a42a73fef
-          # git format-patch ec78d33b5c..HEAD
           # ls -hal
           #
           # if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/10.2.1-gfx-sriov)" ]; then
           #   echo "::warning file=kubevirt-patch/README.md::The 10.2.1-gfx-sriov branch has new commits which are not included here. Consider updating the README and this workflow."
           # fi
-          #
           # cd ..
+          #
+          # # Tarball is fetched ONLY for pc-bios firmware blobs + lcitool submodule content.
           # wget -N https://download.qemu.org/qemu-10.2.1.tar.xz
-          # tar -xf qemu-10.2.1.tar.xz
-          # cd qemu-10.2.1
-          # git init
-          # ls -hal
+          # mkdir -p qemu-tarball
+          # tar -xf qemu-10.2.1.tar.xz -C qemu-tarball --strip-components=1
           #
-          # mkdir sriov
-          # cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
-          # ls -hal sriov/
+          # # Copy firmware blobs into the git checkout so 'meson setup' passes.
+          # cp -r qemu-tarball/pc-bios/* qemu-10.2.1/pc-bios/
           #
-          # git apply sriov/*.patch
-          #
+          # # Generate & build the CentOS Stream 9 image from the tarball tree (has lcitool).
+          # cd qemu-tarball
           # ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
           # perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
-          #
           # docker build -t qemu_build:centos-stream9 -f Dockerfile.centos-stream9 .
-          # cat <<EOF > buildscript.sh
+          # cd ..
+          #
+          # # The build script must live inside the bind-mounted /src (qemu-10.2.1).
+          # cat <<EOF > qemu-10.2.1/buildscript.sh
           # #!/bin/bash
           # set -x
           # set -e
           # cd /src
           # rm -rf build
+          # # Install meson/pycotap system-wide (the container's mkvenv runs offline).
+          # pip3 install --upgrade meson pycotap
           # ./configure --prefix=/usr --enable-kvm --disable-xen --enable-libusb --enable-debug-info --enable-debug  --enable-sdl --enable-vhost-net --enable-spice --disable-debug-tcg  --enable-opengl  --enable-gtk  --enable-virtfs --target-list=x86_64-softmmu --audio-drv-list=pa --firmwarepath=/usr/share/qemu-firmware:/usr/share/ipxe/qemu:/usr/share/seavgabios:/usr/share/seabios:/usr/share/qemu-kvm/ --disable-spice --disable-smartcard --disable-libnfs -Ddocs=disabled --disable-docs
           # mkdir -p build
           # cd build
-          # ninja
-          # ninja install
+          # ninja qemu-system-x86_64
           # EOF
-          # chmod +x buildscript.sh
+          # chmod +x qemu-10.2.1/buildscript.sh
           #
           # docker run \
-          #     -v $(pwd):/src:Z \
+          #     -v $(pwd)/qemu-10.2.1:/src:Z \
           #     -w /src  \
           #     --entrypoint=/src/buildscript.sh \
           #     --security-opt label=disable \
           #     qemu_build:centos-stream9
           #
-          # ls -la build/qemu-system-x86_64
-          # sha256sum build/qemu-system-x86_64
+          # ls -la qemu-10.2.1/build/qemu-system-x86_64
+          # sha256sum qemu-10.2.1/build/qemu-system-x86_64
 
       - name: Upload qemu-system-x86_64 artifact
         id: upload-qemu
