@@ -3,20 +3,29 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Full QEMU + KubeVirt pipeline, but with QEMU built inside a CentOS Stream 10
-# container instead of CentOS Stream 9. Manual-trigger only.
+# container instead of CentOS Stream 9.
 # NOTE: the QEMU binary is built against CentOS Stream 10 libraries; bundling it into
 # the CentOS Stream 9 based virt-launcher may cause runtime library incompatibilities.
 name: "QEMU (CentOS 10) & Kubevirt"
 run-name: "QEMU CentOS 10 build (by @${{ github.actor }} via ${{ github.event_name }})"
 
+# Only run at most 1 workflow concurrently per PR, unlimited for branches
 concurrency:
-  group: ${{ github.workflow }}-${{ github.sha }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
 on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
   workflow_dispatch:
     inputs:
       disable_cache:
