@@ -414,6 +414,18 @@ jobs:
           echo "QEMU_SHA256=$QEMU_SHA256"
           perl -p -i -e "s|<SHA256SUM_OF_PATCHED_QEMU>|$QEMU_SHA256|g" WORKSPACE
 
+          # Select CentOS Stream 10 base images for the KubeVirt containers.
+          # The centos_stream_alias rules in rpm/BUILD.bazel resolve to the *_cs10
+          # targets (e.g. launcherbase_x86_64_cs10) when bazel is invoked with
+          # --define centos_stream_version=10; the default is CentOS Stream 9.
+          # (See upstream rpm/centos_stream.bzl: is_cs10 = {centos_stream_version: "10"}.)
+          # NOTE (option A): the cs10 launcherbase target is stock upstream and does NOT
+          # yet include the custom GTK/mesa local-display packages that cs9 has - this run
+          # only validates that the cs10 base image path builds and its el10 RPMs resolve.
+          echo 'build --define=centos_stream_version=10' >> .bazelrc
+          echo "----- .bazelrc (tail) -----"
+          tail -n 5 .bazelrc
+
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
           export BUILD_ARCH=amd64
