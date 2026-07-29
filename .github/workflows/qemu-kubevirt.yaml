@@ -77,6 +77,9 @@ jobs:
           cache-name: cache-qemu
         with:
           path: workspace/qemu-${{ env.QEMU_VERSION }}
+          # Use the hash of the document this workflow is based on to decide whether the build should be re-run or not
+          # Cache key includes the CentOS Stream + QEMU version so each target keeps its own cache
+          # If the workflow was triggered as a result of pushing a tag, always do a clean cache-free build
           key: "qemu-cs${{ env.CENTOS_STREAM }}-q${{ env.QEMU_VERSION }}-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/README.md', '.github/workflows/qemu-centos10.yaml') }}"
 
       - name: Build and patch QEMU
@@ -435,8 +438,8 @@ jobs:
           echo "QEMU_SHA256=$QEMU_SHA256"
           perl -p -i -e "s|<SHA256SUM_OF_PATCHED_QEMU>|$QEMU_SHA256|g" WORKSPACE
 
-          # Build the KubeVirt images on the selected CentOS Stream base (default is Stream 9)
-          echo "build --define=centos_stream_version=$CENTOS_STREAM" >> .bazelrc
+          # Select the CentOS Stream base for the KubeVirt RPM/image build.
+          export KUBEVIRT_CENTOS_STREAM_VERSION=$CENTOS_STREAM
 
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
