@@ -441,6 +441,13 @@ jobs:
           # Select the CentOS Stream base for the KubeVirt RPM/image build.
           export KUBEVIRT_CENTOS_STREAM_VERSION=$CENTOS_STREAM
 
+          # CentOS Stream 10 builds run inside a dedicated cs10 builder image, which
+          # v1.8.2 does not default. Point at a published kubevirt cs10 builder tag
+          # (only consumed when CENTOS_STREAM=10).
+          if [ "$CENTOS_STREAM" = "10" ]; then
+            export KUBEVIRT_CS10_BUILDER_VERSION=2602231621-e36f1c7568
+          fi
+
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
           export BUILD_ARCH=amd64
