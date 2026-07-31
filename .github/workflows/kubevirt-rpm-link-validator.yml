@@ -6,6 +6,15 @@ name: Kubevirt RPM Link Validator
 
 on:
   workflow_dispatch:
+    inputs:
+      dist:
+        description: "CentOS Stream release to validate/repair"
+        type: choice
+        options:
+          - all
+          - el9
+          - el10
+        default: all
   schedule:
     - cron: "0 3 * * 1"
 
@@ -28,10 +37,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Validate and repair CentOS 9 x86_64 RPM links
+      - name: Validate and repair CentOS Stream 9 & 10 x86_64 RPM links
         shell: bash
+        env:
+          DIST: ${{ github.event.inputs.dist || 'all' }}
         run: |
-          python3 .github/scripts/validate_rpm_links.py --root .
+          python3 .github/scripts/validate_rpm_links.py --root . --dist "${DIST}"
 
       - name: Detect changes
         id: changes
@@ -48,19 +59,21 @@ jobs:
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           branch: automation/kubevirt-rpm-link-fixes
-          commit-message: "chore(kubevirt-patch): repair CentOS 9 x86_64 rpm links"
-          title: "chore(kubevirt-patch): repair CentOS 9 x86_64 rpm links"
+          commit-message: "chore(kubevirt-patch): repair CentOS Stream 9 & 10 x86_64 rpm links"
+          title: "chore(kubevirt-patch): repair CentOS Stream 9 & 10 x86_64 rpm links"
           body: |
-            This automated PR validates and repairs broken CentOS 9 x86_64 RPM URLs in:
+            This automated PR validates and repairs broken CentOS Stream 9 & 10 x86_64 RPM URLs in:
             - `kubevirt-patch/*/WORKSPACE`
             - `kubevirt-patch/*/rpm-BUILD.bazel`
 
             Repair order:
             1. Keep existing URL if reachable.
             2. Fall back to `https://storage.googleapis.com/builddeps/<SHA256SUM>`.
-            3. If still missing, find the latest RPM in CentOS Stream 9 BaseOS/AppStream and update both files.
+            3. If still missing, find the latest RPM in the matching CentOS Stream
+               (9 or 10) BaseOS/AppStream/CRB and update both files.
 
-            Scope is intentionally limited to CentOS 9 and x86_64 entries.
+            Scope is limited to x86_64 entries; the CentOS Stream release (el9/el10)
+            is detected per package from its bazel name.
           labels: |
             dependencies
             automation
