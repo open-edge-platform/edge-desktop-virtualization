@@ -6,15 +6,7 @@ name: Kubevirt RPM Link Validator
 
 on:
   workflow_dispatch:
-    inputs:
-      dist:
-        description: "CentOS Stream release to validate/repair"
-        type: choice
-        options:
-          - all
-          - el9
-          - el10
-        default: all
+
   schedule:
     - cron: "0 3 * * 1"
 
@@ -39,10 +31,8 @@ jobs:
 
       - name: Validate and repair CentOS Stream 9 & 10 x86_64 RPM links
         shell: bash
-        env:
-          DIST: ${{ github.event.inputs.dist || 'all' }}
         run: |
-          python3 .github/scripts/validate_rpm_links.py --root . --dist "${DIST}"
+          python3 .github/scripts/validate_rpm_links.py --root .
 
       - name: Detect changes
         id: changes

@@ -13,23 +13,15 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 
-MIRROR_BASE = "http://mirror.stream.centos.org"
+# CentOS Stream package index URLs - x86_64 only.
+# This validator processes ONLY x86_64 packages. It will NOT touch aarch64/s390x.
+BASEOS_URL = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/"
+APPSTREAM_URL = "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/"
+CRB_URL = "http://mirror.stream.centos.org/9-stream/CRB/x86_64/os/Packages/"
+BASEOS_URL_EL10 = "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/"
+APPSTREAM_URL_EL10 = "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/"
+CRB_URL_EL10 = "http://mirror.stream.centos.org/10-stream/CRB/x86_64/os/Packages/"
 BUILDDEPS_PREFIX = "https://storage.googleapis.com/builddeps/"
-
-# Per-distribution CentOS Stream package index roots (x86_64).
-# pick_search_roots() re-prioritizes these based on where the current URL lives.
-STREAM_ROOTS = {
-    "el9": [
-        f"{MIRROR_BASE}/9-stream/BaseOS/x86_64/os/Packages/",
-        f"{MIRROR_BASE}/9-stream/AppStream/x86_64/os/Packages/",
-        f"{MIRROR_BASE}/9-stream/CRB/x86_64/os/Packages/",
-    ],
-    "el10": [
-        f"{MIRROR_BASE}/10-stream/BaseOS/x86_64/os/Packages/",
-        f"{MIRROR_BASE}/10-stream/AppStream/x86_64/os/Packages/",
-        f"{MIRROR_BASE}/10-stream/CRB/x86_64/os/Packages/",
-    ],
-}
 
 
 @dataclass
@@ -166,35 +158,40 @@ def replace_block_fields(block_text: str, new_name: str, new_sha: str, new_urls:
 
 
 def parse_name(name: str) -> Optional[Tuple[str, str, str, str]]:
-    m = re.match(
-        r"^(?P<pkg>.+)-(?P<epoch>\d+)__(?P<ver>.+\.(?P<dist>el9|el10)(?:\.\d+)?\.x86_64)$",
-        name,
-    )
+    m = re.match(r"^(?P<pkg>.+)-(?P<epoch>\d+)__(?P<ver>.+\.(?P<dist>el9|el10)(?:\.\d+)?\.x86_64)$", name)
     if not m:
         return None
     return m.group("pkg"), m.group("epoch"), m.group("ver"), m.group("dist")
+
+
+def find_mirror_url(urls: List[str]) -> Optional[str]:
+    for u in urls:
+        if "mirror.stream.centos.org" in u and "/os/Packages/" in u:
+            return u
+    return None
 
 
 def is_mirror_url(url: str) -> bool:
     return "mirror.stream.centos.org" in url and "/os/Packages/" in url
 
 
-def find_mirror_url(urls: List[str]) -> Optional[str]:
-    for u in urls:
-        if is_mirror_url(u):
-            return u
-    return None
-
-
 def pick_search_roots(mirror_url: Optional[str], dist: str) -> List[str]:
-    roots = list(STREAM_ROOTS.get(dist, STREAM_ROOTS["el9"]))
-    # Prioritize the repo the current URL already lives in (BaseOS/AppStream/CRB).
-    if mirror_url:
-        for repo in ("BaseOS", "AppStream", "CRB"):
-            if f"/{repo}/" in mirror_url:
-                roots.sort(key=lambda r, _repo=repo: 0 if f"/{_repo}/" in r else 1)
-                break
-    return roots
+    if dist == "el10":
+        if mirror_url and "/BaseOS/" in mirror_url:
+            return [BASEOS_URL_EL10, APPSTREAM_URL_EL10, CRB_URL_EL10]
+        if mirror_url and "/AppStream/" in mirror_url:
+            return [APPSTREAM_URL_EL10, BASEOS_URL_EL10, CRB_URL_EL10]
+        if mirror_url and "/CRB/" in mirror_url:
+            return [CRB_URL_EL10, BASEOS_URL_EL10, APPSTREAM_URL_EL10]
+        return [BASEOS_URL_EL10, APPSTREAM_URL_EL10, CRB_URL_EL10]
+    else:
+        if mirror_url and "/BaseOS/" in mirror_url:
+            return [BASEOS_URL, APPSTREAM_URL, CRB_URL]
+        if mirror_url and "/AppStream/" in mirror_url:
+            return [APPSTREAM_URL, BASEOS_URL, CRB_URL]
+        if mirror_url and "/CRB/" in mirror_url:
+            return [CRB_URL, BASEOS_URL, APPSTREAM_URL]
+        return [BASEOS_URL, APPSTREAM_URL, CRB_URL]
 
 
 def find_latest_rpm_url(pkg: str, current_urls: List[str], dist: str) -> Optional[str]:
@@ -252,7 +249,6 @@ def update_workspace_file(
     workspace_path: pathlib.Path,
     apply_changes: bool,
     live_logger: Optional[callable] = None,
-    dist_filter: str = "all",
 ) -> Tuple[bool, Dict[str, str], List[str]]:
     content = workspace_path.read_text(encoding="utf-8")
     blocks = parse_rpm_blocks(content)
@@ -274,14 +270,10 @@ def update_workspace_file(
     for block in blocks:
         parsed = parse_name(block.name)
         if not parsed:
-            # Only CentOS Stream 9/10 x86_64 RPMs are handled by parse_name.
+            # Only CentOS Stream 9/10 x86_64 RPMs handled by parse_name.
             continue
 
         pkg, epoch, _, dist = parsed
-
-        # Restrict to the requested CentOS Stream release when a filter is set.
-        if dist_filter != "all" and dist != dist_filter:
-            continue
 
         fallback_builddeps = f"{BUILDDEPS_PREFIX}{block.sha256}"
 
@@ -415,12 +407,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Validate and repair CentOS Stream 9 & 10 x86_64 RPM URLs in kubevirt-patch WORKSPACE files.")
     parser.add_argument("--root", default=".", help="Repository root")
     parser.add_argument("--check", action="store_true", help="Check mode only; do not write files")
-    parser.add_argument(
-        "--dist",
-        choices=["all", "el9", "el10"],
-        default="all",
-        help="Restrict processing to a single CentOS Stream release (default: all).",
-    )
     args = parser.parse_args()
 
     repo_root = pathlib.Path(args.root).resolve()
@@ -448,7 +434,6 @@ def main() -> int:
             workspace_path,
             apply_changes=apply_changes,
             live_logger=lambda msg: print(msg, flush=True),
-            dist_filter=args.dist,
         )
 
         changed_rpm_build = False
