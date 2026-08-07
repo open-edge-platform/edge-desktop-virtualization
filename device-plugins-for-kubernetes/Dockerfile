@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Use a minimal base image
-# Pinned version below was published 2025 June 30
-FROM debian:stable-slim@sha256:7e0b7fe7c6d695d615eabaea8d19adf592a6a9ff3dbd5206d3e31139b9afdfa7
+# Pinned version below was published 2026 August 5
+FROM debian:stable-slim@sha256:9b9a22fc31229ee7932e2428807260934d18a509da1b680ff001a955f4d4eeb4
 
 # Set the working directory inside the container
 WORKDIR /app
