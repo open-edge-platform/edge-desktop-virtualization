@@ -233,6 +233,12 @@ def find_latest_rpm_url(pkg: str, current_urls: List[str], dist: str) -> Optiona
                 continue
             if not remainder[0].isdigit():
                 continue
+            
+            # Skip pre-release/git snapshot packages (e.g., 5.87+1.git30db66dc971b)
+            # These contain '+git' or '.git' in the version and cause build failures.
+            if "+git" in file_name or ".git" in file_name:
+                continue
+            
             candidates.append(file_name)
 
         if not candidates:
