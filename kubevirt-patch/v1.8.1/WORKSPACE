@@ -18824,5 +18824,4 @@ rpm(
         "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/xz-devel-5.6.2-1.el10.x86_64.rpm",
     ],
 )
-
 # EDV dependency - END
