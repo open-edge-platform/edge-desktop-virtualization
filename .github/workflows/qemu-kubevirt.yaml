@@ -425,6 +425,15 @@ jobs:
 
           git checkout $KV_VER
 
+          # Edit rpm/repo.yaml to point to the correct CentOS Stream version
+          if [ "$CENTOS_STREAM" = "10" ]; then
+            echo "repo-cs10.yaml" > rpm/repo.yaml
+          else
+            echo "repo-cs9.yaml" > rpm/repo.yaml
+          fi
+          echo "Content of rpm/repo.yaml:"
+          cat rpm/repo.yaml
+
           cp $EDV_HOME/kubevirt-patch/$KV_VER/WORKSPACE ./WORKSPACE
 
           cp $EDV_HOME/kubevirt-patch/$KV_VER/rpm-BUILD.bazel ./rpm/BUILD.bazel
