@@ -425,14 +425,6 @@ jobs:
 
           git checkout $KV_VER
 
-          if [ "$CENTOS_STREAM" = "10" ]; then
-            ln -sf repo-cs10.yaml rpm/repo.yaml
-          else
-            ln -sf repo-cs9.yaml rpm/repo.yaml
-          fi
-          echo "rpm/repo.yaml now points to: $(readlink rpm/repo.yaml)"
-          ls -l rpm/repo.yaml
-
           cp $EDV_HOME/kubevirt-patch/$KV_VER/WORKSPACE ./WORKSPACE
 
           cp $EDV_HOME/kubevirt-patch/$KV_VER/rpm-BUILD.bazel ./rpm/BUILD.bazel
@@ -453,7 +445,10 @@ jobs:
           # v1.8.2 does not default. Point at a published kubevirt cs10 builder tag
           # (only consumed when CENTOS_STREAM=10).
           if [ "$CENTOS_STREAM" = "10" ]; then
-            export KUBEVIRT_CS10_BUILDER_VERSION=2602231621-e36f1c7568
+            cd rpm
+            echo "repo-cs10.yaml" > repo.yaml
+            cd ..
+            export KUBEVIRT_CS10_BUILDER_VERSION=2606301323-b9f50e380a
           fi
 
           export DOCKER_PREFIX=localhost:5000
