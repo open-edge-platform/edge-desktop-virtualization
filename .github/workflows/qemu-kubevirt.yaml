@@ -445,10 +445,9 @@ jobs:
           # v1.8.2 does not default. Point at a published kubevirt cs10 builder tag
           # (only consumed when CENTOS_STREAM=10).
           if [ "$CENTOS_STREAM" = "10" ]; then
-            cd rpm
-            echo "repo-cs10.yaml" > repo.yaml
-            cd ..
-            export KUBEVIRT_CS10_BUILDER_VERSION=2606301323-b9f50e380a
+            export KUBEVIRT_CS10_BUILDER_VERSION=2602231621-e36f1c7568
+
+            grep -q "mirror.stream.centos.org/10-stream" rpm/repo-cs10.yaml || { echo "::error::rpm/repo-cs10.yaml is not pointing to CentOS Stream 10 repositories"; exit 1; }
           fi
 
           export DOCKER_PREFIX=localhost:5000
