@@ -2710,7 +2710,7 @@ rpmtree(
         "@libXtst-devel-0__1.2.4-7.el10.x86_64//rpm",
         "@libXxf86vm-0__1.1.5-7.el10.x86_64//rpm",
         "@libzstd-devel-0__1.5.5-8.el10.x86_64//rpm",
-        "@llvm-filesystem-0__20.1.4-1.el10.x86_64//rpm",
+        "@llvm-filesystem-0__20.1.8-1.el10.x86_64//rpm",
         "@llvm-libs-0__19.1.1-5.el10.x86_64//rpm",
         "@mesa-dri-drivers-0__25.2.7-1.el10.x86_64//rpm",
         "@mesa-filesystem-0__25.2.7-1.el10.x86_64//rpm",

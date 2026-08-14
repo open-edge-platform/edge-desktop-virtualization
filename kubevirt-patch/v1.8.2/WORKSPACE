@@ -18025,10 +18025,10 @@ rpm(
 )
 
 rpm(
-    name = "llvm-filesystem-0__20.1.4-1.el10.x86_64",
-    sha256 = "caefd016ca2fc67fb14e603c394c872fe0ed52d01c13685ea9e7a92746630c42",
+    name = "llvm-filesystem-0__20.1.8-1.el10.x86_64",
+    sha256 = "cb027c5b93681eb1d3f004d443c85d6e6ff05689172adb9e94f4586084a24e53",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/llvm-filesystem-20.1.4-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/llvm-filesystem-20.1.8-1.el10.x86_64.rpm",
     ],
 )
 
