@@ -2613,7 +2613,7 @@ rpmtree(
         "@gdk-pixbuf2-0__2.42.12-1.el10.x86_64//rpm",
         "@gdk-pixbuf2-devel-0__2.42.12-1.el10.x86_64//rpm",
         "@gdk-pixbuf2-modules-0__2.42.12-1.el10.x86_64//rpm",
-        "@glib2-devel-0__2.80.4-10.el10.x86_64//rpm",
+        "@glib2-devel-0__2.80.4-15.el10.x86_64//rpm",
         "@graphite2-0__1.3.14-16.el10.x86_64//rpm",
         "@graphite2-devel-0__1.3.14-16.el10.x86_64//rpm",
         "@gsm-0__1.0.22-7.el10.x86_64//rpm",
