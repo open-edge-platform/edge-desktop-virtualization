@@ -454,7 +454,7 @@ jobs:
           export DOCKER_TAG=$EDV_VERSION
           export BUILD_ARCH=amd64
 
-          make all
+          # make all
           make bazel-build-images
 
           make push
