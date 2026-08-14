@@ -3752,10 +3752,10 @@ rpm(
 )
 
 rpm(
-    name = "glibc-langpack-es-0__2.39-114.el10.aarch64",
-    sha256 = "a565534b17a0e8f446b611fc6304be058c358bc941b41108944542068f1c4c6f",
+    name = "glibc-langpack-es-0__2.39-135.el10.aarch64.rpm",
+    sha256 = "75678b1b759b354aab17a443c2adf0e9cc1d446cc0cf6b9881189ee1436cbbc3",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/BaseOS/aarch64/os/Packages/glibc-langpack-es-2.39-114.el10.aarch64.rpm",
+        "http://mirror.stream.centos.org/10-stream/BaseOS/aarch64/os/Packages/glibc-langpack-es-2.39-135.el10.aarch64.rpm",
     ],
 )
 
@@ -3827,10 +3827,10 @@ rpm(
 )
 
 rpm(
-    name = "glibc-minimal-langpack-0__2.39-114.el10.aarch64",
-    sha256 = "c701b9a0e218d373ecd4951465ed45c0f30c5bcce1697d8944d69cd8eb8cb1dd",
+    name = "glibc-minimal-langpack-0__2.39-135.el10.aarch64",
+    sha256 = "debacf243d55369b62f2fa229cdd8147cebb0de104f099bd981599b89f8a7297",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/BaseOS/aarch64/os/Packages/glibc-minimal-langpack-2.39-114.el10.aarch64.rpm",
+        "http://mirror.stream.centos.org/10-stream/BaseOS/aarch64/os/Packages/glibc-minimal-langpack-2.39-135.el10.aarch64.rpm",
     ],
 )
 
@@ -3878,10 +3878,10 @@ rpm(
 )
 
 rpm(
-    name = "glibc-static-0__2.39-114.el10.aarch64",
-    sha256 = "8187c65502242ffc476ea852cc3e63245fea69d4d3191c67f0502578a747f0e7",
+    name = "glibc-static-0__2.39-135.el10.aarch64",
+    sha256 = "a0a9c745c0a42efff03dda2e60c4543b1309638ad435537d44d8c0d32823f181",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/CRB/aarch64/os/Packages/glibc-static-2.39-114.el10.aarch64.rpm",
+        "http://mirror.stream.centos.org/10-stream/CRB/aarch64/os/Packages/glibc-static-2.39-135.el10.aarch64.rpm",
     ],
 )
 
@@ -3999,10 +3999,10 @@ rpm(
 )
 
 rpm(
-    name = "gnutls-0__3.8.10-3.el10.aarch64",
-    sha256 = "8d8d8ade46ec8214a50f4e3c1c749f0d04d2df012738f87cf5b031a286558710",
+    name = "gnutls-0__3.8.10-4.el10.aarch64",
+    sha256 = "83f76e499060a6a5670315e2bc6c997c2a89d9390c18b16c005b60d1b142120f",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/BaseOS/aarch64/os/Packages/gnutls-3.8.10-3.el10.aarch64.rpm",
+        "http://mirror.stream.centos.org/10-stream/BaseOS/aarch64/os/Packages/gnutls-3.8.10-4.el10.aarch64.rpm",
     ],
 )
 
@@ -4057,10 +4057,10 @@ rpm(
 )
 
 rpm(
-    name = "gnutls-dane-0__3.8.10-3.el10.aarch64",
-    sha256 = "6bfb9f3bb96a0fe3f4ae2c906f1c6769042df05c5eeffdae9e1389187d57f2d4",
+    name = "gnutls-dane-0__3.8.10-4.el10.aarch64",
+    sha256 = "cc9ae625f41867420753d409edd1cca199e23b99c131548624becc3d48f30807",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/aarch64/os/Packages/gnutls-dane-3.8.10-3.el10.aarch64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/aarch64/os/Packages/gnutls-dane-3.8.10-4.el10.aarch64.rpm",
     ],
 )
 
@@ -4109,10 +4109,10 @@ rpm(
 )
 
 rpm(
-    name = "gnutls-utils-0__3.8.10-3.el10.aarch64",
-    sha256 = "02a5817d97614fda36e20c500ac1a87c3c3b25b3656236a205d0dac3504f5a0b",
+    name = "gnutls-utils-0__3.8.10-4.el10.aarch64",
+    sha256 = "ee6553c9e7a1fd26221e57a8d237facc44c517dcfd879eb31e2d9bbddc813ae4",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/aarch64/os/Packages/gnutls-utils-3.8.10-3.el10.aarch64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/aarch64/os/Packages/gnutls-utils-3.8.10-4.el10.aarch64.rpm",
     ],
 )
 
@@ -4947,10 +4947,10 @@ rpm(
 )
 
 rpm(
-    name = "kernel-headers-0__6.12.0-211.el10.aarch64",
-    sha256 = "1109f3c8a5725d7ab10eea8b99ab4be56486e69f76866e87be988c79488135a7",
+    name = "kernel-headers-0__6.12.0-257.el10.aarch64",
+    sha256 = "7ff5ee72a60b82950b7b0dbf3a333e00a3f0057d6e619b91ac01db4e4e131eb4",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/aarch64/os/Packages/kernel-headers-6.12.0-211.el10.aarch64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/aarch64/os/Packages/kernel-headers-6.12.0-257.el10.aarch64.rpm",
     ],
 )
 
