@@ -2627,7 +2627,7 @@ rpmtree(
         "@jbigkit-libs-0__2.1-30.el10.x86_64//rpm",
         "@lcms2-0__2.16-5.el10.x86_64//rpm",
         "@libasyncns-0__0.8-29.el10.x86_64//rpm",
-        "@libatomic-0__14.3.1-4.1.el10.x86_64//rpm",
+        "@libatomic-0__14.3.1-4.4.el10.x86_64//rpm",
         "@libblkid-devel-0__2.40.2-13.el10.x86_64//rpm",
         "@libblkio-0__1.3.0-7.el10.x86_64//rpm",
         "@libbpf-devel-2__1.5.0-4.el10.x86_64//rpm",
