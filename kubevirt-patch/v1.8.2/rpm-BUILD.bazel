@@ -2598,7 +2598,7 @@ rpmtree(
         "@cairo-gobject-devel-0__1.18.0-4.el10.x86_64//rpm",
         "@cmake-filesystem-0__3.28.2-2.el10.x86_64//rpm",
         "@colord-libs-0__1.4.7-5.el10.x86_64//rpm",
-        "@cryptsetup-libs-0__2.7.5-2.el10.x86_64//rpm",
+        "@cryptsetup-libs-0__2.8.6-2.el10.x86_64//rpm",
         "@cups-libs-1__2.4.10-13.el10.x86_64//rpm",
         "@dbus-devel-1__1.14.10-4.el10.x86_64//rpm",
         "@dejavu-sans-fonts-0__2.37-24.el10.x86_64//rpm",

@@ -17137,10 +17137,10 @@ rpm(
 )
 
 rpm(
-    name = "cryptsetup-libs-0__2.7.5-2.el10.x86_64",
-    sha256 = "2ae3966f3e9c131161a3367268dca5dd406775e3e26596e8768671ca3e2ced3a",
+    name = "cryptsetup-libs-0__2.8.6-2.el10.x86_64",
+    sha256 = "a82c9f962cdb0cd7c054e405723a9f56b7e05c4bdeb777da130ec463f641461c",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/cryptsetup-libs-2.7.5-2.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/cryptsetup-libs-2.8.6-2.el10.x86_64.rpm",
     ],
 )
 
