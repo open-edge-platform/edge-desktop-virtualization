@@ -5252,7 +5252,7 @@ rpmtree(
         "@filesystem-0__3.18-17.el10.x86_64//rpm",
         "@glibc-0__2.39-135.el10.x86_64//rpm",
         "@glibc-common-0__2.39-135.el10.x86_64//rpm",
-        "@glibc-langpack-fa-0__2.39-126.el10.x86_64//rpm",
+        "@glibc-langpack-fa-0__2.39-135.el10.x86_64//rpm",
         "@libgcc-0__14.4.1-2.el10.x86_64//rpm",
         "@ncurses-base-0__6.4-15.20240127.el10.x86_64//rpm",
         "@ncurses-libs-0__6.4-15.20240127.el10.x86_64//rpm",

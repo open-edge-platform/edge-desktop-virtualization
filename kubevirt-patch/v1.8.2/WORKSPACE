@@ -3778,10 +3778,10 @@ rpm(
 )
 
 rpm(
-    name = "glibc-langpack-fa-0__2.39-126.el10.x86_64",
-    sha256 = "dbacc816368beec800ded52fb0407cc3015a4e23b5df2a833e704df46e8be42e",
+    name = "glibc-langpack-fa-0__2.39-135.el10.x86_64",
+    sha256 = "afd1cec75399b0ff42e7291d0e0751f29d215272114cf4b1a7965a3fdc9780d3",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/glibc-langpack-fa-2.39-126.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/glibc-langpack-fa-2.39-135.el10.x86_64.rpm",
     ],
 )
 
