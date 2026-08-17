@@ -7746,7 +7746,7 @@ tar2files(
             "libnbd.so.0",
             "libnbd.so.0.0.0",
             "libp11-kit.so.0",
-            "libp11-kit.so.0.4.8",
+            "libp11-kit.so.0.4.10",
             "libtasn1.so.6",
             "libtasn1.so.6.6.4",
             "libunistring.so.5",
