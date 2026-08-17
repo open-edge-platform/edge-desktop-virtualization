@@ -1237,7 +1237,7 @@ rpmtree(
         "@atk-0__2.36.0-5.el9.x86_64//rpm",
         "@atk-devel-0__2.36.0-5.el9.x86_64//rpm",
         "@avahi-libs-0__0.8-22.el9.x86_64//rpm",
-        "@bluez-libs-0__5.72-4.el9.x86_64//rpm",
+        "@bluez-libs-0__5.87+1.git30db66dc971b-1.el9.x86_64//rpm",
         "@boost-iostreams-0__1.75.0-11.el9.x86_64//rpm",
         "@boost-system-0__1.75.0-11.el9.x86_64//rpm",
         "@boost-thread-0__1.75.0-11.el9.x86_64//rpm",
