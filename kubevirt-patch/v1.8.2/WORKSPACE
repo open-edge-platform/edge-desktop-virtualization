@@ -16520,10 +16520,10 @@ rpm(
 )
 
 rpm(
-    name = "libxml2-devel-0__2.9.13-9.el9.x86_64",
-    sha256 = "f98f3688a0303007bff3ec562df8b6b0d700549ca59ca91422ee152c222d461b",
+    name = "libxml2-devel-0__2.9.13-16.el9.x86_64",
+    sha256 = "6d1f30f41f76a7b318f9aaef59dee0870d0101a57faafd0ca588954a68945e4b",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/libxml2-devel-2.9.13-9.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/libxml2-devel-2.9.13-16.el9.x86_64.rpm",
     ],
 )
 
@@ -16536,18 +16536,18 @@ rpm(
 )
 
 rpm(
-    name = "llvm-filesystem-0__20.1.8-3.el9.x86_64",
-    sha256 = "f202993b0c11cc64cad0d2f8e4c6da50aeda05e8ee64eacde9944a41de4dd784",
+    name = "llvm-filesystem-0__22.1.8-1.el9.x86_64",
+    sha256 = "c7f04d4e4d5d03243f9fe4c709099f7bdf70a23ea5ad76c8dad7449cb7f8eeed",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-filesystem-20.1.8-3.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-filesystem-22.1.8-1.el9.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "llvm-libs-0__20.1.8-3.el9.x86_64",
-    sha256 = "e46752cae898bc92d8b7cd3984f294f1b958e950a0afd63a37f444b223927533",
+    name = "llvm-libs-0__22.1.8-1.el9.x86_64",
+    sha256 = "7d91ab63f995b247b7ab57cae0e53fe59772cbd3af683bf5f6066044c87db0a0",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-libs-20.1.8-3.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/llvm-libs-22.1.8-1.el9.x86_64.rpm",
     ],
 )
 
