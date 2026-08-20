@@ -7641,6 +7641,14 @@ rpm(
 )
 
 rpm(
+    name = "libpmem-0__2.1.0-2.el10_0.x86_64",
+    sha256 = "5ab61d83e4acc99c17486a6397037b6c43ead77613fc1427b8b3e5a4cb3f90fb",
+    urls = [
+        "https://dl.fedoraproject.org/pub/epel/10/Everything/x86_64/Packages/l/libpmem-2.1.0-2.el10_0.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "libpng-2__1.6.37-12.el9.x86_64",
     sha256 = "b3f3a689918dc50a9bc41c33abf1a36bdb8e4a707daac77a91e0814407b07ae3",
     urls = [
