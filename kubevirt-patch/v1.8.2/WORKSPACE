@@ -7852,6 +7852,14 @@ rpm(
 )
 
 rpm(
+    name = "librdmacm-0__62.0-3.el10.x86_64",
+    sha256 = "85da12c5b90edc6ec9e4412e8cf15cd833e5cce0b8f2d20caaeda2070b2c5d51",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/librdmacm-62.0-3.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "libseccomp-0__2.5.2-2.el9.aarch64",
     sha256 = "ee31abd3d1325b05c5ba336158ba3b235a718a99ad5cec5e6ab498ca99b688b5",
     urls = [
@@ -17257,6 +17265,14 @@ rpm(
 )
 
 rpm(
+    name = "fribidi-0__1.0.14-4.el10.x86_64",
+    sha256 = "dc33219d3fcf826d08a1a749ae7f17851354ccbab121403e27c7c3e81224d06c",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/fribidi-1.0.14-4.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "gdk-pixbuf2-0__2.42.12-1.el10.x86_64",
     sha256 = "21747d36a0c51562c4180c79fe21be323e9cacfaba17f56052e241ff475c98dd",
     urls = [
@@ -17373,6 +17389,14 @@ rpm(
     sha256 = "6a6f580c46f1a4e3016a3ae58582a183587cb719881c2fb30bd439ec0e939873",
     urls = [
         "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/jbigkit-libs-2.1-30.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
+    name = "lame-libs-0__3.100-19.el10.x86_64",
+    sha256 = "0482c725e2304c1ef0884c23e82076fe9e4fcd6a1decc3f454b8705ea53d282b",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/lame-libs-3.100-19.el10.x86_64.rpm",
     ],
 )
 
@@ -18141,6 +18165,14 @@ rpm(
     sha256 = "5ea29fb5a1173407739044946462ee1f862b574472375f298034c0613cc3ab34",
     urls = [
         "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mkfontscale-1.2.2-7.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
+    name = "mpg123-libs-0__1.32.9-1.el10.x86_64",
+    sha256 = "9167c958080c355a435bf351da94f6b65bac9e9ea2874bf8b4be633918277e04",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mpg123-libs-1.32.9-1.el10.x86_64.rpm",
     ],
 )
 
