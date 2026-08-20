@@ -2478,6 +2478,8 @@ rpmtree(
         "@libnghttp2-0__1.68.0-5.el10.x86_64//rpm",
         "@libnl3-0__3.11.0-1.el10.x86_64//rpm",
         "@libpcap-14__1.10.4-7.el10.x86_64//rpm",
+        "@daxctl-libs-0__82-2.el10.x86_64//rpm",
+        "@ndctl-libs-0__82-2.el10.x86_64//rpm",
         "@libpmem-0__2.1.0-2.el10_0.x86_64//rpm",
         "@libpng-2__1.6.40-13.el10.x86_64//rpm",
         "@libpwquality-0__1.4.5-13.el10.x86_64//rpm",

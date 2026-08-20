@@ -1882,6 +1882,14 @@ rpm(
 )
 
 rpm(
+    name = "daxctl-libs-0__82-2.el10.x86_64",
+    sha256 = "0601f358b9b2de8f82e8a0deebe21bfd5ef34111fc1dc3c4a77c4f28242a9920",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/daxctl-libs-82-2.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "dbus-1__1.12.20-8.el9.aarch64",
     sha256 = "29c244f31d9f3ae910a6b95d4d5534cdf1ea4870fc277e29876a10cf3bd193ae",
     urls = [
@@ -10412,6 +10420,14 @@ rpm(
     urls = [
         "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/ndctl-libs-82-1.el9.x86_64.rpm",
         "https://storage.googleapis.com/builddeps/a0e0c0618946ac1cf3ede937f9a43787d7cb40fe2626ccbf29cc8267b75d48f5",
+    ],
+)
+
+rpm(
+    name = "ndctl-libs-0__82-2.el10.x86_64",
+    sha256 = "1182b689b3a90ebd92a7bf8cf2ee08257fe8dc85c5233a09c48a21a3a603838c",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/ndctl-libs-82-2.el10.x86_64.rpm",
     ],
 )
 
