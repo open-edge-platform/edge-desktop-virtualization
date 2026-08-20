@@ -17057,6 +17057,14 @@ rpm(
 )
 
 rpm(
+    name = "avahi-glib-0__0.8-29.el10.x86_64",
+    sha256 = "8e9e0f8d59701e84fa7527dae43f4e0e6cc48886b9e316f6f5b213c74201a5d4",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/avahi-glib-0.8-29.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "avahi-libs-0__0.8-29.el10.x86_64",
     sha256 = "cf30c5ad675882a0c321c1a27ada70ac856d37220d4f87c253be4b2850ec2387",
     urls = [
@@ -17413,6 +17421,14 @@ rpm(
     sha256 = "660d9d7424276f7862b7e5735b5a4282674cbcae4ed88074e4be35a1371c3a1c",
     urls = [
         "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/libasyncns-0.8-29.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
+    name = "liblerc-0__4.0.0-8.el10.x86_64",
+    sha256 = "e870baa939d041e6b60ee6eb2dd94bbf475d641f71b90726c32a38f4f904ace0",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/liblerc-4.0.0-8.el10.x86_64.rpm",
     ],
 )
 
@@ -18097,6 +18113,14 @@ rpm(
 )
 
 rpm(
+    name = "llvm-libs-0__20.1.8-1.el10.x86_64",
+    sha256 = "030f6cd3459cae12547b7729a9cc73677ce66fe1abf6527cf626a931ccc77ae8",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/llvm-libs-20.1.8-1.el10.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "mesa-dri-drivers-0__25.2.7-1.el10.x86_64",
     sha256 = "a717a219d48130eca700f27b04d119afea43a1f8a9eba4fb2233c2d45876ffa0",
     urls = [
@@ -18333,6 +18357,14 @@ rpm(
     sha256 = "e0ec28a91394e852cc7c56d7088db4e38f3384789faf1ff950501808b2f11582",
     urls = [
         "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/sound-theme-freedesktop-0.8-22.el10.noarch.rpm",
+    ],
+)
+
+rpm(
+    name = "spirv-tools-libs-0__2026.1-1.el10.x86_64",
+    sha256 = "46bd325c8a506659ce90844c1c486e28ae72858df78cd519190f1a08c8085843",
+    urls = [
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/spirv-tools-libs-2026.1-1.el10.x86_64.rpm",
     ],
 )
 
