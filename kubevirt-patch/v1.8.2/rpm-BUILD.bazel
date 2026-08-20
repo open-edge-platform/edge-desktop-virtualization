@@ -2578,7 +2578,7 @@ rpmtree(
         # EDV dependency - START
         "@adwaita-cursor-theme-0__46.0-2.el10.x86_64//rpm",
         "@adwaita-icon-theme-0__46.0-2.el10.x86_64//rpm",
-        "@alsa-lib-0__1.2.13-1.el10.x86_64//rpm",
+        "@alsa-lib-0__1.2.13-2.el10.x86_64//rpm",
         "@atk-0__2.52.0-2.el10.x86_64//rpm",
         "@atk-devel-0__2.52.0-2.el10.x86_64//rpm",
         "@at-spi2-atk-0__2.52.0-2.el10.x86_64//rpm",

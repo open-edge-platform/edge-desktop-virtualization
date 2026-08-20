@@ -16977,10 +16977,10 @@ rpm(
 )
 
 rpm(
-    name = "alsa-lib-0__1.2.13-1.el10.x86_64",
-    sha256 = "a9ff8437bcb5cc1ab0006c7706bca2cb04e0dcf7d2dae86e15fafb083e4e837c",
+    name = "alsa-lib-0__1.2.13-2.el10.x86_64",
+    sha256 = "39b420b68b9c4d7698ac585a0fbc02838e15474a5cd87c8c6ea52d84cdc31138",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/alsa-lib-1.2.13-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/alsa-lib-1.2.13-2.el10.x86_64.rpm",
     ],
 )
 
