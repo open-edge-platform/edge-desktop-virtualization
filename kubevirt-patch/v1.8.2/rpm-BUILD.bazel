@@ -2449,6 +2449,7 @@ rpmtree(
         "@json-glib-0__1.8.0-5.el10.x86_64//rpm",
         "@keyutils-libs-0__1.6.3-5.el10.x86_64//rpm",
         "@kmod-0__31-13.el10.x86_64//rpm",
+        "@kmod-libs-0__31-13.el10.x86_64//rpm",
         "@krb5-libs-0__1.21.3-11.el10.x86_64//rpm",
         "@lame-libs-0__3.100-19.el10.x86_64//rpm",
         "@libacl-0__2.4.0-2.el10.x86_64//rpm",
