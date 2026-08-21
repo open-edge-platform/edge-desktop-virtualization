@@ -130,7 +130,7 @@ jobs:
           cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
           ls -hal sriov/
 
-          git apply sriov/*.patch
+          git apply --verbose --whitespace=fix sriov/*.patch
 
           # Confirm the bundled lcitool supports the selected CentOS Stream target.
           ./tests/lcitool/libvirt-ci/bin/lcitool targets | grep -xF "centos-stream-$CENTOS_STREAM"
