@@ -17,7 +17,7 @@ permissions:
 env:
   # Change these two to switch build targets.
   # CentOS Stream for the build container + KubeVirt base image ("9" or "10")
-  CENTOS_STREAM: "10"
+  CENTOS_STREAM: "9"
   # QEMU version ("9.1.0" or "10.2.1"). The matching Intel SR-IOV branch/commit/patch
   # args are derived automatically from this value in the "Build and patch QEMU" step.
   QEMU_VERSION: "9.1.0"
@@ -131,14 +131,6 @@ jobs:
           ls -hal sriov/
 
           git apply sriov/*.patch
-
-          # The lcitool/libvirt-ci copy bundled inside older QEMU tarballs is frozen at
-          # release time and may predate support for newer CentOS Stream targets (e.g.
-          # QEMU 9.1.0 predates CentOS Stream 10 support in libvirt-ci). Refresh it with
-          # the latest upstream project so any CENTOS_STREAM value works regardless of
-          # which QEMU_VERSION is selected.
-          rm -rf tests/lcitool/libvirt-ci
-          git clone --depth 1 https://gitlab.com/libvirt/libvirt-ci.git tests/lcitool/libvirt-ci
 
           # Confirm the bundled lcitool supports the selected CentOS Stream target.
           ./tests/lcitool/libvirt-ci/bin/lcitool targets | grep -xF "centos-stream-$CENTOS_STREAM"
