@@ -130,7 +130,15 @@ jobs:
           cp -r ../Intel-distribution-of-QEMU/00*.patch sriov/
           ls -hal sriov/
 
-          git apply --verbose --whitespace=fix sriov/*.patch
+          git apply sriov/*.patch
+
+          # The lcitool/libvirt-ci copy bundled inside older QEMU tarballs is frozen at
+          # release time and may predate support for newer CentOS Stream targets (e.g.
+          # QEMU 9.1.0 predates CentOS Stream 10 support in libvirt-ci). Refresh it with
+          # the latest upstream project so any CENTOS_STREAM value works regardless of
+          # which QEMU_VERSION is selected.
+          rm -rf tests/lcitool/libvirt-ci
+          git clone --depth 1 https://gitlab.com/libvirt/libvirt-ci.git tests/lcitool/libvirt-ci
 
           # Confirm the bundled lcitool supports the selected CentOS Stream target.
           ./tests/lcitool/libvirt-ci/bin/lcitool targets | grep -xF "centos-stream-$CENTOS_STREAM"
