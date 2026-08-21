@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+
 name: "QEMU & Kubevirt"
 run-name: "Workflow (by @${{ github.actor }} via ${{ github.event_name }})"
 
@@ -12,6 +13,14 @@ concurrency:
 
 permissions:
   contents: read
+
+env:
+  # Change these two to switch build targets.
+  # CentOS Stream for the build container + KubeVirt base image ("9" or "10")
+  CENTOS_STREAM: "9"
+  # QEMU version ("9.1.0" or "10.2.1"). The matching Intel SR-IOV branch/commit/patch
+  # args are derived automatically from this value in the "Build and patch QEMU" step.
+  QEMU_VERSION: "10.2.1"
 
 on:
   pull_request:
@@ -67,32 +76,53 @@ jobs:
         env:
           cache-name: cache-qemu
         with:
-          path: workspace/qemu-9.1.0
+          path: workspace/qemu-${{ env.QEMU_VERSION }}
           # Use the hash of the document this workflow is based on to decide whether the build should be re-run or not
+          # Cache key includes the CentOS Stream + QEMU version so each target keeps its own cache
           # If the workflow was triggered as a result of pushing a tag, always do a clean cache-free build
-          key: "qemu-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/README.md') }}"
+          key: "qemu-cs${{ env.CENTOS_STREAM }}-q${{ env.QEMU_VERSION }}-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/README.md', '.github/workflows/qemu-centos10.yaml') }}"
 
       - name: Build and patch QEMU
         if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' || inputs.disable_cache == 'true' }}
-        # Each logical block here is copied exactly from a code block in kubevirt-patch/README.md
+        # Tarball + 27-patch build. Build container OS comes from CENTOS_STREAM; the QEMU
+        # source version comes from QEMU_VERSION, from which the Intel SR-IOV branch,
+        # commit, and format-patch args are derived below.
         run: |
+          # Derive the Intel SR-IOV branch/commit/patch args from the selected QEMU version.
+          case "$QEMU_VERSION" in
+            9.1.0)
+              QEMU_SRIOV_BRANCH="9.1.0-gfx-sriov"
+              QEMU_SRIOV_COMMIT="29ed545c07364a99a931b31712ae68fdf74f6992"
+              QEMU_FORMAT_PATCH_ARGS="-54"
+              ;;
+            10.2.1)
+              QEMU_SRIOV_BRANCH="10.2.1-gfx-sriov"
+              QEMU_SRIOV_COMMIT="faa368fe92642adf983b77fdc599466a42a73fef"
+              QEMU_FORMAT_PATCH_ARGS="ec78d33b5c..HEAD"
+              ;;
+            *)
+              echo "::error::Unsupported QEMU_VERSION '$QEMU_VERSION' (expected 9.1.0 or 10.2.1)"
+              exit 1
+              ;;
+          esac
+
           mkdir -p workspace
           cd workspace
 
           git clone https://github.com/intel/Intel-distribution-of-QEMU.git
           cd Intel-distribution-of-QEMU
-          git checkout 29ed545c07364a99a931b31712ae68fdf74f6992
-          git format-patch -54
+          git checkout "$QEMU_SRIOV_COMMIT"
+          git format-patch $QEMU_FORMAT_PATCH_ARGS
           ls -hal
 
-          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/9.1.0-gfx-sriov)" ]; then
-            echo "::warning file=kubevirt-patch/README.md::The 9.1.0-gfx-sriov branch has new commits which are not included here. Consider updating the README and this workflow."
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/$QEMU_SRIOV_BRANCH)" ]; then
+            echo "::warning file=kubevirt-patch/README.md::The $QEMU_SRIOV_BRANCH branch has new commits which are not included here. Consider updating the README and this workflow."
           fi
 
           cd ..
-          wget -N https://download.qemu.org/qemu-9.1.0.tar.xz
-          tar -xf qemu-9.1.0.tar.xz
-          cd qemu-9.1.0
+          wget -N https://download.qemu.org/qemu-$QEMU_VERSION.tar.xz
+          tar -xf qemu-$QEMU_VERSION.tar.xz
+          cd qemu-$QEMU_VERSION
           git init
           ls -hal
 
@@ -102,10 +132,18 @@ jobs:
 
           git apply sriov/*.patch
 
-          ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
-          perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream9
+          # Confirm the bundled lcitool supports the selected CentOS Stream target.
+          ./tests/lcitool/libvirt-ci/bin/lcitool targets | grep -xF "centos-stream-$CENTOS_STREAM"
 
-          docker build -t qemu_build:centos-stream9 -f Dockerfile.centos-stream9 .
+          # Generate the CentOS Stream build Dockerfile.
+          ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool dockerfile centos-stream-$CENTOS_STREAM qemu > Dockerfile.centos-stream$CENTOS_STREAM
+          perl -p -i -e 's|zstd &&|zstd libslirp-devel liburing-devel libbpf-devel libblkio-devel &&|g' Dockerfile.centos-stream$CENTOS_STREAM
+
+          # Show the generated recipe for debugging (package availability differs by Stream version).
+          echo "----- Dockerfile.centos-stream$CENTOS_STREAM -----"
+          cat Dockerfile.centos-stream$CENTOS_STREAM
+
+          docker build -t qemu_build:centos-stream$CENTOS_STREAM -f Dockerfile.centos-stream$CENTOS_STREAM .
           cat <<EOF > buildscript.sh
           #!/bin/bash
           set -x
@@ -125,7 +163,7 @@ jobs:
               -w /src  \
               --entrypoint=/src/buildscript.sh \
               --security-opt label=disable \
-              qemu_build:centos-stream9
+              qemu_build:centos-stream$CENTOS_STREAM
 
           ls -la build/qemu-system-x86_64
           sha256sum build/qemu-system-x86_64
@@ -137,7 +175,7 @@ jobs:
         with:
           name: qemu-artifact
           path: |
-            workspace/qemu-9.1.0/build/qemu-system-x86_64
+            workspace/qemu-${{ env.QEMU_VERSION }}/build/qemu-system-x86_64
 
       - name: Upload entire QEMU build directory as a temporary artifact for scanning
         id: upload-qemu-scan-source
@@ -147,7 +185,7 @@ jobs:
           retention-days: 2 # This only needs to be retained long enough for the scanner to run on it
           name: qemu-scan-source
           path: |
-            workspace/qemu-9.1.0
+            workspace/qemu-${{ env.QEMU_VERSION }}
 
   qemu-scan:
     needs: qemu-build
@@ -181,12 +219,12 @@ jobs:
         shell: bash
         run: |
           mkdir -p workspace
-          mv qemu-scan-source workspace/qemu-9.1.0
+          mv qemu-scan-source workspace/qemu-$QEMU_VERSION
 
       - name: trivy qemu source scan
         shell: bash
         run: |
-          cd workspace/qemu-9.1.0
+          cd workspace/qemu-$QEMU_VERSION
           trivy --version
           which trivy
           trivy image --download-db-only
@@ -242,27 +280,27 @@ jobs:
         with:
           name: trivy-qemu-results
           path: |
-              workspace/qemu-9.1.0/trivy_code_scan_qemu.html
+              workspace/qemu-${{ env.QEMU_VERSION }}/trivy_code_scan_qemu.html
 
       - name: Upload Trivy scan results to GitHub Security tab
         # upload-sarif@v3.29.2 released 2025 June 30. SHA pinned for enhanced security
         uses: github/codeql-action/upload-sarif@181d5eefc20863364f96762470ba6f862bdef56b
         with:
-          sarif_file: 'workspace/qemu-9.1.0/trivy_code_scan_qemu.sarif'
+          sarif_file: workspace/qemu-${{ env.QEMU_VERSION }}/trivy_code_scan_qemu.sarif
 
       - name: ClamAV QEMU Antivirus Scan
         shell: bash
         run: |
-          echo "Starting ClamAV scan on workspace/qemu-9.1.0/build/..."
+          echo "Starting ClamAV scan on workspace/qemu-$QEMU_VERSION/build/..."
 
           CLAMAV_STATUS=0
           docker run --rm \
-            --mount type=bind,source=./workspace/qemu-9.1.0/build/,target=/scandir \
+            --mount type=bind,source=./workspace/qemu-$QEMU_VERSION/build/,target=/scandir \
             clamav/clamav:stable \
             clamscan --recursive --log=/scandir/clamav-scan-report.log \
             /scandir || CLAMAV_STATUS=$?
 
-          sudo chown $USER:$USER workspace/qemu-9.1.0/build/clamav-scan-report.log 2>/dev/null || true
+          sudo chown $USER:$USER workspace/qemu-$QEMU_VERSION/build/clamav-scan-report.log 2>/dev/null || true
 
           if [ $CLAMAV_STATUS -ne 0 ]; then
             echo "QEMU ClamAV scan failed or found issues"
@@ -275,14 +313,14 @@ jobs:
           fi
 
           echo "# ClamAV QEMU Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat workspace/qemu-9.1.0/build/clamav-scan-report.log | grep -v 'Empty file$')" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat workspace/qemu-$QEMU_VERSION/build/clamav-scan-report.log | grep -v 'Empty file$')" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload QEMU Antivirus Report
         # upload-artifact@v4.6.2 released 2025 March 19. SHA pinned for enhanced security
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: clamav-qemu-results
-          path: workspace/qemu-9.1.0/build/clamav-scan-report.log
+          path: workspace/qemu-${{ env.QEMU_VERSION }}/build/clamav-scan-report.log
 
       - name: Evaluate Scan Results
         shell: bash
@@ -333,7 +371,7 @@ jobs:
           # Use the hash of the document this workflow is based on to decide whether the build should be re-run or not
           # If the workflow was triggered as a result of pushing a tag, always do a clean cache-free build
           # NOTE: This must be a superset of the qemu cache hashFiles above. In other words if qemu needs to be rebuilt, so does kubevirt
-          key: "kubevirt-binary-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch', 'kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch', 'kubevirt-patch/README.md') }}"
+          key: "kubevirt-binary-cs${{ env.CENTOS_STREAM }}-q${{ env.QEMU_VERSION }}-${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref || hashFiles('kubevirt-patch/0001-Bump-dependency-versions-for-kubevirt-v1.5.0.patch', 'kubevirt-patch/0001-Patching-Kubevirt-with-GTK-libraries_v1.patch', 'kubevirt-patch/README.md', '.github/workflows/qemu-centos10.yaml') }}"
 
       ######################################################################################################3
       # The kubevirt workflow requires 30+ GB of free space to run successfully
@@ -400,11 +438,23 @@ jobs:
           echo "QEMU_SHA256=$QEMU_SHA256"
           perl -p -i -e "s|<SHA256SUM_OF_PATCHED_QEMU>|$QEMU_SHA256|g" WORKSPACE
 
+          # Select the CentOS Stream base for the KubeVirt RPM/image build.
+          export KUBEVIRT_CENTOS_STREAM_VERSION=$CENTOS_STREAM
+
+          # CentOS Stream 10 builds run inside a dedicated cs10 builder image, which
+          # v1.8.2 does not default. Point at a published kubevirt cs10 builder tag
+          # (only consumed when CENTOS_STREAM=10).
+          if [ "$CENTOS_STREAM" = "10" ]; then
+            export KUBEVIRT_CS10_BUILDER_VERSION=2602231621-e36f1c7568
+
+            grep -q "mirror.stream.centos.org/10-stream" rpm/repo-cs10.yaml || { echo "::error::rpm/repo-cs10.yaml is not pointing to CentOS Stream 10 repositories"; exit 1; }
+          fi
+
           export DOCKER_PREFIX=localhost:5000
           export DOCKER_TAG=$EDV_VERSION
           export BUILD_ARCH=amd64
 
-          make all
+          # make all
           make bazel-build-images
 
           make push

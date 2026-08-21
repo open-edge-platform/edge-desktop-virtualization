@@ -13,8 +13,14 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 
+# CentOS Stream package index URLs - x86_64 only.
+# This validator processes ONLY x86_64 packages. It will NOT touch aarch64/s390x.
 BASEOS_URL = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/"
 APPSTREAM_URL = "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/"
+CRB_URL = "http://mirror.stream.centos.org/9-stream/CRB/x86_64/os/Packages/"
+BASEOS_URL_EL10 = "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/"
+APPSTREAM_URL_EL10 = "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/"
+CRB_URL_EL10 = "http://mirror.stream.centos.org/10-stream/CRB/x86_64/os/Packages/"
 BUILDDEPS_PREFIX = "https://storage.googleapis.com/builddeps/"
 
 
@@ -151,33 +157,44 @@ def replace_block_fields(block_text: str, new_name: str, new_sha: str, new_urls:
     return updated
 
 
-def parse_name(name: str) -> Optional[Tuple[str, str, str]]:
-    m = re.match(r"^(?P<pkg>.+)-(?P<epoch>\d+)__(?P<ver>.+\.el9\.x86_64)$", name)
+def parse_name(name: str) -> Optional[Tuple[str, str, str, str]]:
+    m = re.match(r"^(?P<pkg>.+)-(?P<epoch>\d+)__(?P<ver>.+\.(?P<dist>el9|el10)(?:\.\d+)?\.x86_64)$", name)
     if not m:
         return None
-    return m.group("pkg"), m.group("epoch"), m.group("ver")
+    return m.group("pkg"), m.group("epoch"), m.group("ver"), m.group("dist")
 
 
 def find_mirror_url(urls: List[str]) -> Optional[str]:
     for u in urls:
-        if "/9-stream/BaseOS/x86_64/os/Packages/" in u or "/9-stream/AppStream/x86_64/os/Packages/" in u:
+        if "mirror.stream.centos.org" in u and "/os/Packages/" in u:
             return u
     return None
 
 
 def is_mirror_url(url: str) -> bool:
-    return "/9-stream/BaseOS/x86_64/os/Packages/" in url or "/9-stream/AppStream/x86_64/os/Packages/" in url
+    return "mirror.stream.centos.org" in url and "/os/Packages/" in url
 
 
-def pick_search_roots(mirror_url: Optional[str]) -> List[str]:
-    if mirror_url and "/BaseOS/" in mirror_url:
-        return [BASEOS_URL, APPSTREAM_URL]
-    if mirror_url and "/AppStream/" in mirror_url:
-        return [APPSTREAM_URL, BASEOS_URL]
-    return [BASEOS_URL, APPSTREAM_URL]
+def pick_search_roots(mirror_url: Optional[str], dist: str) -> List[str]:
+    if dist == "el10":
+        if mirror_url and "/BaseOS/" in mirror_url:
+            return [BASEOS_URL_EL10, APPSTREAM_URL_EL10, CRB_URL_EL10]
+        if mirror_url and "/AppStream/" in mirror_url:
+            return [APPSTREAM_URL_EL10, BASEOS_URL_EL10, CRB_URL_EL10]
+        if mirror_url and "/CRB/" in mirror_url:
+            return [CRB_URL_EL10, BASEOS_URL_EL10, APPSTREAM_URL_EL10]
+        return [BASEOS_URL_EL10, APPSTREAM_URL_EL10, CRB_URL_EL10]
+    else:
+        if mirror_url and "/BaseOS/" in mirror_url:
+            return [BASEOS_URL, APPSTREAM_URL, CRB_URL]
+        if mirror_url and "/AppStream/" in mirror_url:
+            return [APPSTREAM_URL, BASEOS_URL, CRB_URL]
+        if mirror_url and "/CRB/" in mirror_url:
+            return [CRB_URL, BASEOS_URL, APPSTREAM_URL]
+        return [BASEOS_URL, APPSTREAM_URL, CRB_URL]
 
 
-def find_latest_rpm_url(pkg: str, current_urls: List[str]) -> Optional[str]:
+def find_latest_rpm_url(pkg: str, current_urls: List[str], dist: str) -> Optional[str]:
     mirror_url = find_mirror_url(current_urls)
     arch_suffix = ".x86_64.rpm"
 
@@ -187,7 +204,8 @@ def find_latest_rpm_url(pkg: str, current_urls: List[str]) -> Optional[str]:
             arch_suffix = ".noarch.rpm"
 
     pattern_prefix = f"{pkg}-"
-    roots = pick_search_roots(mirror_url)
+    dist_tag = f".{dist}."
+    roots = pick_search_roots(mirror_url, dist)
 
     for root in roots:
         try:
@@ -205,7 +223,7 @@ def find_latest_rpm_url(pkg: str, current_urls: List[str]) -> Optional[str]:
                 continue
             if not file_name.endswith(arch_suffix):
                 continue
-            if ".el9." not in file_name:
+            if dist_tag not in file_name:
                 continue
             if not file_name.startswith(pattern_prefix):
                 continue
@@ -215,6 +233,12 @@ def find_latest_rpm_url(pkg: str, current_urls: List[str]) -> Optional[str]:
                 continue
             if not remainder[0].isdigit():
                 continue
+            
+            # Skip pre-release/git snapshot packages (e.g., 5.87+1.git30db66dc971b)
+            # These contain '+git' or '.git' in the version and cause build failures.
+            if "+git" in file_name or ".git" in file_name:
+                continue
+            
             candidates.append(file_name)
 
         if not candidates:
@@ -252,10 +276,10 @@ def update_workspace_file(
     for block in blocks:
         parsed = parse_name(block.name)
         if not parsed:
-            # Only report CentOS 9 x86_64 RPMs handled by parse_name.
+            # Only CentOS Stream 9/10 x86_64 RPMs handled by parse_name.
             continue
 
-        pkg, epoch, _ = parsed
+        pkg, epoch, _, dist = parsed
 
         fallback_builddeps = f"{BUILDDEPS_PREFIX}{block.sha256}"
 
@@ -310,7 +334,7 @@ def update_workspace_file(
                 log(f"FAIL\t[{kubevirt_version}]\t{block.name}\t-> builddeps-switched")
                 continue
 
-        latest_url = find_latest_rpm_url(pkg, block.urls)
+        latest_url = find_latest_rpm_url(pkg, block.urls, dist)
         if not latest_url:
             log(f"FAIL\t[{kubevirt_version}]\t{block.name}\t-> no-replace")
             continue
@@ -386,7 +410,7 @@ def update_rpm_build_file(rpm_build_path: pathlib.Path, name_map: Dict[str, str]
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate and repair CentOS 9 x86_64 RPM URLs in kubevirt-patch WORKSPACE files.")
+    parser = argparse.ArgumentParser(description="Validate and repair CentOS Stream 9 & 10 x86_64 RPM URLs in kubevirt-patch WORKSPACE files.")
     parser.add_argument("--root", default=".", help="Repository root")
     parser.add_argument("--check", action="store_true", help="Check mode only; do not write files")
     args = parser.parse_args()
