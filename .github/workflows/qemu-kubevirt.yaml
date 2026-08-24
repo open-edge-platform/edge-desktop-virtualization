@@ -17,7 +17,7 @@ permissions:
 env:
   # Change these two to switch build targets.
   # CentOS Stream for the build container + KubeVirt base image ("9" or "10")
-  CENTOS_STREAM: "10"
+  CENTOS_STREAM: "9"
   # QEMU version ("9.1.0" or "10.2.1"). The matching Intel SR-IOV branch/commit/patch
   # args are derived automatically from this value in the "Build and patch QEMU" step.
   QEMU_VERSION: "10.2.1"
