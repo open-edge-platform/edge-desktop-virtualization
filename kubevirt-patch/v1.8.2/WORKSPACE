@@ -16856,6 +16856,14 @@ rpm(
 )
 
 rpm(
+    name = "spirv-tools-libs-0__2026.1-1.el9.x86_64",
+    sha256 = "52fba73ee4882fb463a614129cd9dd65fca16b6a1fddc088915d1b256ab094db",
+    urls = [
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/spirv-tools-libs-2026.1-1.el9.x86_64.rpm",
+    ],
+)
+
+rpm(
     name = "sysprof-capture-devel-0__3.40.1-3.el9.x86_64",
     sha256 = "57ef7ebd2b77a0671a90b6f728e6ba9e72a0c12ac7262b7127f0d13a35eec1ce",
     urls = [
