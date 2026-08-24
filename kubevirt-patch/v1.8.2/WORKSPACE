@@ -17761,10 +17761,10 @@ rpm(
 )
 
 rpm(
-    name = "libwayland-client-0__1.23.0-1.el10.x86_64",
-    sha256 = "e104b736dca59d94f1ed63625e0b26abe771af29a6776b6dc304f516f31a0975",
+    name = "libwayland-client-0__1.25.0-1.el10.x86_64",
+    sha256 = "d5be22715c24ef52e73e89a185000b8ac0cca81d93f6b4667d385aa40f44a90d",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/libwayland-client-1.23.0-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/libwayland-client-1.25.0-1.el10.x86_64.rpm",
     ],
 )
 

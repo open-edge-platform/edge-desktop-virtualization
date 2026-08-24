@@ -2684,7 +2684,7 @@ rpmtree(
         "@libtiff-devel-0__4.6.0-10.el10.x86_64//rpm",
         "@libtracker-sparql-0__3.7.3-3.el10.x86_64//rpm",
         "@libvorbis-1__1.3.7-11.el10.x86_64//rpm",
-        "@libwayland-client-0__1.23.0-1.el10.x86_64//rpm",
+        "@libwayland-client-0__1.25.0-1.el10.x86_64//rpm",
         "@libwayland-cursor-0__1.23.0-1.el10.x86_64//rpm",
         "@libwayland-egl-0__1.23.0-1.el10.x86_64//rpm",
         "@libwayland-server-0__1.23.0-1.el10.x86_64//rpm",
