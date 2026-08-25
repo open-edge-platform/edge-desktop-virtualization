@@ -3,8 +3,8 @@ module device-plugin
 go 1.26.0
 
 require (
-	google.golang.org/grpc v1.83.0
-	k8s.io/kubelet v0.36.4
+	google.golang.org/grpc v1.83.1
+	k8s.io/kubelet v0.36.2
 )
 
 require (
