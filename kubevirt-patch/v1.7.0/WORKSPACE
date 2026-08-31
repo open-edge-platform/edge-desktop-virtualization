@@ -8565,10 +8565,10 @@ rpm(
 )
 
 rpm(
-    name = "glib2-devel-0__2.68.4-16.el9.x86_64",
-    sha256 = "7b248800aef3307e0d9c83e49e19e24a3c3953c2f2322de4c9ae7d852089778c",
+    name = "glib2-devel-0__2.68.4-29.el9.x86_64",
+    sha256 = "531d382ee7a84ea0cd0b857745915109a05416f4b692ba60facba6326369a7ba",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/glib2-devel-2.68.4-16.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/glib2-devel-2.68.4-29.el9.x86_64.rpm",
     ],
 )
 
