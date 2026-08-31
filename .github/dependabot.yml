@@ -5,8 +5,8 @@
 
 version: 2
 updates:
-  - package-ecosystem: "gomod" 
-    directory: "/device-plugins-for-kubernetes/" 
+  - package-ecosystem: "gomod"
+    directory: "/device-plugins-for-kubernetes/"
     schedule:
       interval: "weekly"
 
@@ -16,11 +16,6 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /device-plugins-for-kubernetes
-    schedule:
-      interval: daily
-
-  - package-ecosystem: gomod
     directory: /device-plugins-for-kubernetes
     schedule:
       interval: daily
