@@ -15768,10 +15768,10 @@ rpm(
 )
 
 rpm(
-    name = "glib2-devel-0__2.68.4-16.el9.x86_64",
-    sha256 = "7b248800aef3307e0d9c83e49e19e24a3c3953c2f2322de4c9ae7d852089778c",
+    name = "glib2-devel-0__2.68.4-29.el9.x86_64",
+    sha256 = "531d382ee7a84ea0cd0b857745915109a05416f4b692ba60facba6326369a7ba",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/glib2-devel-2.68.4-16.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/glib2-devel-2.68.4-29.el9.x86_64.rpm",
     ],
 )
 
@@ -18129,50 +18129,50 @@ rpm(
 )
 
 rpm(
-    name = "mesa-dri-drivers-0__25.2.7-1.el10.x86_64",
-    sha256 = "a717a219d48130eca700f27b04d119afea43a1f8a9eba4fb2233c2d45876ffa0",
+    name = "mesa-dri-drivers-0__26.1.1-2.el10.x86_64",
+    sha256 = "c981c9d00c63cf734620a7c584748dc725e6ec723adeaa9796a92c573b506b01",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-dri-drivers-25.2.7-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-dri-drivers-26.1.1-2.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "mesa-filesystem-0__25.2.7-1.el10.x86_64",
-    sha256 = "4418cec84910604b8a963004be50697528b53d8974cbb4c887643d15dd6084e4",
+    name = "mesa-filesystem-0__26.1.1-2.el10.x86_64",
+    sha256 = "3d714e056cbf1df198e8003fb3a0bd67a142dba39ffe16f3797a3dbe528bb05d",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-filesystem-25.2.7-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-filesystem-26.1.1-2.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "mesa-libEGL-0__25.2.7-1.el10.x86_64",
-    sha256 = "53e4aa54662a6f9ba528d7915b4e28358ea65d0ed57f8dc8850c89f8b4bc7b4d",
+    name = "mesa-libEGL-0__26.1.1-2.el10.x86_64",
+    sha256 = "2eb894abcf66ed369351f73af582caae5e74087dd352cc18df868f692be61dc6",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libEGL-25.2.7-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libEGL-26.1.1-2.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "mesa-libgbm-0__25.2.7-1.el10.x86_64",
-    sha256 = "64b898f1712b2460d60041e8718fcfafa58310d1b02e20af9cbc4d8a16f37e9d",
+    name = "mesa-libgbm-0__26.1.1-2.el10.x86_64",
+    sha256 = "eea2c78fd7d0a91cd4ec845efacd8b28398fc66c0411c40c6dac651eecf2abd8",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libgbm-25.2.7-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libgbm-26.1.1-2.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "mesa-libgbm-devel-0__25.2.7-1.el10.x86_64",
-    sha256 = "371effd5f8a430d95b412c3472fc265379d05a7f198875366fb2cf3dea379e08",
+    name = "mesa-libgbm-devel-0__26.1.1-2.el10.x86_64",
+    sha256 = "4193539706a9294e9132ba1df38aeed353c57f06cc91b1aa358c15ec8d479137",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libgbm-devel-25.2.7-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libgbm-devel-26.1.1-2.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "mesa-libGL-0__25.2.7-1.el10.x86_64",
-    sha256 = "bd4eefc9b006b3cdec008151286c4d2b8f32b024163a9a81206ec7e4b3cb33b2",
+    name = "mesa-libGL-0__26.1.1-2.el10.x86_64",
+    sha256 = "b4e21f81221cf2b8d464167a49543ab914c9ffd0fe5e09eeaded92f1dba5329b",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libGL-25.2.7-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-libGL-26.1.1-2.el10.x86_64.rpm",
     ],
 )
 
@@ -18185,10 +18185,10 @@ rpm(
 )
 
 rpm(
-    name = "mesa-vulkan-drivers-0__25.2.7-1.el10.x86_64",
-    sha256 = "3200d8c8684ca8159670a8ef00a36e0dd458400b437c2c01f544507a5db4bd09",
+    name = "mesa-vulkan-drivers-0__26.1.1-2.el10.x86_64",
+    sha256 = "35ac47cd27e9514da4c04e6f2e18ba8583436698bdeb0843b5fc068c433c4e1f",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-vulkan-drivers-25.2.7-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/mesa-vulkan-drivers-26.1.1-2.el10.x86_64.rpm",
     ],
 )
 
