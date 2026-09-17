@@ -1273,7 +1273,7 @@ rpmtree(
         "@gdk-pixbuf2-devel-0__2.42.6-4.el9.x86_64//rpm",
         "@gdk-pixbuf2-modules-0__2.42.6-4.el9.x86_64//rpm",
         "@glib-networking-0__2.68.3-3.el9.x86_64//rpm",
-        "@glib2-devel-0__2.68.4-16.el9.x86_64//rpm",
+        "@glib2-devel-0__2.68.4-29.el9.x86_64//rpm",
         "@graphite2-0__1.3.14-9.el9.x86_64//rpm",
         "@graphite2-devel-0__1.3.14-9.el9.x86_64//rpm",
         "@gsettings-desktop-schemas-0__40.0-6.el9.x86_64//rpm",
