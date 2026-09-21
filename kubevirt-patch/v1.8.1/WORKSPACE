@@ -17065,26 +17065,26 @@ rpm(
 )
 
 rpm(
-    name = "avahi-glib-0__0.8-29.el10.x86_64",
-    sha256 = "8e9e0f8d59701e84fa7527dae43f4e0e6cc48886b9e316f6f5b213c74201a5d4",
+    name = "avahi-glib-0__0.9~rc2-4.el10.x86_64",
+    sha256 = "82d6f2fd4e03d91d48798f7097fedd802dab2bad400dc14291a18fbc5794e947",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/avahi-glib-0.8-29.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/avahi-glib-0.9~rc2-4.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "avahi-libs-0__0.8-29.el10.x86_64",
-    sha256 = "cf30c5ad675882a0c321c1a27ada70ac856d37220d4f87c253be4b2850ec2387",
+    name = "avahi-libs-0__0.9~rc2-4.el10.x86_64",
+    sha256 = "d7c872212a41668673e6465f24bea73b0195ec3063413e65358a6a7ecb2313d6",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/avahi-libs-0.8-29.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/avahi-libs-0.9~rc2-4.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "bluez-libs-0__5.85-1.el10.x86_64",
-    sha256 = "aa15bd0a95186ad55f5ee47afe244813a325e62d30536392ea902dbd3caa6a2a",
+    name = "bluez-libs-0__5.86-2.el10.x86_64",
+    sha256 = "c5065597951b0bffc98665fea163c48453d7c5f055a76a65bb0982711657ea1e",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/bluez-libs-5.85-1.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/bluez-libs-5.86-2.el10.x86_64.rpm",
     ],
 )
 
@@ -18265,50 +18265,50 @@ rpm(
 )
 
 rpm(
-    name = "pipewire-0__1.2.6-3.el10.x86_64",
-    sha256 = "8dc3de70e7f0cfdd5f6d01005371d91a5094a53895b20660a9da4771c6e86838",
+    name = "pipewire-0__1.4.11-1.el10.x86_64",
+    sha256 = "8dd41d865da6e5362e4792a94bef8e236f9dacce8fea70a95155628f3dd82251",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-1.2.6-3.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-1.4.11-1.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "pipewire-alsa-0__1.2.6-3.el10.x86_64",
-    sha256 = "3df43b2045097f485c5ae2d2302c88b9b11d4ad32ad368b997035d0f02854f30",
+    name = "pipewire-alsa-0__1.4.11-1.el10.x86_64",
+    sha256 = "603a43094e224f003205c490c05e1e6b80e6e0eee2126845ffebf7c4a712f743",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-alsa-1.2.6-3.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-alsa-1.4.11-1.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "pipewire-jack-audio-connection-kit-0__1.2.6-3.el10.x86_64",
-    sha256 = "c024b28d66363753762188feb77b6b77a5f5b87e5f2b0915ea8cae8193643be5",
+    name = "pipewire-jack-audio-connection-kit-0__1.4.11-1.el10.x86_64",
+    sha256 = "62ba28408465d5c993b53241edd5afb4832388b0643888d06408dbdde3423ed5",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-jack-audio-connection-kit-1.2.6-3.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-jack-audio-connection-kit-1.4.11-1.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "pipewire-jack-audio-connection-kit-libs-0__1.2.6-3.el10.x86_64",
-    sha256 = "71ea6b756239d0541cb20172121bfa73947f1e3b021949e9b6e04b15d1e13214",
+    name = "pipewire-jack-audio-connection-kit-libs-0__1.4.11-1.el10.x86_64",
+    sha256 = "ed0b8a3c4f983b4e585a1d9b2b834045d68b6964bbe411fc057b2087b1d51456",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-jack-audio-connection-kit-libs-1.2.6-3.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-jack-audio-connection-kit-libs-1.4.11-1.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "pipewire-libs-0__1.2.6-3.el10.x86_64",
-    sha256 = "e9359ad01630332838fa38848d0a6f7f482b0b172ff4500df1f5c5cb558e9a34",
+    name = "pipewire-libs-0__1.4.11-1.el10.x86_64",
+    sha256 = "d56449b729bcac8e47e7c811d341e104438c8c783df46889e72ac1657ebf247e",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-libs-1.2.6-3.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-libs-1.4.11-1.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "pipewire-pulseaudio-0__1.2.6-3.el10.x86_64",
-    sha256 = "077c7135b335a3470835a27f7b2a3947e152c552d1979ad572ab6ec4f0d79161",
+    name = "pipewire-pulseaudio-0__1.4.11-1.el10.x86_64",
+    sha256 = "ec65e8266d22cbe0a99920923bae6c61c05b08291a5a162869cdd80b1bb90256",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-pulseaudio-1.2.6-3.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/pipewire-pulseaudio-1.4.11-1.el10.x86_64.rpm",
     ],
 )
 
