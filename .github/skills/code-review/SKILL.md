@@ -12,16 +12,16 @@ This repository is not a single application. It is a solution stack made up of:
 - sample manifests and Helm charts for guest image creation and VM deployment
 - documentation that ties the full flow together
 
-For the end-to-end workflow, start with [README.md](README.md).
+For the end-to-end workflow, start with [README.md](../../../README.md).
 
 ## Repository Map
 
-- [README.md](README.md): top-level architecture, prerequisites, and the order in which the solution is assembled
-- [docs/](docs): supporting setup guides, host configuration, and images referenced by the main docs
-- [device-plugins-for-kubernetes/](device-plugins-for-kubernetes): the only compiled code in this repo; Go-based Kubernetes device plugin plus manifests and Helm chart
-- [idv-services/](idv-services): host-side systemd services and shell scripts that initialize SR-IOV/display state and launch VMs
-- [kubevirt-patch/](kubevirt-patch): instructions plus version-specific patch overlay files for building KubeVirt with patched QEMU and local GTK display support
-- [sample-application/](sample-application): guest boot disk creation manifests and VM deployment examples for both discrete-monitor and single-Helm flows
+- [README.md](../../../README.md): top-level architecture, prerequisites, and the order in which the solution is assembled
+- [docs/](../../../docs): supporting setup guides, host configuration, and images referenced by the main docs
+- [device-plugins-for-kubernetes/](../../../device-plugins-for-kubernetes): the only compiled code in this repo; Go-based Kubernetes device plugin plus manifests and Helm chart
+- [idv-services/](../../../idv-services): host-side systemd services and shell scripts that initialize SR-IOV/display state and launch VMs
+- [kubevirt-patch/](../../../kubevirt-patch): instructions plus version-specific patch overlay files for building KubeVirt with patched QEMU and local GTK display support
+- [sample-application/](../../../sample-application): guest boot disk creation manifests and VM deployment examples for both discrete-monitor and single-Helm flows
 
 ## What To Edit For Common Requests
 
