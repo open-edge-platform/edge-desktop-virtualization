@@ -1,4 +1,4 @@
-# Edge Desktop Virtualization Skills for Coding Agents
+# Edge Desktop Virtualization Skill for Coding Agents
 
 Use this file when helping a user enable, customize, or troubleshoot desktop virtualization with Intel graphics SR-IOV using this repository.
 
