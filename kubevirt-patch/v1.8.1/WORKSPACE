@@ -4975,6 +4975,7 @@ rpm(
     sha256 = "52cd1b3c1dded02463b36431332ff3a40fc68c6def78045e454f9c1c13d4ace3",
     urls = [
         "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/kernel-headers-6.12.0-257.el10.x86_64.rpm",
+        "https://storage.googleapis.com/builddeps/52cd1b3c1dded02463b36431332ff3a40fc68c6def78045e454f9c1c13d4ace3",
     ],
 )
 
@@ -15800,26 +15801,26 @@ rpm(
 )
 
 rpm(
-    name = "gtk-update-icon-cache-0__3.24.31-5.el9.x86_64",
-    sha256 = "91ac46ed1e4bac38f5e0457635873916fee31adeef9fdfdec63ad7d9c34f4a15",
+    name = "gtk-update-icon-cache-0__3.24.31-12.el9.x86_64",
+    sha256 = "2181ae8edf8522db9a4359ebae9909a14edbd298c3e0783bc4bde69e9afedcd4",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk-update-icon-cache-3.24.31-5.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk-update-icon-cache-3.24.31-12.el9.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "gtk3-0__3.24.31-5.el9.x86_64",
-    sha256 = "37886175fbb321f4bb4102556d5163d87e0adfd07fcc7ec43f0b2452c4a2c547",
+    name = "gtk3-0__3.24.31-12.el9.x86_64",
+    sha256 = "39b4d015943b3282d80d912e35521dd3e2e413dd45d0e4fdde08cb6f8fb68e1e",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-3.24.31-5.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-3.24.31-12.el9.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "gtk3-devel-0__3.24.31-5.el9.x86_64",
-    sha256 = "bb3a014b6a7da8a5662d56a7e516cd18108fe75981adcdfa536ecd79a99b4ddd",
+    name = "gtk3-devel-0__3.24.31-12.el9.x86_64",
+    sha256 = "47c5f7c5bd7e218e3b1e218d749ab19e9ffe3acdda93d6415e6ea77f1a3e9f21",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-devel-3.24.31-5.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-devel-3.24.31-12.el9.x86_64.rpm",
     ],
 )
 
@@ -17449,10 +17450,10 @@ rpm(
 )
 
 rpm(
-    name = "libblkid-devel-0__2.40.2-13.el10.x86_64",
-    sha256 = "2930aefc79760eea78808cf73df752d64e7d8910ba2b6811f0b676dcfd0b8ad5",
+    name = "libblkid-devel-0__2.40.2-23.el10.x86_64",
+    sha256 = "25c556300cc87144bc1f03830c2d402582578f0735887f8cf33f5d5763b847c5",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/libblkid-devel-2.40.2-13.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/libblkid-devel-2.40.2-23.el10.x86_64.rpm",
     ],
 )
 
@@ -17633,10 +17634,10 @@ rpm(
 )
 
 rpm(
-    name = "libmount-devel-0__2.40.2-13.el10.x86_64",
-    sha256 = "dd2dc6f0526859e16a754aabce5240e3f8fe663dbc05424f81f1e85897825074",
+    name = "libmount-devel-0__2.40.2-23.el10.x86_64",
+    sha256 = "cc6801d12e8a0245a04d286cb1dcaa60632c2f5fa40c5815ac66ad8685666675",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/libmount-devel-2.40.2-13.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/libmount-devel-2.40.2-23.el10.x86_64.rpm",
     ],
 )
 
@@ -18393,18 +18394,18 @@ rpm(
 )
 
 rpm(
-    name = "vte291-0__0.76.3-2.el10.x86_64",
-    sha256 = "1ef46ee93ba156d8486607e6d1e78c1b3b685de5c3003dac67fe6e9f7c35809f",
+    name = "vte291-0__0.78.7-2.el10.x86_64",
+    sha256 = "af24b7ce6674fed45007847c1a5cac64af5bde6d31d29d2385a2d702acc7ce5d",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/vte291-0.76.3-2.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/vte291-0.78.7-2.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "vte-profile-0__0.76.3-2.el10.x86_64",
-    sha256 = "900e5a67f367cddd99d303d12814bd0544f0f596d878b97b801571cb32920574",
+    name = "vte-profile-0__0.78.7-2.el10.x86_64",
+    sha256 = "49d581c8f926a66fff24889bb1768d5c64c79e499dda3a68eee24fe4bc0c9381",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/vte-profile-0.76.3-2.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/vte-profile-0.78.7-2.el10.x86_64.rpm",
     ],
 )
 
