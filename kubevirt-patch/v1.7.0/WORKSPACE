@@ -8597,26 +8597,26 @@ rpm(
 )
 
 rpm(
-    name = "gtk-update-icon-cache-0__3.24.31-5.el9.x86_64",
-    sha256 = "91ac46ed1e4bac38f5e0457635873916fee31adeef9fdfdec63ad7d9c34f4a15",
+    name = "gtk-update-icon-cache-0__3.24.31-12.el9.x86_64",
+    sha256 = "2181ae8edf8522db9a4359ebae9909a14edbd298c3e0783bc4bde69e9afedcd4",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk-update-icon-cache-3.24.31-5.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk-update-icon-cache-3.24.31-12.el9.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "gtk3-0__3.24.31-5.el9.x86_64",
-    sha256 = "37886175fbb321f4bb4102556d5163d87e0adfd07fcc7ec43f0b2452c4a2c547",
+    name = "gtk3-0__3.24.31-12.el9.x86_64",
+    sha256 = "39b4d015943b3282d80d912e35521dd3e2e413dd45d0e4fdde08cb6f8fb68e1e",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-3.24.31-5.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-3.24.31-12.el9.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "gtk3-devel-0__3.24.31-5.el9.x86_64",
-    sha256 = "bb3a014b6a7da8a5662d56a7e516cd18108fe75981adcdfa536ecd79a99b4ddd",
+    name = "gtk3-devel-0__3.24.31-12.el9.x86_64",
+    sha256 = "47c5f7c5bd7e218e3b1e218d749ab19e9ffe3acdda93d6415e6ea77f1a3e9f21",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-devel-3.24.31-5.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages/gtk3-devel-3.24.31-12.el9.x86_64.rpm",
     ],
 )
 
