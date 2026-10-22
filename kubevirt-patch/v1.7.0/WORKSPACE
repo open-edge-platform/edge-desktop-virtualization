@@ -8925,10 +8925,10 @@ rpm(
 )
 
 rpm(
-    name = "libatomic-0__11.5.0-7.el9.x86_64",
-    sha256 = "42d59da75f7e0ba9cf1ab079463b4efc5e131c4754ee9f6c40a9b2d09c233ecd",
+    name = "libatomic-0__11.5.0-16.el9.x86_64",
+    sha256 = "a06c4f959dea395ed0c07b51f8caaa5f1a67e6ebd3641ebef4e95169f1e58865",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/libatomic-11.5.0-7.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/libatomic-11.5.0-16.el9.x86_64.rpm",
     ],
 )
 
