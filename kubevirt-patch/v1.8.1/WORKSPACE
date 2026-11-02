@@ -16129,10 +16129,10 @@ rpm(
 )
 
 rpm(
-    name = "libatomic-0__11.5.0-7.el9.x86_64",
-    sha256 = "42d59da75f7e0ba9cf1ab079463b4efc5e131c4754ee9f6c40a9b2d09c233ecd",
+    name = "libatomic-0__11.5.0-16.el9.x86_64",
+    sha256 = "a06c4f959dea395ed0c07b51f8caaa5f1a67e6ebd3641ebef4e95169f1e58865",
     urls = [
-        "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/libatomic-11.5.0-7.el9.x86_64.rpm",
+        "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/libatomic-11.5.0-16.el9.x86_64.rpm",
     ],
 )
 
@@ -17346,26 +17346,26 @@ rpm(
 )
 
 rpm(
-    name = "gtk3-0__3.24.42-2.el10.x86_64",
-    sha256 = "d04a348c361ba4d370cd7932518e510a8dbecf7596bf9ec10bc89ab4ca175ceb",
+    name = "gtk3-0__3.24.52-1.el10.x86_64",
+    sha256 = "00fcdd68860bfb2ec22e5af213ba56c4d04f766ee855f2b23b9972799d41d482",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/gtk3-3.24.42-2.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/gtk3-3.24.52-1.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "gtk3-devel-0__3.24.42-2.el10.x86_64",
-    sha256 = "19b70a885a3276d341e9d23d46880943c79cbd9591ba33d6cec90e9189ccedb6",
+    name = "gtk3-devel-0__3.24.52-1.el10.x86_64",
+    sha256 = "6ae5c5ee718ffdbced052d2db46b647ba2bf0e7ede4fea1b2ae3d690cad2af64",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/gtk3-devel-3.24.42-2.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/gtk3-devel-3.24.52-1.el10.x86_64.rpm",
     ],
 )
 
 rpm(
-    name = "gtk-update-icon-cache-0__3.24.42-2.el10.x86_64",
-    sha256 = "9e4b9ed7b98571c5aff4e8616833eba4c6dd6f5123d482957c7b26b95fcf1ebd",
+    name = "gtk-update-icon-cache-0__3.24.52-1.el10.x86_64",
+    sha256 = "17ee62cfe0f86e8a09e7968d2b901fb3cbbde7a23ddd807491e07d2200b12081",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/gtk-update-icon-cache-3.24.42-2.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/gtk-update-icon-cache-3.24.52-1.el10.x86_64.rpm",
     ],
 )
 
