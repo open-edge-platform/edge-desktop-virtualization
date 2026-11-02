@@ -2617,7 +2617,7 @@ rpmtree(
         "@cups-libs-1__2.4.10-13.el10.x86_64//rpm",
         "@dbus-devel-1__1.14.10-4.el10.x86_64//rpm",
         "@dejavu-sans-fonts-0__2.37-24.el10.x86_64//rpm",
-        "@elfutils-libelf-devel-0__0.192-5.el10.x86_64//rpm",
+        "@elfutils-libelf-devel-0__0.197-1.el10.x86_64//rpm",
         "@fdk-aac-free-0__2.0.0-14.el10.x86_64//rpm",
         "@flac-libs-0__1.4.3-5.el10.x86_64//rpm",
         "@fontconfig-0__2.15.0-6.el10.x86_64//rpm",

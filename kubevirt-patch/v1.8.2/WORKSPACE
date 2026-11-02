@@ -17226,10 +17226,10 @@ rpm(
 )
 
 rpm(
-    name = "elfutils-libelf-devel-0__0.192-5.el10.x86_64",
-    sha256 = "eeff899368662ff0261bde5b0a94eb861d40e4d2a6fc6ba8ebf41c7e1117a5b4",
+    name = "elfutils-libelf-devel-0__0.197-1.el10.x86_64",
+    sha256 = "9c6321351216324cd6add2e1badffd02a9cec694b9faf1c3fe976d5728d8df2f",
     urls = [
-        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/elfutils-libelf-devel-0.192-5.el10.x86_64.rpm",
+        "http://mirror.stream.centos.org/10-stream/AppStream/x86_64/os/Packages/elfutils-libelf-devel-0.197-1.el10.x86_64.rpm",
     ],
 )
 
